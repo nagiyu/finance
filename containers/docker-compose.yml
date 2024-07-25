@@ -1,0 +1,57 @@
+version: '3'
+services:
+  influxdb:
+    image: influxdb:1.8.10
+    container_name: "${PROJECT_NAME}_influxdb"
+    ports:
+      - "8086:8086"
+    environment:
+      - INFLUXDB_DB=stock_prices
+    volumes:
+      - ./../resources/influxdb-data:/var/lib/influxdb
+    networks:
+      - finance_network
+
+  stock_price_viewer:
+    build:
+      context: ./stock_price_viewer
+      dockerfile: Dockerfile
+    container_name: "${PROJECT_NAME}_stock_price_viewer"
+    ports:
+      - "9008:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+    volumes:
+      - ./stock_price_viewer/bin:/app
+    networks:
+      - finance_network
+
+  postgres:
+    image: postgres:13.3
+    container_name: "${PROJECT_NAME}_postgres"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=Password123!
+      - POSTGRES_DB=my_finance_manager_db
+    volumes:
+      - ./postgres/initdb:/docker-entrypoint-initdb.d
+      - ./../resources/postgres:/var/lib/postgresql/data
+    networks:
+      - finance_network
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: "${PROJECT_NAME}_pgadmin"
+    ports:
+      - "9006:80"
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=test@sample.com
+      - PGADMIN_DEFAULT_PASSWORD=Password123!
+    volumes:
+      - ./pgadmin/servers.json:/pgadmin4/servers.json
+    networks:
+      - finance_network
+
+networks:
+  finance_network:
+    external: true

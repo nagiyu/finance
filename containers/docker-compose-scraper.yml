@@ -1,0 +1,27 @@
+version: '3'
+services:
+  selenium:
+    image: selenium/standalone-chrome:4.0.0-rc-1-prerelease-20210713
+    container_name: "${PROJECT_NAME}_selenium"
+    ports:
+      - "9007:7900"
+    shm_size: 2gb
+    networks:
+      - finance_network
+
+  scraper:
+    build:
+      context: ./scraper
+      dockerfile: Dockerfile
+    container_name: "${PROJECT_NAME}_scraper"
+    volumes:
+      - ./scraper/requirements.txt:/usr/src/app/requirements.txt
+      - ./scraper/main.py:/usr/src/app/main.py
+    environment:
+      - SELENIUM_REMOTE_URL=http://selenium:4444/wd/hub
+    networks:
+      - finance_network
+
+networks:
+  finance_network:
+    external: true

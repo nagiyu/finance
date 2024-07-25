@@ -1,0 +1,6 @@
+selenium==3.141.0
+urllib3>=1.26.15,<2
+webdriver_manager
+requests
+influxdb
+psycopg2-binary
