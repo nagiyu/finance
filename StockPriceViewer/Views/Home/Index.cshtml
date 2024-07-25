@@ -1,0 +1,33 @@
+﻿@model List<StockPriceViewer.Services.StockPrice>
+
+@{
+    ViewData["Title"] = "Stock Prices";
+}
+
+<h1>Stock Prices</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Time</th>
+            <th>Price</th>
+            @foreach (var tagKey in Model.FirstOrDefault()?.Tags.Keys ?? new Dictionary<string, string>().Keys)
+            {
+                <th>@tagKey</th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var price in Model)
+        {
+            <tr>
+                <td>@price.Time</td>
+                <td>@price.Price</td>
+                @foreach (var tagValue in price.Tags.Values)
+                {
+                    <td>@tagValue</td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>
