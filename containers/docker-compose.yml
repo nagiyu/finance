@@ -3,8 +3,8 @@ services:
   influxdb:
     image: influxdb:1.8.10
     container_name: "${PROJECT_NAME}_influxdb"
-    ports:
-      - "8086:8086"
+    # ports:
+    #   - "8086:8086" # Temporarily port for development
     environment:
       - INFLUXDB_DB=stock_prices
     volumes:
