@@ -118,29 +118,7 @@ def get_elements_from_tabs():
                     write_to_influxdb(ticker, stock_price)
 
                 except Exception as e:
-                    print(f"Error accessing element on URL: {driver.current_url}, Error: {e}")
-
-                    # スクリーンショットを撮る
-                    driver.save_screenshot("output_%s.png" % int(time.time()))
-
-                    # http://secret/Secret/ErrorAccessToken の API を GET する
-                    response = requests.get("http://secret/Secret/ErrorAccessToken")
-                    # key-value の JSON で返ってくるので、アクセストークンを取得する
-                    access_token = response.json()["value"]
-
-                    # アクセストークンをもとに、LineNotify でエラー文とスクリーンショットを送信する
-                    headers = {
-                        "Content-Type": "application/x-www-form-urlencoded",
-                        "Authorization": f"Bearer {access_token}"
-                    }
-                    payload = {
-                        message: f"Error accessing element on URL: {driver.current_url}, Error: {e}"
-                    }
-                    files = {
-                        "imageFile": open("output_%s.png" % int(time.time()), "rb")
-                    }
-                    response = requests.post("https://notify-api.line.me/api/notify", headers=headers, data=payload, files=files)
-
+                    send_error_notification(driver, e)
                     raise e
 
                 # ランダムにリロードを実施
@@ -157,6 +135,9 @@ def get_elements_from_tabs():
             
             if remaining_time > 0:
                 time.sleep(remaining_time)
+
+    except WebDriverException as e:
+        send_error_notification(driver, e)
 
     finally:
         # PostgreSQL との接続を閉じる
@@ -181,6 +162,29 @@ def write_to_influxdb(ticker, stock_price):
         }
     ]
     client.write_points(json_body)
+
+def send_error_notification(driver, e):
+    # スクリーンショットを撮る
+    screenshot_path = "output_%s.png" % int(time.time())
+    driver.save_screenshot(screenshot_path)
+
+    # http://secret/Secret/ErrorAccessToken の API を GET する
+    response = requests.get("http://secret/Secret/ErrorAccessToken")
+    # key-value の JSON で返ってくるので、アクセストークンを取得する
+    access_token = response.json()["value"]
+
+    # アクセストークンをもとに、LineNotify でエラー文とスクリーンショットを送信する
+    headers = {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Authorization": f"Bearer {access_token}"
+    }
+    payload = {
+        "message": f"Error accessing element on URL: {driver.current_url}, Error: {e}"
+    }
+    files = {
+        "imageFile": open(screenshot_path, "rb")
+    }
+    response = requests.post("https://notify-api.line.me/api/notify", headers=headers, data=payload, files=files)
 
 if __name__ == "__main__":
     get_elements_from_tabs()
