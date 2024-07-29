@@ -3,6 +3,7 @@ import time
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
+import random
 import requests
 import os
 from datetime import datetime
@@ -96,6 +97,10 @@ def get_elements_from_tabs():
 
         while True:
             start_time = time.time()  # 処理開始時間を記録
+
+            # 各タブごとにリロードのタイミングを記録する辞書
+            last_reload_times = {handle: time.time() for handle in driver.window_handles}
+
             for index, handle in enumerate(driver.window_handles):
                 driver.switch_to.window(handle)
                 try:
@@ -114,6 +119,35 @@ def get_elements_from_tabs():
 
                 except Exception as e:
                     print(f"Error accessing element on URL: {driver.current_url}, Error: {e}")
+
+                    # スクリーンショットを撮る
+                    driver.save_screenshot("output_%s.png" % int(time.time()))
+
+                    # http://secret/Secret/ErrorAccessToken の API を GET する
+                    response = requests.get("http://secret/Secret/ErrorAccessToken")
+                    # key-value の JSON で返ってくるので、アクセストークンを取得する
+                    access_token = response.json()["value"]
+
+                    # アクセストークンをもとに、LineNotify でエラー文とスクリーンショットを送信する
+                    headers = {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                        "Authorization": f"Bearer {access_token}"
+                    }
+                    payload = {
+                        message: f"Error accessing element on URL: {driver.current_url}, Error: {e}"
+                    }
+                    files = {
+                        "imageFile": open("output_%s.png" % int(time.time()), "rb")
+                    }
+                    response = requests.post("https://notify-api.line.me/api/notify", headers=headers, data=payload, files=files)
+
+                    raise e
+
+                # ランダムにリロードを実施
+                current_time = time.time()
+                if random.random() < 0.1 or (current_time - last_reload_times[handle]) > 3600:
+                    driver.refresh()
+                    last_reload_times[handle] = current_time
 
                 # 0.3秒待つ
                 time.sleep(0.3)
