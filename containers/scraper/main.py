@@ -121,14 +121,14 @@ def initialize_driver():
             time.sleep(5)
     return None
 
-def process_tabs(driver, ticker_urls, system_info):
+def process_tabs(driver, cursor, ticker_urls, system_info):
     """Process each tab to fetch stock prices."""
     driver.get(system_info["login_url"])
 
     # Wait for the user to login
     while True:
-        cur.execute("SELECT value FROM system_info WHERE key = 'status'")
-        if cur.fetchone()[0] == "true":
+        cursor.execute("SELECT value FROM system_info WHERE key = 'status'")
+        if cursor.fetchone()[0] == "true":
             break
         time.sleep(5)
 
@@ -202,7 +202,7 @@ def get_elements_from_tabs():
         ticker_urls = fetch_ticker_urls(cur)
         system_info = fetch_system_info(cur)
         update_system_status(cur, "false")
-        process_tabs(driver, ticker_urls, system_info)
+        process_tabs(driver, cur, ticker_urls, system_info)
     except TimeoutException as e:
         send_error_notification_with_image(driver, e)
     except WebDriverException as e:
