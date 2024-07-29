@@ -1,6 +1,7 @@
 # main.py
 import time
 from selenium import webdriver
+from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 import random
@@ -45,6 +46,7 @@ def get_elements_from_tabs():
         print("Failed to connect to the Selenium server after several retries.")
         return
 
+    driver.set_page_load_timeout(60)  # タイムアウトを60秒に延長
     driver.maximize_window()
 
     try:
@@ -136,6 +138,9 @@ def get_elements_from_tabs():
             if remaining_time > 0:
                 time.sleep(remaining_time)
 
+    except TimeoutException as e:
+        send_error_notification(driver, e)
+
     except WebDriverException as e:
         send_error_notification(driver, e)
 
@@ -165,7 +170,7 @@ def write_to_influxdb(ticker, stock_price):
 
 def send_error_notification(driver, e):
     # スクリーンショットを撮る
-    screenshot_path = "output_%s.png" % int(time.time())
+    screenshot_path = "/output/%s.png" % int(time.time())
     driver.save_screenshot(screenshot_path)
 
     # http://secret/Secret/ErrorAccessToken の API を GET する
