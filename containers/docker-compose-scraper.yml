@@ -18,6 +18,8 @@ services:
       - ./scraper/requirements.txt:/usr/src/app/requirements.txt
       - ./scraper/main.py:/usr/src/app/main.py
       - ./../resources/scraper:/output
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /usr/bin/docker:/usr/bin/docker
     environment:
       - SELENIUM_REMOTE_URL=http://selenium:4444/wd/hub
     networks:
