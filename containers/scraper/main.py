@@ -238,8 +238,11 @@ def get_elements_from_tabs():
     if not driver:
         send_error_notification("Failed to initialize Selenium WebDriver")
         return
-    driver.set_page_load_timeout(60)
+
+    driver.set_page_load_timeout(300)
+    driver.set_script_timeout(300)
     driver.maximize_window()
+
     conn = get_database_connection()
     cur = conn.cursor()
     try:
