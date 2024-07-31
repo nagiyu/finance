@@ -1,3 +1,4 @@
+import docker
 import time
 import random
 import requests
@@ -23,6 +24,8 @@ POSTGRES_HOST = "postgres"
 POSTGRES_DB = "my_finance_manager_db"
 POSTGRES_USER = "postgres"
 POSTGRES_PASSWORD = "Password123!"
+
+client = docker.from_env()
 
 def can_fetch(url):
     """Check if the URL can be fetched based on robots.txt."""
@@ -76,6 +79,22 @@ def write_to_influxdb(ticker, stock_price):
     ]
     client.write_points(json_body)
 
+def send_warning_notification(message):
+    """Send error notification with a screenshot."""
+    with open(f"/output/{int(time.time())}.txt", "w") as f:
+        f.write(str(e))
+
+    response = requests.get("http://secret/Secret/AlertAccessToken")
+    access_token = response.json()["value"]
+    headers = {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Authorization": f"Bearer {access_token}"
+    }
+    payload = {
+        "message": f"Warning: {message}"
+    }
+    requests.post("https://notify-api.line.me/api/notify", headers=headers, params=payload)
+
 def send_error_notification(message):
     """Send error notification with a screenshot."""
     with open(f"/output/{int(time.time())}.txt", "w") as f:
@@ -90,7 +109,7 @@ def send_error_notification(message):
     payload = {
         "message": f"Error: {message}"
     }
-    requests.post("https://notify-api.line.me/api/notify", headers=headers, data=payload)
+    requests.post("https://notify-api.line.me/api/notify", headers=headers, params=payload)
 
 def send_error_notification_with_image(driver, e):
     """Send error notification with a screenshot."""
@@ -112,7 +131,7 @@ def send_error_notification_with_image(driver, e):
     files = {
         "imageFile": open(screenshot_path, "rb")
     }
-    requests.post("https://notify-api.line.me/api/notify", headers=headers, data=payload, files=files)
+    requests.post("https://notify-api.line.me/api/notify", headers=headers, params=payload, files=files)
 
 def initialize_driver():
     """Initialize the Selenium WebDriver."""
@@ -159,6 +178,11 @@ def process_tabs(driver, cursor, ticker_urls, system_info):
     while True:
         start_time = time.time()
         for index, handle in enumerate(driver.window_handles):
+            memory_usage, memory_limit = check_container_memory("finance_selenium")
+            if memory_usage and memory_limit:
+                if memory_usage / memory_limit > 0.8:
+                    send_warning_notification(f"Warning: Memory usage exceeds 80% of limit. / Memory Usage: {memory_usage:.2f} MB / {memory_limit:.2f} MB")
+
             driver.switch_to.window(handle)
 
             try:
@@ -195,14 +219,30 @@ def process_tabs(driver, cursor, ticker_urls, system_info):
         if remaining_time > 0:
             time.sleep(remaining_time)
 
+def check_container_memory(container_name):
+    try:
+        container = client.containers.get(container_name)
+        stats = container.stats(stream=False)
+        memory_usage = stats['memory_stats']['usage']
+        memory_limit = stats['memory_stats']['limit']
+        memory_usage_mb = memory_usage / 1024 / 1024
+        memory_limit_mb = memory_limit / 1024 / 1024
+        return memory_usage_mb, memory_limit_mb
+    except Exception as e:
+        send_error_notification(f"Error checking memory usage: {e}")
+        return None, None
+
 def get_elements_from_tabs():
     """Main function to get elements from tabs."""
     driver = initialize_driver()
     if not driver:
         send_error_notification("Failed to initialize Selenium WebDriver")
         return
-    driver.set_page_load_timeout(60)
+
+    driver.set_page_load_timeout(300)
+    driver.set_script_timeout(300)
     driver.maximize_window()
+
     conn = get_database_connection()
     cur = conn.cursor()
     try:

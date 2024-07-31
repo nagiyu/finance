@@ -5,7 +5,7 @@ services:
     container_name: "${PROJECT_NAME}_selenium"
     ports:
       - "9007:7900"
-    shm_size: 2gb
+    shm_size: 4gb
     networks:
       - finance_network
 
@@ -18,6 +18,8 @@ services:
       - ./scraper/requirements.txt:/usr/src/app/requirements.txt
       - ./scraper/main.py:/usr/src/app/main.py
       - ./../resources/scraper:/output
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /usr/bin/docker:/usr/bin/docker
     environment:
       - SELENIUM_REMOTE_URL=http://selenium:4444/wd/hub
     networks:
