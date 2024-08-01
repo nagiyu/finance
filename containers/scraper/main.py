@@ -177,12 +177,13 @@ def process_tabs(driver, cursor, ticker_urls, system_info):
 
     while True:
         start_time = time.time()
-        for index, handle in enumerate(driver.window_handles):
-            memory_usage, memory_limit = check_container_memory("finance_selenium")
-            if memory_usage and memory_limit:
-                if memory_usage / memory_limit > 0.8:
-                    send_warning_notification(f"Warning: Memory usage exceeds 80% of limit. / Memory Usage: {memory_usage:.2f} MB / {memory_limit:.2f} MB")
 
+        memory_usage, memory_limit = check_container_memory("finance_selenium")
+        if memory_usage and memory_limit:
+            if memory_usage / memory_limit > 0.8:
+                send_warning_notification(f"Warning: Memory usage exceeds 80% of limit. / Memory Usage: {memory_usage:.2f} MB / {memory_limit:.2f} MB")
+
+        for index, handle in enumerate(driver.window_handles):
             driver.switch_to.window(handle)
 
             try:
