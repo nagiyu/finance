@@ -82,7 +82,7 @@ def write_to_influxdb(ticker, stock_price):
 def send_warning_notification(message):
     """Send error notification with a screenshot."""
     with open(f"/output/{int(time.time())}.txt", "w") as f:
-        f.write(str(e))
+        f.write(f"Warning: {message}")
 
     response = requests.get("http://secret/Secret/AlertAccessToken")
     access_token = response.json()["value"]
@@ -98,7 +98,7 @@ def send_warning_notification(message):
 def send_error_notification(message):
     """Send error notification with a screenshot."""
     with open(f"/output/{int(time.time())}.txt", "w") as f:
-        f.write(str(e))
+        f.write(f"Error: {message}")
 
     response = requests.get("http://secret/Secret/ErrorAccessToken")
     access_token = response.json()["value"]
@@ -177,12 +177,13 @@ def process_tabs(driver, cursor, ticker_urls, system_info):
 
     while True:
         start_time = time.time()
-        for index, handle in enumerate(driver.window_handles):
-            memory_usage, memory_limit = check_container_memory("finance_selenium")
-            if memory_usage and memory_limit:
-                if memory_usage / memory_limit > 0.8:
-                    send_warning_notification(f"Warning: Memory usage exceeds 80% of limit. / Memory Usage: {memory_usage:.2f} MB / {memory_limit:.2f} MB")
 
+        memory_usage, memory_limit = check_container_memory("finance_selenium")
+        if memory_usage and memory_limit:
+            if memory_usage / memory_limit > 0.8:
+                send_warning_notification(f"Warning: Memory usage exceeds 80% of limit. / Memory Usage: {memory_usage:.2f} MB / {memory_limit:.2f} MB")
+
+        for index, handle in enumerate(driver.window_handles):
             driver.switch_to.window(handle)
 
             try:
