@@ -82,7 +82,7 @@ def write_to_influxdb(ticker, stock_price):
 def send_warning_notification(message):
     """Send error notification with a screenshot."""
     with open(f"/output/{int(time.time())}.txt", "w") as f:
-        f.write(str(e))
+        f.write(f"Warning: {message}")
 
     response = requests.get("http://secret/Secret/AlertAccessToken")
     access_token = response.json()["value"]
@@ -98,7 +98,7 @@ def send_warning_notification(message):
 def send_error_notification(message):
     """Send error notification with a screenshot."""
     with open(f"/output/{int(time.time())}.txt", "w") as f:
-        f.write(str(e))
+        f.write(f"Error: {message}")
 
     response = requests.get("http://secret/Secret/ErrorAccessToken")
     access_token = response.json()["value"]
