@@ -1,0 +1,22 @@
+services:
+  test:
+    build:
+      context: ./scraper
+      dockerfile: Dockerfile
+    container_name: "${PROJECT_NAME}_test"
+    tty: true
+    volumes:
+      - ./scraper:/app
+      - ./scraper/requirements.txt:/usr/src/app/requirements.txt
+      - ./scraper/main.py:/usr/src/app/main.py
+      - ./../resources/scraper:/output
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /usr/bin/docker:/usr/bin/docker
+    networks:
+      - secret_network
+    working_dir: /app
+    command: ["/bin/bash"]
+
+networks:
+  secret_network:
+    external: true
