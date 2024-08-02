@@ -12,6 +12,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from influxdb import InfluxDBClient
 import psycopg2
+from notifications import send_warning_notification, send_error_notification, send_error_notification_with_image
 
 # Constants
 WAIT_INTERVAL = 30
@@ -79,60 +80,6 @@ def write_to_influxdb(ticker, stock_price):
     ]
     client.write_points(json_body)
 
-def send_warning_notification(message):
-    """Send error notification with a screenshot."""
-    with open(f"/output/{int(time.time())}.txt", "w") as f:
-        f.write(str(e))
-
-    response = requests.get("http://secret/Secret/AlertAccessToken")
-    access_token = response.json()["value"]
-    headers = {
-        "Content-Type": "application/x-www-form-urlencoded",
-        "Authorization": f"Bearer {access_token}"
-    }
-    payload = {
-        "message": f"Warning: {message}"
-    }
-    requests.post("https://notify-api.line.me/api/notify", headers=headers, params=payload)
-
-def send_error_notification(message):
-    """Send error notification with a screenshot."""
-    with open(f"/output/{int(time.time())}.txt", "w") as f:
-        f.write(str(e))
-
-    response = requests.get("http://secret/Secret/ErrorAccessToken")
-    access_token = response.json()["value"]
-    headers = {
-        "Content-Type": "application/x-www-form-urlencoded",
-        "Authorization": f"Bearer {access_token}"
-    }
-    payload = {
-        "message": f"Error: {message}"
-    }
-    requests.post("https://notify-api.line.me/api/notify", headers=headers, params=payload)
-
-def send_error_notification_with_image(driver, e):
-    """Send error notification with a screenshot."""
-    with open(f"/output/{int(time.time())}.txt", "w") as f:
-        f.write(str(e))
-
-    screenshot_path = f"/output/{int(time.time())}.png"
-    driver.save_screenshot(screenshot_path)
-
-    response = requests.get("http://secret/Secret/ErrorAccessToken")
-    access_token = response.json()["value"]
-    headers = {
-        "Content-Type": "application/x-www-form-urlencoded",
-        "Authorization": f"Bearer {access_token}"
-    }
-    payload = {
-        "message": f"Error accessing element on URL: {driver.current_url}, Error: {e}"
-    }
-    files = {
-        "imageFile": open(screenshot_path, "rb")
-    }
-    requests.post("https://notify-api.line.me/api/notify", headers=headers, params=payload, files=files)
-
 def initialize_driver():
     """Initialize the Selenium WebDriver."""
     options = Options()
@@ -177,12 +124,13 @@ def process_tabs(driver, cursor, ticker_urls, system_info):
 
     while True:
         start_time = time.time()
-        for index, handle in enumerate(driver.window_handles):
-            memory_usage, memory_limit = check_container_memory("finance_selenium")
-            if memory_usage and memory_limit:
-                if memory_usage / memory_limit > 0.8:
-                    send_warning_notification(f"Warning: Memory usage exceeds 80% of limit. / Memory Usage: {memory_usage:.2f} MB / {memory_limit:.2f} MB")
 
+        memory_usage, memory_limit = check_container_memory("finance_selenium")
+        if memory_usage and memory_limit:
+            if memory_usage / memory_limit > 0.8:
+                send_warning_notification(f"Warning: Memory usage exceeds 80% of limit. / Memory Usage: {memory_usage:.2f} MB / {memory_limit:.2f} MB")
+
+        for index, handle in enumerate(driver.window_handles):
             driver.switch_to.window(handle)
 
             try:
