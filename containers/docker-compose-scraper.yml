@@ -16,7 +16,7 @@ services:
     container_name: "${PROJECT_NAME}_scraper"
     volumes:
       - ./scraper/requirements.txt:/usr/src/app/requirements.txt
-      - ./scraper/main.py:/usr/src/app/main.py
+      - ./scraper:/usr/src/app
       - ./../resources/scraper:/output
       - /var/run/docker.sock:/var/run/docker.sock
       - /usr/bin/docker:/usr/bin/docker

@@ -3,28 +3,22 @@ import time
 import random
 import requests
 import os
-from datetime import datetime
 from urllib.parse import urlparse, urljoin
 from urllib.robotparser import RobotFileParser
 from selenium import webdriver
 from selenium.common.exceptions import WebDriverException, TimeoutException
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.chrome.options import Options
-from influxdb import InfluxDBClient
-import psycopg2
+import check_price
+import influxdb_utils
+from database import get_database_connection, fetch_ticker_urls, fetch_system_info, update_system_status
 from notifications import send_warning_notification, send_error_notification, send_error_notification_with_image
 
 # Constants
 WAIT_INTERVAL = 30
 MAX_RETRIES = 10
 SELENIUM_REMOTE_URL = os.getenv('SELENIUM_REMOTE_URL', 'http://selenium:4444/wd/hub')
-INFLUXDB_HOST = 'influxdb'
-INFLUXDB_PORT = 8086
-INFLUXDB_DB = 'stock_prices'
-POSTGRES_HOST = "postgres"
-POSTGRES_DB = "my_finance_manager_db"
-POSTGRES_USER = "postgres"
-POSTGRES_PASSWORD = "Password123!"
 
 client = docker.from_env()
 
@@ -38,47 +32,6 @@ def can_fetch(url):
         rp.parse(response.text.split('\n'))
         return rp.can_fetch("*", url)
     return False
-
-def get_database_connection():
-    """Establish a connection to the PostgreSQL database."""
-    return psycopg2.connect(
-        host=POSTGRES_HOST,
-        database=POSTGRES_DB,
-        user=POSTGRES_USER,
-        password=POSTGRES_PASSWORD
-    )
-
-def fetch_ticker_urls(cursor):
-    """Fetch ticker URLs from the database."""
-    cursor.execute("SELECT ticker_name, url FROM ticker_urls")
-    return {row[0]: row[1] for row in cursor.fetchall()}
-
-def fetch_system_info(cursor):
-    """Fetch system information from the database."""
-    cursor.execute("SELECT key, value FROM system_info")
-    return {row[0]: row[1] for row in cursor.fetchall()}
-
-def update_system_status(cursor, status):
-    """Update the system status in the database."""
-    cursor.execute("UPDATE system_info SET value = %s WHERE key = 'status'", (status,))
-    cursor.connection.commit()
-
-def write_to_influxdb(ticker, stock_price):
-    """Write stock price data to InfluxDB."""
-    client = InfluxDBClient(host=INFLUXDB_HOST, port=INFLUXDB_PORT, database=INFLUXDB_DB)
-    json_body = [
-        {
-            "measurement": "stock_price",
-            "tags": {
-                "stock": ticker
-            },
-            "time": datetime.utcnow().isoformat(),
-            "fields": {
-                "price": stock_price
-            }
-        }
-    ]
-    client.write_points(json_body)
 
 def initialize_driver():
     """Initialize the Selenium WebDriver."""
@@ -94,7 +47,7 @@ def initialize_driver():
             time.sleep(5)
     return None
 
-def process_tabs(driver, cursor, ticker_urls, system_info):
+def process_tabs(driver, cursor, ticker_client, ticker_urls, system_info):
     """Process each tab to fetch stock prices."""
     driver.get(system_info["login_url"])
 
@@ -144,8 +97,8 @@ def process_tabs(driver, cursor, ticker_urls, system_info):
                 stock_price = premarket_element.text if premarket_element.text else element.text
 
                 # Write to InfluxDB
-                ticker = list(ticker_urls.keys())[index]
-                write_to_influxdb(ticker, stock_price)
+                ticker_id = list(ticker_urls.keys())[index]
+                influxdb_utils.write_to_influxdb(ticker_client, ticker_id, stock_price)
 
             except Exception as e:
                 send_error_notification_with_image(driver, e)
@@ -159,6 +112,8 @@ def process_tabs(driver, cursor, ticker_urls, system_info):
                 last_reload_times[handle] = current_time
 
             time.sleep(0.3)
+
+        check_price.check_price(cursor, ticker_client)
 
         # Wait for the next interval
         elapsed_time = time.time() - start_time
@@ -191,17 +146,24 @@ def get_elements_from_tabs():
     driver.set_script_timeout(300)
     driver.maximize_window()
 
+    # Connect to PostgreSQL
     conn = get_database_connection()
     cur = conn.cursor()
+
+    # Connect to InfluxDB
+    ticker_client = influxdb_utils.create_influxdb_client()
+
     try:
         ticker_urls = fetch_ticker_urls(cur)
         system_info = fetch_system_info(cur)
         update_system_status(cur, "false")
-        process_tabs(driver, cur, ticker_urls, system_info)
+        process_tabs(driver, cur, ticker_client ,ticker_urls, system_info)
     except TimeoutException as e:
         send_error_notification_with_image(driver, e)
     except WebDriverException as e:
         send_error_notification_with_image(driver, e)
+    except Exception as e:
+        send_error_notification(str(e))
     finally:
         cur.close()
         conn.close()
