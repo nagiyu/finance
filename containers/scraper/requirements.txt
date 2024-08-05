@@ -5,3 +5,4 @@ webdriver_manager
 requests
 influxdb
 psycopg2-binary
+yfinance
