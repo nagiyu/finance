@@ -11,7 +11,7 @@ from selenium.common.exceptions import WebDriverException, TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from influxdb import InfluxDBClient
-import psycopg2
+from database import get_database_connection, fetch_ticker_urls, fetch_system_info, update_system_status
 from notifications import send_warning_notification, send_error_notification, send_error_notification_with_image
 
 # Constants
@@ -21,10 +21,6 @@ SELENIUM_REMOTE_URL = os.getenv('SELENIUM_REMOTE_URL', 'http://selenium:4444/wd/
 INFLUXDB_HOST = 'influxdb'
 INFLUXDB_PORT = 8086
 INFLUXDB_DB = 'stock_prices'
-POSTGRES_HOST = "postgres"
-POSTGRES_DB = "my_finance_manager_db"
-POSTGRES_USER = "postgres"
-POSTGRES_PASSWORD = "Password123!"
 
 client = docker.from_env()
 
@@ -38,30 +34,6 @@ def can_fetch(url):
         rp.parse(response.text.split('\n'))
         return rp.can_fetch("*", url)
     return False
-
-def get_database_connection():
-    """Establish a connection to the PostgreSQL database."""
-    return psycopg2.connect(
-        host=POSTGRES_HOST,
-        database=POSTGRES_DB,
-        user=POSTGRES_USER,
-        password=POSTGRES_PASSWORD
-    )
-
-def fetch_ticker_urls(cursor):
-    """Fetch ticker URLs from the database."""
-    cursor.execute("SELECT ticker_name, url FROM ticker_urls")
-    return {row[0]: row[1] for row in cursor.fetchall()}
-
-def fetch_system_info(cursor):
-    """Fetch system information from the database."""
-    cursor.execute("SELECT key, value FROM system_info")
-    return {row[0]: row[1] for row in cursor.fetchall()}
-
-def update_system_status(cursor, status):
-    """Update the system status in the database."""
-    cursor.execute("UPDATE system_info SET value = %s WHERE key = 'status'", (status,))
-    cursor.connection.commit()
 
 def write_to_influxdb(ticker, stock_price):
     """Write stock price data to InfluxDB."""
