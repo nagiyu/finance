@@ -3,14 +3,13 @@ import time
 import random
 import requests
 import os
-from datetime import datetime
 from urllib.parse import urlparse, urljoin
 from urllib.robotparser import RobotFileParser
 from selenium import webdriver
 from selenium.common.exceptions import WebDriverException, TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
-from influxdb import InfluxDBClient
+import influxdb_utils
 from database import get_database_connection, fetch_ticker_urls, fetch_system_info, update_system_status
 from notifications import send_warning_notification, send_error_notification, send_error_notification_with_image
 
@@ -18,9 +17,6 @@ from notifications import send_warning_notification, send_error_notification, se
 WAIT_INTERVAL = 30
 MAX_RETRIES = 10
 SELENIUM_REMOTE_URL = os.getenv('SELENIUM_REMOTE_URL', 'http://selenium:4444/wd/hub')
-INFLUXDB_HOST = 'influxdb'
-INFLUXDB_PORT = 8086
-INFLUXDB_DB = 'stock_prices'
 
 client = docker.from_env()
 
@@ -34,23 +30,6 @@ def can_fetch(url):
         rp.parse(response.text.split('\n'))
         return rp.can_fetch("*", url)
     return False
-
-def write_to_influxdb(ticker, stock_price):
-    """Write stock price data to InfluxDB."""
-    client = InfluxDBClient(host=INFLUXDB_HOST, port=INFLUXDB_PORT, database=INFLUXDB_DB)
-    json_body = [
-        {
-            "measurement": "stock_price",
-            "tags": {
-                "stock": ticker
-            },
-            "time": datetime.utcnow().isoformat(),
-            "fields": {
-                "price": stock_price
-            }
-        }
-    ]
-    client.write_points(json_body)
 
 def initialize_driver():
     """Initialize the Selenium WebDriver."""
@@ -66,7 +45,7 @@ def initialize_driver():
             time.sleep(5)
     return None
 
-def process_tabs(driver, cursor, ticker_urls, system_info):
+def process_tabs(driver, cursor, ticker_client, ticker_urls, system_info):
     """Process each tab to fetch stock prices."""
     driver.get(system_info["login_url"])
 
@@ -117,7 +96,7 @@ def process_tabs(driver, cursor, ticker_urls, system_info):
 
                 # Write to InfluxDB
                 ticker = list(ticker_urls.keys())[index]
-                write_to_influxdb(ticker, stock_price)
+                influxdb_utils.write_to_influxdb(ticker_client, ticker, stock_price)
 
             except Exception as e:
                 send_error_notification_with_image(driver, e)
@@ -163,13 +142,18 @@ def get_elements_from_tabs():
     driver.set_script_timeout(300)
     driver.maximize_window()
 
+    # Connect to PostgreSQL
     conn = get_database_connection()
     cur = conn.cursor()
+
+    # Connect to InfluxDB
+    ticker_client = influxdb_utils.create_influxdb_client()
+
     try:
         ticker_urls = fetch_ticker_urls(cur)
         system_info = fetch_system_info(cur)
         update_system_status(cur, "false")
-        process_tabs(driver, cur, ticker_urls, system_info)
+        process_tabs(driver, cur, ticker_client ,ticker_urls, system_info)
     except TimeoutException as e:
         send_error_notification_with_image(driver, e)
     except WebDriverException as e:

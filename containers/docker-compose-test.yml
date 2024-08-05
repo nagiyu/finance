@@ -13,10 +13,13 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - /usr/bin/docker:/usr/bin/docker
     networks:
+      - finance_network
       - secret_network
     working_dir: /app
     command: ["/bin/bash"]
 
 networks:
+  finance_network:
+    external: true
   secret_network:
     external: true
