@@ -14,6 +14,14 @@ def main():
     system_info = database.fetch_system_info(cur)
     print("System information fetched from the database:", system_info)
 
+    # Fetch ticker information from the database
+    ticker_info = database.fetch_ticker_id_list(cur)
+    print("Ticker information fetched from the database:", ticker_info)
+
+    # Fetch ticker name from the database
+    ticker_name = database.fetch_ticker_name(cur, 3)
+    print("Ticker name fetched from the database:", ticker_name)
+
     cur.close()
     conn.close()
 

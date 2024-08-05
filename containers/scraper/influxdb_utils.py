@@ -30,7 +30,7 @@ def write_to_influxdb(client, ticker_id, stock_price):
     ]
     client.write_points(json_body)
 
-def read_from_influxdb(client, ticker):
+def read_from_influxdb(client, ticker_id):
     """Read stock price data from InfluxDB."""
     query = f"""
         SELECT
@@ -38,7 +38,7 @@ def read_from_influxdb(client, ticker):
         FROM
             stock_price
         WHERE
-            "stock" = \'{ticker}\'
+            "ticker_id" = \'{ticker_id}\'
         ORDER BY
             time DESC
     """
@@ -51,7 +51,7 @@ def read_from_influxdb(client, ticker):
 
     return None
 
-def get_max_min_influxdb(client, ticker, start_time, end_time):
+def get_max_min_influxdb(client, ticker_id, start_time, end_time):
     query = f"""
         SELECT
             MAX(price) as max_price,
@@ -59,7 +59,7 @@ def get_max_min_influxdb(client, ticker, start_time, end_time):
         FROM
             stock_price
         WHERE
-            "stock" = \'{ticker}\'
+            "ticker_id" = \'{ticker_id}\'
             AND time >= \'{start_time}\'
             AND time <= \'{end_time}\'
     """
@@ -71,9 +71,9 @@ def get_max_min_influxdb(client, ticker, start_time, end_time):
 
     return None
 
-def is_latest_data_max_or_min(client, ticker, start_time, end_time):
-    max_min_data = get_max_min_influxdb(client, ticker, start_time, end_time)
-    latest_data = read_from_influxdb(client, ticker)
+def is_latest_data_max_or_min(client, ticker_id, start_time, end_time):
+    max_min_data = get_max_min_influxdb(client, ticker_id, start_time, end_time)
+    latest_data = read_from_influxdb(client, ticker_id)
 
     if not max_min_data or not latest_data:
         return False

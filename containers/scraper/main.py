@@ -10,6 +10,7 @@ from selenium.common.exceptions import WebDriverException, TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.chrome.options import Options
+import check_price
 import influxdb_utils
 from database import get_database_connection, fetch_ticker_urls, fetch_system_info, update_system_status
 from notifications import send_warning_notification, send_error_notification, send_error_notification_with_image
@@ -111,6 +112,8 @@ def process_tabs(driver, cursor, ticker_client, ticker_urls, system_info):
                 last_reload_times[handle] = current_time
 
             time.sleep(0.3)
+
+        check_price.check_price(cursor, ticker_client)
 
         # Wait for the next interval
         elapsed_time = time.time() - start_time

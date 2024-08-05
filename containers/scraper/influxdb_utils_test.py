@@ -6,7 +6,7 @@ def main():
     client = influxdb_utils.create_influxdb_client()
     print("InfluxDB client created:", client)
 
-    ticker = 'TEST'
+    ticker = '999'
 
     # Write data to InfluxDB
     stock_price = 150.0
