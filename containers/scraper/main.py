@@ -8,6 +8,7 @@ from urllib.robotparser import RobotFileParser
 from selenium import webdriver
 from selenium.common.exceptions import WebDriverException, TimeoutException
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.chrome.options import Options
 import influxdb_utils
 from database import get_database_connection, fetch_ticker_urls, fetch_system_info, update_system_status
@@ -95,8 +96,8 @@ def process_tabs(driver, cursor, ticker_client, ticker_urls, system_info):
                 stock_price = premarket_element.text if premarket_element.text else element.text
 
                 # Write to InfluxDB
-                ticker = list(ticker_urls.keys())[index]
-                influxdb_utils.write_to_influxdb(ticker_client, ticker, stock_price)
+                ticker_id = list(ticker_urls.keys())[index]
+                influxdb_utils.write_to_influxdb(ticker_client, ticker_id, stock_price)
 
             except Exception as e:
                 send_error_notification_with_image(driver, e)
@@ -158,6 +159,8 @@ def get_elements_from_tabs():
         send_error_notification_with_image(driver, e)
     except WebDriverException as e:
         send_error_notification_with_image(driver, e)
+    except Exception as e:
+        send_error_notification(str(e))
     finally:
         cur.close()
         conn.close()

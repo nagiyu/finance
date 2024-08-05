@@ -16,7 +16,7 @@ def get_database_connection():
 
 def fetch_ticker_urls(cursor):
     """Fetch ticker URLs from the database."""
-    cursor.execute("SELECT ticker_name, url FROM ticker_urls")
+    cursor.execute("SELECT ticker_id, url FROM ticker_info")
     return {row[0]: row[1] for row in cursor.fetchall()}
 
 def fetch_system_info(cursor):

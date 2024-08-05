@@ -29,7 +29,8 @@ CREATE TABLE IF NOT EXISTS tickers (
     id SERIAL PRIMARY KEY,
     ticker_name VARCHAR(255) NOT NULL,
     ticker_code VARCHAR(255) NOT NULL,
-    exchange_id INTEGER NOT NULL
+    exchange_id INTEGER NOT NULL,
+    url VARCHAR(255) NOT NULL
 );
 
 -- 自分が所有している銘柄情報を保存するテーブル
@@ -44,9 +45,10 @@ CREATE TABLE IF NOT EXISTS my_tickers (
 -- 銘柄情報、証券取引所情報をJOINしたビュー
 CREATE OR REPLACE VIEW ticker_info AS (
     SELECT
-        tickers.id AS id,
+        tickers.id AS ticker_id,
         tickers.ticker_name AS ticker_name,
         tickers.ticker_code AS ticker_code,
+        tickers.url AS url,
         exchanges.exchange_name AS exchange_name
     FROM
         tickers
@@ -57,10 +59,14 @@ CREATE OR REPLACE VIEW ticker_info AS (
 -- 自分が所有している銘柄情報、銘柄情報をJOINしたビュー
 CREATE OR REPLACE VIEW my_ticker_info AS (
     SELECT
-        my_tickers.id AS id,
+        my_tickers.id AS my_ticker_id,
+        tickers.id AS ticker_id,
         tickers.ticker_name AS ticker_name,
         tickers.ticker_code AS ticker_code,
+        tickers.url AS url,
         exchanges.exchange_name AS exchange_name,
+        exchanges.start_time AS start_time,
+        exchanges.end_time AS end_time,
         my_tickers.purchase_price AS purchase_price,
         my_tickers.purchase_quantity AS purchase_quantity
     FROM

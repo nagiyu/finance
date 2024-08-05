@@ -9,13 +9,18 @@ def create_influxdb_client():
     """Create InfluxDB client."""
     return InfluxDBClient(host=INFLUXDB_HOST, port=INFLUXDB_PORT, database=INFLUXDB_DB)
 
-def write_to_influxdb(client, ticker, stock_price):
+def write_to_influxdb(client, ticker_id, stock_price):
     """Write stock price data to InfluxDB."""
+    try:
+        stock_price = float(str(stock_price).replace(",", "")) # Ensure stock_price is a float
+    except ValueError:
+        raise ValueError("stock_price must be a number")
+
     json_body = [
         {
             "measurement": "stock_price",
             "tags": {
-                "stock": ticker
+                "ticker_id": str(ticker_id)
             },
             "time": datetime.utcnow().isoformat(),
             "fields": {
