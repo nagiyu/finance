@@ -19,8 +19,8 @@ CREATE TABLE IF NOT EXISTS system_info (
 CREATE TABLE IF NOT EXISTS exchanges (
     id SERIAL PRIMARY KEY,
     exchange_name VARCHAR(255) NOT NULL,
-    start_time TIME NOT NULL,
-    end_time TIME NOT NULL
+    start_time TIME WITH TIME ZONE NOT NULL,
+    end_time TIME WITH TIME ZONE NOT NULL
 );
 
 -- 銘柄情報を保存するテーブル
@@ -32,6 +32,15 @@ CREATE TABLE IF NOT EXISTS tickers (
     exchange_id INTEGER NOT NULL
 );
 
+-- 自分が所有している銘柄情報を保存するテーブル
+-- ID、銘柄ID、購入価格、購入株数
+CREATE TABLE IF NOT EXISTS my_tickers (
+    id SERIAL PRIMARY KEY,
+    ticker_id INTEGER NOT NULL,
+    purchase_price INTEGER NOT NULL,
+    purchase_quantity FLOAT NOT NULL
+);
+
 -- 銘柄情報、証券取引所情報をJOINしたビュー
 CREATE OR REPLACE VIEW ticker_info AS (
     SELECT
@@ -41,6 +50,23 @@ CREATE OR REPLACE VIEW ticker_info AS (
         exchanges.exchange_name AS exchange_name
     FROM
         tickers
+        JOIN exchanges 
+            ON tickers.exchange_id = exchanges.id
+);
+
+-- 自分が所有している銘柄情報、銘柄情報をJOINしたビュー
+CREATE OR REPLACE VIEW my_ticker_info AS (
+    SELECT
+        my_tickers.id AS id,
+        tickers.ticker_name AS ticker_name,
+        tickers.ticker_code AS ticker_code,
+        exchanges.exchange_name AS exchange_name,
+        my_tickers.purchase_price AS purchase_price,
+        my_tickers.purchase_quantity AS purchase_quantity
+    FROM
+        my_tickers
+        JOIN tickers 
+            ON my_tickers.ticker_id = tickers.id
         JOIN exchanges 
             ON tickers.exchange_id = exchanges.id
 );
