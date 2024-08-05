@@ -17,6 +17,6 @@ def check_price(cursor, client):
         ticker_name = database.fetch_ticker_name(cursor, ticker_id)
 
         if result == 'max':
-            notifications.send_error_notification(f"Latest data for ticker \"{ticker_name}\" is the maximum value")
+            notifications.send_warning_notification(f"Latest data for ticker \"{ticker_name}\" is the maximum value")
         elif result == 'min':
-            notifications.send_error_notification(f"Latest data for ticker \"{ticker_name}\" is the minimum value")
+            notifications.send_warning_notification(f"Latest data for ticker \"{ticker_name}\" is the minimum value")

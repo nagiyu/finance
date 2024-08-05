@@ -17,7 +17,20 @@ def get_database_connection():
 
 def fetch_ticker_urls(cursor):
     """Fetch ticker URLs from the database."""
-    cursor.execute("SELECT ticker_id, url FROM ticker_info")
+    now = datetime.datetime.now().strftime("%H:%M:%S%z")
+
+    cursor.execute(
+        """
+        SELECT
+            ticker_id,
+            url
+        FROM
+            ticker_info
+        WHERE
+            start_time <= %s
+            AND end_time >= %s
+        """, (now, now))
+
     return {row[0]: row[1] for row in cursor.fetchall()}
 
 def fetch_system_info(cursor):

@@ -49,7 +49,9 @@ CREATE OR REPLACE VIEW ticker_info AS (
         tickers.ticker_name AS ticker_name,
         tickers.ticker_code AS ticker_code,
         tickers.url AS url,
-        exchanges.exchange_name AS exchange_name
+        exchanges.exchange_name AS exchange_name,
+        exchanges.start_time AS start_time,
+        exchanges.end_time AS end_time
     FROM
         tickers
         JOIN exchanges 
