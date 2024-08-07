@@ -52,11 +52,18 @@ def process_tabs(driver, cursor, ticker_client, ticker_urls, system_info):
     driver.get(system_info["login_url"])
 
     # Wait for the user to login
+    last_reload_time = time.time()
+
     while True:
         cursor.execute("SELECT value FROM system_info WHERE key = 'status'")
         if cursor.fetchone()[0] == "true":
             break
         time.sleep(5)
+
+        # Check if 3 minutes have passed since the last reload
+        if time.time() - last_reload_time >= 180:
+            driver.get(system_info["login_url"])
+            last_reload_time = time.time()
 
     # Open tabs for each ticker
     for ticker, url in ticker_urls.items():
