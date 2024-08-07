@@ -47,7 +47,7 @@ def initialize_driver():
             time.sleep(5)
     return None
 
-def process_tabs(driver, cursor, ticker_client, ticker_urls, system_info):
+def process_tabs(driver, cursor, ticker_client, system_info):
     """Process each tab to fetch stock prices."""
     driver.get(system_info["login_url"])
 
@@ -65,25 +65,36 @@ def process_tabs(driver, cursor, ticker_client, ticker_urls, system_info):
             driver.get(system_info["login_url"])
             last_reload_time = time.time()
 
-    # Open tabs for each ticker
-    for ticker, url in ticker_urls.items():
-        if can_fetch(url):
-            driver.execute_script("window.open('');")
-            driver.switch_to.window(driver.window_handles[-1])
-            driver.get(url)
-            time.sleep(5)
-        else:
-            print(f"Fetching not allowed by robots.txt: {url}")
-
-    # Close the first tab
-    driver.switch_to.window(driver.window_handles[0])
-    driver.close()
+    ticker_urls = {}
 
     # Process each tab
     last_reload_times = {handle: time.time() for handle in driver.window_handles}
 
     while True:
         start_time = time.time()
+
+        # Fetch ticker URLs
+        new_ticker_urls = fetch_ticker_urls(cursor)
+
+        removed_tickers = set(ticker_urls.keys()) - set(new_ticker_urls.keys())
+
+        for ticker in removed_tickers:
+            driver.switch_to.window(list(ticker_urls.keys()).index(ticker))
+            driver.close()
+
+        added_tickers = set(new_ticker_urls.keys()) - set(ticker_urls.keys())
+
+        for ticker in added_tickers:
+            url = new_ticker_urls[ticker]
+            if can_fetch(url):
+                driver.execute_script("window.open('');")
+                driver.switch_to.window(driver.window_handles[-1])
+                driver.get(url)
+                time.sleep(5)
+            else:
+                send_warning_notification(f"Fetching not allowed by robots.txt: {url}")
+
+        ticker_urls = new_ticker_urls
 
         memory_usage, memory_limit = check_container_memory("finance_selenium")
         if memory_usage and memory_limit:
@@ -92,6 +103,10 @@ def process_tabs(driver, cursor, ticker_client, ticker_urls, system_info):
 
         for index, handle in enumerate(driver.window_handles):
             driver.switch_to.window(handle)
+
+            # Check if the current URL is the login URL
+            if driver.current_url == system_info["login_url"]:
+                continue
 
             try:
                 # Fetch premarket price
@@ -161,10 +176,9 @@ def get_elements_from_tabs():
     ticker_client = influxdb_utils.create_influxdb_client()
 
     try:
-        ticker_urls = fetch_ticker_urls(cur)
         system_info = fetch_system_info(cur)
         update_system_status(cur, "false")
-        process_tabs(driver, cur, ticker_client ,ticker_urls, system_info)
+        process_tabs(driver, cur, ticker_client, system_info)
     except TimeoutException as e:
         send_error_notification_with_image(driver, e)
     except WebDriverException as e:
