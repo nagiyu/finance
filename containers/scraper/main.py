@@ -74,11 +74,7 @@ def process_tabs(driver, cursor, ticker_client, system_info):
         new_ticker_urls = fetch_ticker_urls(cursor)
 
         removed_tickers = set(ticker_urls.keys()) - set(new_ticker_urls.keys())
-
-        for ticker in removed_tickers:
-            driver.switch_to.window(list(ticker_urls.keys()).index(ticker))
-            driver.close()
-            time.sleep(0.3)
+        removed_urls = [ticker_urls[ticker] for ticker in removed_tickers]
 
         added_tickers = set(new_ticker_urls.keys()) - set(ticker_urls.keys())
 
@@ -101,11 +97,16 @@ def process_tabs(driver, cursor, ticker_client, system_info):
 
         driver.switch_to.window(driver.window_handles[0])
 
-        for index, handle in enumerate(driver.window_handles):
+        for handle in driver.window_handles:
             driver.switch_to.window(handle)
 
             # Check if the current URL is the login URL
             if driver.current_url == system_info["login_url"]:
+                continue
+
+            # removed_urls に含まれる URL があれば、そのタブを閉じる
+            if driver.current_url in removed_urls:
+                driver.close()
                 continue
 
             time.sleep(0.3)
