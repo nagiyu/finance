@@ -90,7 +90,6 @@ def process_tabs(driver, cursor, ticker_client, system_info):
                 driver.execute_script("window.open('');")
                 driver.switch_to.window(driver.window_handles[-1])
                 driver.get(url)
-                time.sleep(5)
             else:
                 send_warning_notification(f"Fetching not allowed by robots.txt: {url}")
 
@@ -100,6 +99,8 @@ def process_tabs(driver, cursor, ticker_client, system_info):
         if memory_usage and memory_limit:
             if memory_usage / memory_limit > 0.8:
                 send_warning_notification(f"Warning: Memory usage exceeds 80% of limit. / Memory Usage: {memory_usage:.2f} MB / {memory_limit:.2f} MB")
+
+        driver.switch_to.window(driver.window_handles[0])
 
         for index, handle in enumerate(driver.window_handles):
             driver.switch_to.window(handle)
