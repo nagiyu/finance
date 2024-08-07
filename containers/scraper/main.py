@@ -99,7 +99,7 @@ def process_tabs(driver, cursor, ticker_client, system_info):
 
         driver.switch_to.window(driver.window_handles[0])
 
-        for handle in enumerate(driver.window_handles):
+        for index, handle in enumerate(driver.window_handles):
             driver.switch_to.window(handle)
 
             # Check if the current URL is the login URL
