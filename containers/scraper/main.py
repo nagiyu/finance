@@ -78,6 +78,7 @@ def process_tabs(driver, cursor, ticker_client, system_info):
         for ticker in removed_tickers:
             driver.switch_to.window(list(ticker_urls.keys()).index(ticker))
             driver.close()
+            time.sleep(0.3)
 
         added_tickers = set(new_ticker_urls.keys()) - set(ticker_urls.keys())
 
@@ -87,6 +88,7 @@ def process_tabs(driver, cursor, ticker_client, system_info):
                 driver.execute_script("window.open('');")
                 driver.switch_to.window(driver.window_handles[-1])
                 driver.get(url)
+                time.sleep(0.3)
             else:
                 send_warning_notification(f"Fetching not allowed by robots.txt: {url}")
 
