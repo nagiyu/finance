@@ -67,9 +67,6 @@ def process_tabs(driver, cursor, ticker_client, system_info):
 
     ticker_urls = {}
 
-    # Process each tab
-    last_reload_times = {handle: time.time() for handle in driver.window_handles}
-
     while True:
         start_time = time.time()
 
@@ -109,6 +106,8 @@ def process_tabs(driver, cursor, ticker_client, system_info):
             if driver.current_url == system_info["login_url"]:
                 continue
 
+            time.sleep(0.3)
+
             try:
                 # Fetch premarket price
                 premarket_element = driver.find_element(By.XPATH, system_info["premarket_xpath"])
@@ -127,14 +126,7 @@ def process_tabs(driver, cursor, ticker_client, system_info):
                 send_error_notification_with_image(driver, e)
                 raise e
 
-            # Randomly reload the page
-            current_time = time.time()
-
-            if random.random() < 0.1 or (current_time - last_reload_times[handle]) > 3600:
-                driver.refresh()
-                last_reload_times[handle] = current_time
-
-            time.sleep(0.3)
+            # time.sleep(0.3)
 
         check_price.check_price(cursor, ticker_client)
 
