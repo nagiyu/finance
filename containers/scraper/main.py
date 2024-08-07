@@ -133,7 +133,7 @@ def process_tabs(driver, cursor, ticker_client, system_info):
                 send_error_notification_with_image(driver, e)
                 raise e
 
-        check_price.check_price(cursor, ticker_client)
+        check_price.check_price(cursor, ticker_client, system_info["access_token"])
 
         # Wait for the next interval
         elapsed_time = time.time() - start_time

@@ -3,7 +3,7 @@ import datetime
 import influxdb_utils
 import notifications
 
-def check_price(cursor, client):
+def check_price(cursor, client, access_token):
     ticker_id_list = database.fetch_ticker_id_list(cursor)
 
     for ticker_id in ticker_id_list:
@@ -17,6 +17,6 @@ def check_price(cursor, client):
         ticker_name = database.fetch_ticker_name(cursor, ticker_id)
 
         if result == 'max':
-            notifications.send_warning_notification(f"Latest data for ticker \"{ticker_name}\" is the maximum value")
+            notifications.send_notification(access_token, f"Latest data for ticker \"{ticker_name}\" is the maximum value")
         elif result == 'min':
-            notifications.send_warning_notification(f"Latest data for ticker \"{ticker_name}\" is the minimum value")
+            notifications.send_notification(access_token, f"Latest data for ticker \"{ticker_name}\" is the minimum value")

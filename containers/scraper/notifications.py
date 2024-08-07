@@ -1,6 +1,17 @@
 import time
 import requests
 
+def send_notification(access_token, message):
+    """Send error notification with a screenshot."""
+    headers = {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Authorization": f"Bearer {access_token}"
+    }
+    payload = {
+        "message": f"Warning: {message}"
+    }
+    requests.post("https://notify-api.line.me/api/notify", headers=headers, params=payload)
+
 def send_warning_notification(message):
     """Send error notification with a screenshot."""
     response = requests.get("http://secret/Secret/AlertAccessToken")
