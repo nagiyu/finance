@@ -99,7 +99,7 @@ def process_tabs(driver, cursor, ticker_client, system_info):
 
         driver.switch_to.window(driver.window_handles[0])
 
-        for index, handle in enumerate(driver.window_handles):
+        for handle in enumerate(driver.window_handles):
             driver.switch_to.window(handle)
 
             # Check if the current URL is the login URL
@@ -118,15 +118,17 @@ def process_tabs(driver, cursor, ticker_client, system_info):
                 # If premarket price is not available, use market price
                 stock_price = premarket_element.text if premarket_element.text else element.text
 
+                # Fetch ticker ID
+                for ticker_id, url in ticker_urls.items():
+                    if driver.current_url == url:
+                        break
+
                 # Write to InfluxDB
-                ticker_id = list(ticker_urls.keys())[index]
                 influxdb_utils.write_to_influxdb(ticker_client, ticker_id, stock_price)
 
             except Exception as e:
                 send_error_notification_with_image(driver, e)
                 raise e
-
-            # time.sleep(0.3)
 
         check_price.check_price(cursor, ticker_client)
 
