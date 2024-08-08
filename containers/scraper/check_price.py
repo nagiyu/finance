@@ -71,9 +71,7 @@ def check_price_trend(ticker_id):
         system_info = database.fetch_system_info()
         access_token = system_info["access_token"]
 
-        path = create_plot(ticker_id)
-
-        notifications.send_notification_with_image(access_token, f"Stock price for ticker \"{ticker_name}\" has been rising for the last 6 data points", path)
+        notifications.send_notification(access_token, f"Stock price for ticker \"{ticker_name}\" has been rising for the last 6 data points")
 
 def check_price_trend_down(ticker_id):
     points = influxdb_utils.read_latest_6_from_influxdb(ticker_id)
@@ -89,6 +87,4 @@ def check_price_trend_down(ticker_id):
         system_info = database.fetch_system_info()
         access_token = system_info["access_token"]
 
-        path = create_plot(ticker_id)
-
-        notifications.send_notification_with_image(access_token, f"Stock price for ticker \"{ticker_name}\" has been falling for the last 6 data points", path)
+        notifications.send_notification(access_token, f"Stock price for ticker \"{ticker_name}\" has been falling for the last 6 data points")
