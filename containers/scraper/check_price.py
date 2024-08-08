@@ -1,22 +1,71 @@
 import database
-import datetime
 import influxdb_utils
 import notifications
 
-def check_price(cursor, client, access_token):
-    ticker_id_list = database.fetch_ticker_id_list(cursor)
+def check_price():
+    ticker_id_list = database.fetch_my_ticker_id_list()
 
     for ticker_id in ticker_id_list:
-        start_time = datetime.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0).isoformat() + 'Z'
-        end_time = datetime.datetime.now().replace(hour=23, minute=59, second=59, microsecond=999999).isoformat() + 'Z'
-        result = influxdb_utils.is_latest_data_max_or_min(client, ticker_id, start_time, end_time)
-
-        if result == False:
+        if (check_latest_2_price(ticker_id) != True):
             continue
 
-        ticker_name = database.fetch_ticker_name(cursor, ticker_id)
+        check_price_trend(ticker_id)
+        check_price_trend_down(ticker_id)
 
-        if result == 'max':
-            notifications.send_notification(access_token, f"Latest data for ticker \"{ticker_name}\" is the maximum value")
-        elif result == 'min':
-            notifications.send_notification(access_token, f"Latest data for ticker \"{ticker_name}\" is the minimum value")
+        check_max_min_price(ticker_id)
+
+def check_latest_2_price(ticker_id):
+    points = influxdb_utils.read_latest_2_from_influxdb(ticker_id)
+
+    print(points)
+
+    if not points:
+        return True
+
+    return points[0]['price'] != points[1]['price']
+
+def check_max_min_price(ticker_id):
+    result = influxdb_utils.get_max_min_last_24h(ticker_id)
+
+    if result == False:
+        return
+
+    system_info = database.fetch_system_info()
+    access_token = system_info["access_token"]
+
+    if result == 'max':
+        notifications.send_notification(access_token, f"Latest data for ticker \"{ticker_name}\" is the maximum value")
+    elif result == 'min':
+        notifications.send_notification(access_token, f"Latest data for ticker \"{ticker_name}\" is the minimum value")
+
+def check_price_trend(ticker_id):
+    points = influxdb_utils.read_latest_6_from_influxdb(ticker_id)
+
+    if not points:
+        return
+
+    prices = [point['price'] for point in points]
+
+    if prices == sorted(prices):
+        ticker_name = database.fetch_ticker_name(ticker_id)
+
+        system_info = database.fetch_system_info()
+        access_token = system_info["access_token"]
+
+        notifications.send_notification(access_token, f"Stock price for ticker \"{ticker_name}\" has been rising for the last 6 data points")
+
+def check_price_trend_down(ticker_id):
+    points = influxdb_utils.read_latest_6_from_influxdb(ticker_id)
+
+    if not points:
+        return
+
+    prices = [point['price'] for point in points]
+
+    if prices == sorted(prices, reverse=True):
+        ticker_name = database.fetch_ticker_name(ticker_id)
+
+        system_info = database.fetch_system_info()
+        access_token = system_info["access_token"]
+
+        notifications.send_notification(access_token, f"Stock price for ticker \"{ticker_name}\" has been falling for the last 6 data points")

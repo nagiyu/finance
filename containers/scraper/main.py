@@ -133,7 +133,7 @@ def process_tabs(driver, cursor, ticker_client, system_info):
                 send_error_notification_with_image(driver, e)
                 raise e
 
-        check_price.check_price(cursor, ticker_client, system_info["access_token"])
+        check_price.check_price()
 
         # Wait for the next interval
         elapsed_time = time.time() - start_time
@@ -174,7 +174,7 @@ def get_elements_from_tabs():
     ticker_client = influxdb_utils.create_influxdb_client()
 
     try:
-        system_info = fetch_system_info(cur)
+        system_info = fetch_system_info()
         update_system_status(cur, "false")
         process_tabs(driver, cur, ticker_client, system_info)
     except TimeoutException as e:

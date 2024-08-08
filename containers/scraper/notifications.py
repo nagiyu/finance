@@ -8,7 +8,7 @@ def send_notification(access_token, message):
         "Authorization": f"Bearer {access_token}"
     }
     payload = {
-        "message": f"Warning: {message}"
+        "message": f"{message}"
     }
     requests.post("https://notify-api.line.me/api/notify", headers=headers, params=payload)
 

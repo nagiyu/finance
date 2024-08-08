@@ -11,7 +11,7 @@ def main():
     print("Ticker URLs fetched from the database:", ticker_urls)
 
     # Fetch system information from the database
-    system_info = database.fetch_system_info(cur)
+    system_info = database.fetch_system_info()
     print("System information fetched from the database:", system_info)
 
     # Fetch ticker information from the database
