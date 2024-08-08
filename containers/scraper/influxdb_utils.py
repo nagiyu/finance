@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from influxdb import InfluxDBClient
 
 INFLUXDB_HOST = 'influxdb'
@@ -30,8 +30,10 @@ def write_to_influxdb(client, ticker_id, stock_price):
     ]
     client.write_points(json_body)
 
-def read_from_influxdb(client, ticker_id):
+def read_from_influxdb(ticker_id):
     """Read stock price data from InfluxDB."""
+    client = create_influxdb_client()
+
     query = f"""
         SELECT
             *
@@ -45,6 +47,60 @@ def read_from_influxdb(client, ticker_id):
 
     result = client.query(query)
     points = list(result.get_points())
+
+    client.close()
+
+    if points:
+        return points
+
+    return None
+
+def read_latest_2_from_influxdb(ticker_id):
+    """Read latest stock price data from InfluxDB."""
+    client = create_influxdb_client()
+
+    query = f"""
+        SELECT
+            *
+        FROM
+            stock_price
+        WHERE
+            "ticker_id" = \'{ticker_id}\'
+        ORDER BY
+            time DESC
+        LIMIT 2
+    """
+
+    result = client.query(query)
+    points = list(result.get_points())
+
+    client.close()
+
+    if points:
+        return points
+
+    return None
+
+def read_latest_6_from_influxdb(ticker_id):
+    """Read latest stock price data from InfluxDB."""
+    client = create_influxdb_client()
+
+    query = f"""
+        SELECT
+            *
+        FROM
+            stock_price
+        WHERE
+            "ticker_id" = \'{ticker_id}\'
+        ORDER BY
+            time DESC
+        LIMIT 6
+    """
+
+    result = client.query(query)
+    points = list(result.get_points())
+
+    client.close()
 
     if points:
         return points
@@ -71,9 +127,21 @@ def get_max_min_influxdb(client, ticker_id, start_time, end_time):
 
     return None
 
+def get_max_min_last_24h(ticker_id):
+    client = create_influxdb_client()
+
+    start_time = (datetime.utcnow() - timedelta(days=1)).isoformat() + 'Z'
+    end_time = datetime.utcnow().isoformat() + 'Z'
+
+    result = get_max_min_influxdb(client, ticker_id, start_time, end_time)
+
+    client.close()
+
+    return result
+
 def is_latest_data_max_or_min(client, ticker_id, start_time, end_time):
     max_min_data = get_max_min_influxdb(client, ticker_id, start_time, end_time)
-    latest_data = read_from_influxdb(client, ticker_id)
+    latest_data = read_from_influxdb(ticker_id)
 
     if not max_min_data or not latest_data:
         return False

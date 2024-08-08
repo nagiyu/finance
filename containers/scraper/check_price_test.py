@@ -1,16 +1,13 @@
 import check_price
-import database
-import influxdb_utils
 
 def main():
-    conn = database.get_database_connection()
-    cur = conn.cursor()
-    client = influxdb_utils.create_influxdb_client()
+    for ticker_id in [4, 10, 14, 16, 18, 19]:
+        if (check_price.check_latest_2_price(ticker_id) != True):
+            print("Price has changed")
+        check_price.check_price_trend(ticker_id)
+        check_price.check_price_trend_down(ticker_id)
 
-    check_price.check_price(cur, client)
-
-    cur.close()
-    conn.close()
+        check_price.check_max_min_price(ticker_id)
 
 if __name__ == "__main__":
     main()

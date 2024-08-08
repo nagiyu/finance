@@ -33,18 +33,30 @@ def fetch_ticker_urls(cursor):
 
     return {row[0]: row[1] for row in cursor.fetchall()}
 
-def fetch_system_info(cursor):
+def fetch_system_info():
     """Fetch system information from the database."""
+    conn = get_database_connection()
+    cursor = conn.cursor()
+
     cursor.execute("SELECT key, value FROM system_info")
-    return {row[0]: row[1] for row in cursor.fetchall()}
+
+    system_info = {row[0]: row[1] for row in cursor.fetchall()}
+
+    cursor.close()
+    conn.close()
+
+    return system_info
 
 def update_system_status(cursor, status):
     """Update the system status in the database."""
     cursor.execute("UPDATE system_info SET value = %s WHERE key = 'status'", (status,))
     cursor.connection.commit()
 
-def fetch_ticker_id_list(cursor):
+def fetch_my_ticker_id_list():
     """Fetch ticker information from the database."""
+    conn = get_database_connection()
+    cursor = conn.cursor()
+
     now = datetime.datetime.now().strftime("%H:%M:%S%z")
     cursor.execute(
         """
@@ -57,18 +69,31 @@ def fetch_ticker_id_list(cursor):
             AND end_time >= %s
         """, (now, now))
 
-    return [row[0] for row in cursor.fetchall()]
+    result = [row[0] for row in cursor.fetchall()]
 
-def fetch_ticker_name(cursor, id):
+    cursor.close()
+    conn.close()
+
+    return result
+
+def fetch_ticker_name(id):
     """Fetch ticker name from the database."""
+    conn = get_database_connection()
+    cursor = conn.cursor()
+
     cursor.execute(
         """
         SELECT
             ticker_name
         FROM
-            my_ticker_info
+            ticker_info
         WHERE
             ticker_id = %s
         """, (id,))
 
-    return cursor.fetchone()[0]
+    ticker_name = cursor.fetchone()[0]
+
+    cursor.close()
+    conn.close()
+
+    return ticker_name
