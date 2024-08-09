@@ -50,12 +50,10 @@ def check_max_min_price(ticker_id):
     system_info = database.fetch_system_info()
     access_token = system_info["access_token"]
 
-    path = create_plot(ticker_id)
-
     if result == 'max':
-        notifications.send_notification_with_image(access_token, f"Latest data for ticker \"{ticker_name}\" is the maximum value", path)
+        notifications.send_notification(access_token, f"Latest data for ticker \"{ticker_name}\" is the maximum value")
     elif result == 'min':
-        notifications.send_notification_with_image(access_token, f"Latest data for ticker \"{ticker_name}\" is the minimum value", path)
+        notifications.send_notification(access_token, f"Latest data for ticker \"{ticker_name}\" is the minimum value")
 
 def check_price_trend(ticker_id):
     points = influxdb_utils.read_latest_6_from_influxdb(ticker_id)
