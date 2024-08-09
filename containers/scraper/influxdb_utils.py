@@ -55,6 +55,35 @@ def read_from_influxdb(ticker_id):
 
     return None
 
+def get_one_day_data(ticker_id):
+    client = create_influxdb_client()
+
+    start_time = (datetime.utcnow() - timedelta(days=1)).isoformat() + 'Z'
+    end_time = datetime.utcnow().isoformat() + 'Z'
+
+    query = f"""
+        SELECT
+            *
+        FROM
+            stock_price
+        WHERE
+            "ticker_id" = \'{ticker_id}\'
+            AND time >= \'{start_time}\'
+            AND time <= \'{end_time}\'
+        ORDER BY
+            time DESC
+    """
+
+    result = client.query(query)
+    points = list(result.get_points())
+
+    client.close()
+
+    if points:
+        return points
+
+    return None
+
 def read_latest_2_from_influxdb(ticker_id):
     """Read latest stock price data from InfluxDB."""
     client = create_influxdb_client()

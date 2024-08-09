@@ -1,3 +1,6 @@
+import matplotlib.pyplot as plt
+import time
+
 import database
 import influxdb_utils
 import notifications
@@ -24,11 +27,25 @@ def check_latest_2_price(ticker_id):
 
     return points[0]['price'] != points[1]['price']
 
+def create_plot(ticker_id):
+    result = influxdb_utils.get_one_day_data(ticker_id)
+
+    times = [point["time"] for point in result]
+    prices = [point["price"] for point in result]
+
+    plt.plot(times, prices)
+    path = f"/output/{int(time.time())}.png"
+    plt.savefig(path)
+
+    return path
+
 def check_max_min_price(ticker_id):
     result = influxdb_utils.get_max_min_last_24h(ticker_id)
 
     if result == False:
         return
+
+    ticker_name = database.fetch_ticker_name(ticker_id)
 
     system_info = database.fetch_system_info()
     access_token = system_info["access_token"]
@@ -46,7 +63,7 @@ def check_price_trend(ticker_id):
 
     prices = [point['price'] for point in points]
 
-    if prices == sorted(prices):
+    if prices == sorted(prices, reverse=True):
         ticker_name = database.fetch_ticker_name(ticker_id)
 
         system_info = database.fetch_system_info()
@@ -62,7 +79,7 @@ def check_price_trend_down(ticker_id):
 
     prices = [point['price'] for point in points]
 
-    if prices == sorted(prices, reverse=True):
+    if prices == sorted(prices):
         ticker_name = database.fetch_ticker_name(ticker_id)
 
         system_info = database.fetch_system_info()

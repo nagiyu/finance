@@ -4,5 +4,6 @@ urllib3>=1.26.15,<2
 webdriver_manager
 requests
 influxdb
+matplotlib
 psycopg2-binary
 yfinance
