@@ -135,6 +135,8 @@ def process_tabs(driver, cursor, ticker_client, system_info):
 
         check_price.check_price()
 
+        driver.switch_to.window(driver.window_handles[0])
+
         # Wait for the next interval
         elapsed_time = time.time() - start_time
         remaining_time = WAIT_INTERVAL - elapsed_time
