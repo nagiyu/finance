@@ -1,17 +1,24 @@
-﻿using Microsoft.AspNetCore.DataProtection;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
 using Microsoft.EntityFrameworkCore;
 
-namespace Ticker
+using DbAccess.Models;
+
+namespace DbAccess.Data
 {
     public class TickerDbContext : DbContext
     {
         public TickerDbContext(DbContextOptions<TickerDbContext> options) : base(options) { }
 
-        public DbSet<Models.Ticker> Tickers { get; set; }
+        public DbSet<Ticker> Tickers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Models.Ticker>(entity =>
+            modelBuilder.Entity<Ticker>(entity =>
             {
                 entity.ToTable("tickers");
 

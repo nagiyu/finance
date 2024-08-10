@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
-using Ticker.Repositories;
+
+using DbAccess.Repositories;
 
 namespace Ticker
 {

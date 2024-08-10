@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
-using Ticker.Repositories;
+﻿using System.Threading.Tasks;
+
+using Microsoft.AspNetCore.Mvc;
+
+using DbAccess.Repositories;
 
 namespace Ticker.Controllers
 {
@@ -35,7 +37,7 @@ namespace Ticker.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Models.Ticker ticker)
+        public async Task<IActionResult> Create(DbAccess.Models.Ticker ticker)
         {
             if (ModelState.IsValid)
             {
@@ -57,7 +59,7 @@ namespace Ticker.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Models.Ticker ticker)
+        public async Task<IActionResult> Edit(int id, DbAccess.Models.Ticker ticker)
         {
             if (id != ticker.Id)
             {

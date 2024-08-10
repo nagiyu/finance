@@ -1,8 +1,15 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
-namespace Ticker.Repositories
+using Microsoft.EntityFrameworkCore;
+
+using DbAccess.Data;
+using DbAccess.Models;
+
+namespace DbAccess.Repositories
 {
     public class TickerRepository : ITickerRepository
     {
@@ -13,24 +20,24 @@ namespace Ticker.Repositories
             _context = context;
         }
 
-        public async Task<IEnumerable<Models.Ticker>> GetAllTickers()
+        public async Task<IEnumerable<Ticker>> GetAllTickers()
         {
             return await _context.Tickers.ToListAsync();
         }
 
-        public async Task<Models.Ticker> GetTickerById(int id)
+        public async Task<Ticker> GetTickerById(int id)
         {
             return await _context.Tickers.FindAsync(id);
         }
 
-        public async Task<Models.Ticker> AddTicker(Models.Ticker ticker)
+        public async Task<Ticker> AddTicker(Ticker ticker)
         {
             _context.Tickers.Add(ticker);
             await _context.SaveChangesAsync();
             return ticker;
         }
 
-        public async Task<Models.Ticker> UpdateTicker(Models.Ticker ticker)
+        public async Task<Ticker> UpdateTicker(Ticker ticker)
         {
             _context.Entry(ticker).State = EntityState.Modified;
             await _context.SaveChangesAsync();
