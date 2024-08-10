@@ -1,0 +1,48 @@
+﻿@model IEnumerable<MyTickerInfo>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.TickerName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PurchasePrice)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PurchaseQuantity)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TickerName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.PurchasePrice)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.PurchaseQuantity)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.MyTickerId">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.MyTickerId">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.MyTickerId">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
