@@ -18,11 +18,14 @@ namespace DbAccess
         {
             services.AddScoped<IExchangeRepository, ExchangeRepository>();
             services.AddScoped<ITickerRepository, TickerRepository>();
+            services.AddScoped<IMyTickerRepository, MyTickerRepository>();
             services.AddScoped<ITickerInfoRepository, TickerInfoRepository>();
 
             services.AddDbContext<ExchangeContext>(options =>
                 options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
             services.AddDbContext<TickerDbContext>(options =>
+                options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
+            services.AddDbContext<MyTickerContext>(options =>
                 options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
             services.AddDbContext<TickerInfoContext>(options =>
                 options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
