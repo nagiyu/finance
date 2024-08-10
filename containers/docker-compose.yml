@@ -12,23 +12,25 @@ services:
     networks:
       - finance_network
 
-  stock_price_viewer:
+  management:
     build:
-      context: ./stock_price_viewer
+      context: ./management
       dockerfile: Dockerfile
-    container_name: "${PROJECT_NAME}_stock_price_viewer"
+    container_name: "${PROJECT_NAME}_management"
     ports:
       - "9008:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
     volumes:
-      - ./stock_price_viewer/bin:/app
+      - ./management/bin:/app
     networks:
       - finance_network
 
   postgres:
     image: postgres:13.3
     container_name: "${PROJECT_NAME}_postgres"
+    # ports:
+    #   - "5432:5432" # Temporarily port for development
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=Password123!
