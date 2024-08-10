@@ -5,13 +5,13 @@ VisualStudioVersion = 17.9.34723.18
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StockPriceViewer", "StockPriceViewer\StockPriceViewer.csproj", "{5E7B1DFE-C0D8-43CE-BF72-EEBB1A82B2F2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Finance", "Finance\Finance.csproj", "{8DE1FED8-40DA-4A2D-A400-FC480CC3ACF8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Finance", "Finance\Finance.csproj", "{8DE1FED8-40DA-4A2D-A400-FC480CC3ACF8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ticker", "Ticker\Ticker.csproj", "{FA7F8889-7F31-4261-B4F8-DB54C63FF8F5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ticker", "Ticker\Ticker.csproj", "{FA7F8889-7F31-4261-B4F8-DB54C63FF8F5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DbAccess", "DbAccess\DbAccess.csproj", "{E6655F2F-774D-40EE-BFA6-C28330257C29}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DbAccess", "DbAccess\DbAccess.csproj", "{E6655F2F-774D-40EE-BFA6-C28330257C29}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyTickers", "MyTickers\MyTickers.csproj", "{F3148177-1FE0-47F4-B237-E1F519473908}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyTickers", "MyTickers\MyTickers.csproj", "{F3148177-1FE0-47F4-B237-E1F519473908}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
