@@ -10,12 +10,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="appsettings.Development.json">
-      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
-    </None>
-    <None Update="appsettings.json">
-      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
-    </None>
+    <None Update="appsettings.Development.json" CopyToOutputDirectory="Never" />
+    <None Update="appsettings.json" CopyToOutputDirectory="Never" />
   </ItemGroup>
 
 </Project>
