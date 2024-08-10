@@ -10,14 +10,17 @@ namespace Ticker.Controllers
     {
         private readonly ITickerRepository _tickerRepository;
 
-        public TickersController(ITickerRepository tickerRepository)
+        private readonly ITickerInfoRepository _tickerInfoRepository;
+
+        public TickersController(ITickerRepository tickerRepository, ITickerInfoRepository tickerInfoRepository)
         {
             _tickerRepository = tickerRepository;
+            _tickerInfoRepository = tickerInfoRepository;
         }
 
         public async Task<IActionResult> Index()
         {
-            return View(await _tickerRepository.GetAllTickers());
+            return View(await _tickerInfoRepository.GetTickerInfosAsync());
         }
 
         public async Task<IActionResult> Details(int id)

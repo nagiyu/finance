@@ -1,23 +1,18 @@
 using Microsoft.AspNetCore.Builder;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-using DbAccess.Data;
+using DbAccess;
 using Ticker;
 using Ticker.Controllers;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddTickerServices();
+builder.Services.AddDbAccessServices(builder.Configuration);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews()
     .AddApplicationPart(typeof(TickersController).Assembly);
-
-builder.Services.AddDbContext<TickerDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
 
