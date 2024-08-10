@@ -1,19 +1,22 @@
 ﻿using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
+using DbAccess.Models;
 using DbAccess.Repositories;
 
 namespace Ticker.Controllers
 {
     public class TickersController : Controller
     {
+        private readonly IExchangeRepository _exchangeRepository;
         private readonly ITickerRepository _tickerRepository;
-
         private readonly ITickerInfoRepository _tickerInfoRepository;
 
-        public TickersController(ITickerRepository tickerRepository, ITickerInfoRepository tickerInfoRepository)
+        public TickersController(IExchangeRepository exchangeRepository, ITickerRepository tickerRepository, ITickerInfoRepository tickerInfoRepository)
         {
+            _exchangeRepository = exchangeRepository;
             _tickerRepository = tickerRepository;
             _tickerInfoRepository = tickerInfoRepository;
         }
@@ -33,8 +36,10 @@ namespace Ticker.Controllers
             return View(ticker);
         }
 
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            var exchanges = await _exchangeRepository.GetAllExchanges();
+            ViewBag.ExchangeList = new SelectList(exchanges, nameof(Exchange.Id), nameof(Exchange.ExchangeName));
             return View();
         }
 
@@ -47,6 +52,8 @@ namespace Ticker.Controllers
                 await _tickerRepository.AddTicker(ticker);
                 return RedirectToAction(nameof(Index));
             }
+            var exchanges = await _exchangeRepository.GetAllExchanges();
+            ViewBag.ExchangeList = new SelectList(exchanges, nameof(Exchange.Id), nameof(Exchange.ExchangeName));
             return View(ticker);
         }
 
@@ -57,6 +64,10 @@ namespace Ticker.Controllers
             {
                 return NotFound();
             }
+            
+            var exchanges = await _exchangeRepository.GetAllExchanges();
+            ViewBag.ExchangeList = new SelectList(exchanges, nameof(Exchange.Id), nameof(Exchange.ExchangeName));
+
             return View(ticker);
         }
 
@@ -74,6 +85,10 @@ namespace Ticker.Controllers
                 await _tickerRepository.UpdateTicker(ticker);
                 return RedirectToAction(nameof(Index));
             }
+
+            var exchanges = await _exchangeRepository.GetAllExchanges();
+            ViewBag.ExchangeList = new SelectList(exchanges, nameof(Exchange.Id), nameof(Exchange.ExchangeName));
+
             return View(ticker);
         }
 
