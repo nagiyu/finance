@@ -1,25 +1,32 @@
 ﻿using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 using DbAccess.Repositories;
 using DbAccess.Models;
-using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace MyTickers.Controllers
 {
     public class MyTickersController : Controller
     {
+        private readonly ITickerRepository tickerRepository;
         private readonly IMyTickerRepository myTickerRepository;
+        private readonly IMyTickerInfoRepository myTickerInfoRepository;
 
-        public MyTickersController(IMyTickerRepository myTickerRepository)
+        public MyTickersController(
+            ITickerRepository tickerRepository, 
+            IMyTickerRepository myTickerRepository, 
+            IMyTickerInfoRepository myTickerInfoRepository)
         {
+            this.tickerRepository = tickerRepository;
             this.myTickerRepository = myTickerRepository;
+            this.myTickerInfoRepository = myTickerInfoRepository;
         }
 
         public async Task<IActionResult> Index()
         {
-            return View(await myTickerRepository.GetAllMyTickers());
+            return View(await myTickerInfoRepository.GetMyTickerInfosAsync());
         }
 
         public async Task<IActionResult> Details(int id)
@@ -34,8 +41,8 @@ namespace MyTickers.Controllers
 
         public async Task<IActionResult> Create()
         {
-            //var exchanges = await _exchangeRepository.GetAllExchanges();
-            //ViewBag.ExchangeList = new SelectList(exchanges, nameof(Exchange.Id), nameof(Exchange.ExchangeName));
+            ViewBag.TickersList = await GetTickersSelectListItems();
+
             return View();
         }
 
@@ -48,8 +55,9 @@ namespace MyTickers.Controllers
                 await myTickerRepository.AddMyTicker(ticker);
                 return RedirectToAction(nameof(Index));
             }
-            //var exchanges = await _exchangeRepository.GetAllExchanges();
-            //ViewBag.ExchangeList = new SelectList(exchanges, nameof(Exchange.Id), nameof(Exchange.ExchangeName));
+            
+            ViewBag.TickersList = await GetTickersSelectListItems();
+
             return View(ticker);
         }
 
@@ -61,8 +69,7 @@ namespace MyTickers.Controllers
                 return NotFound();
             }
 
-            //var exchanges = await _exchangeRepository.GetAllExchanges();
-            //ViewBag.ExchangeList = new SelectList(exchanges, nameof(Exchange.Id), nameof(Exchange.ExchangeName));
+            ViewBag.TickersList = await GetTickersSelectListItems();
 
             return View(ticker);
         }
@@ -82,10 +89,15 @@ namespace MyTickers.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            //var exchanges = await _exchangeRepository.GetAllExchanges();
-            //ViewBag.ExchangeList = new SelectList(exchanges, nameof(Exchange.Id), nameof(Exchange.ExchangeName));
+            ViewBag.TickersList = await GetTickersSelectListItems();
 
             return View(ticker);
+        }
+
+        private async Task<SelectList> GetTickersSelectListItems()
+        {
+            var tickers = await tickerRepository.GetAllTickers();
+            return new SelectList(tickers, nameof(Ticker.Id), nameof(Ticker.TickerName));
         }
 
         public async Task<IActionResult> Delete(int id)

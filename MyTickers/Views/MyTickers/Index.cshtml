@@ -1,4 +1,4 @@
-﻿@model IEnumerable<MyTicker>
+﻿@model IEnumerable<MyTickerInfo>
 
 @{
     ViewData["Title"] = "Index";
@@ -13,7 +13,7 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.TickerId)
+                @Html.DisplayNameFor(model => model.TickerName)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.PurchasePrice)
@@ -29,7 +29,7 @@
         {
             <tr>
                 <td>
-                    @Html.DisplayFor(modelItem => item.TickerId)
+                    @Html.DisplayFor(modelItem => item.TickerName)
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.PurchasePrice)
@@ -37,16 +37,10 @@
                 <td>
                     @Html.DisplayFor(modelItem => item.PurchaseQuantity)
                 </td>
-                @* <td> *@
-                    @* @item.StartTime.ToString("HH:mm:ss zzz") *@
-                @* </td> *@
-                @* <td> *@
-                    @* @item.EndTime.ToString("HH:mm:ss zzz") *@
-                @* </td> *@
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    <a asp-action="Edit" asp-route-id="@item.MyTickerId">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.MyTickerId">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.MyTickerId">Delete</a>
                 </td>
             </tr>
         }

@@ -6,10 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Views\MyTickers\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\DbAccess\DbAccess.csproj" />
   </ItemGroup>
 

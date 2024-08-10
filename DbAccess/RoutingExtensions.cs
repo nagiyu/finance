@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,6 +21,7 @@ namespace DbAccess
             services.AddScoped<ITickerRepository, TickerRepository>();
             services.AddScoped<IMyTickerRepository, MyTickerRepository>();
             services.AddScoped<ITickerInfoRepository, TickerInfoRepository>();
+            services.AddScoped<IMyTickerInfoRepository, MyTickerInfoRepository>();
 
             services.AddDbContext<ExchangeContext>(options =>
                 options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
@@ -28,6 +30,8 @@ namespace DbAccess
             services.AddDbContext<MyTickerContext>(options =>
                 options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
             services.AddDbContext<TickerInfoContext>(options =>
+                options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
+            services.AddDbContext<MyTickerInfoContext>(options =>
                 options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
         }
     }

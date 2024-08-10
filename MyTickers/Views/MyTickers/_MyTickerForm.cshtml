@@ -1,0 +1,17 @@
+﻿@model MyTicker
+
+<div class="form-group">
+    <label asp-for="TickerId" class="control-label"></label>
+    <select asp-for="TickerId" class="form-control" asp-items="ViewBag.TickersList"></select>
+    <span asp-validation-for="TickerId" class="text-danger"></span>
+</div>
+<div class="form-group">
+    <label asp-for="PurchasePrice" class="control-label"></label>
+    <input asp-for="PurchasePrice" class="form-control" />
+    <span asp-validation-for="PurchasePrice" class="text-danger"></span>
+</div>
+<div class="form-group">
+    <label asp-for="PurchaseQuantity" class="control-label"></label>
+    <input asp-for="PurchaseQuantity" class="form-control" />
+    <span asp-validation-for="PurchaseQuantity" class="text-danger"></span>
+</div>
