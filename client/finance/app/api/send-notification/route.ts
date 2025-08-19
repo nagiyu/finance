@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 
-import NotificationUtil, { NotificationPayloadType } from '@client-common/utils/NotificationUtil.server';
+import ClientNotificationUtil, { NotificationPayloadType } from '@client-common/utils/NotificationUtil.server';
 
 export async function POST(request: NextRequest) {
   const { message, subscription } = await request.json();
@@ -11,5 +11,5 @@ export async function POST(request: NextRequest) {
     icon: "/logo.png",
   };
 
-  return NotificationUtil.sendNotification(subscription, payload);
+  return ClientNotificationUtil.sendNotification(subscription, payload);
 }

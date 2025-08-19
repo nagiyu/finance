@@ -5,8 +5,12 @@
   "scripts": {
     "build": "esbuild index.ts --bundle --minify --sourcemap --platform=node --target=es2020 --outfile=dist/index.js"
   },
+  "dependencies": {
+    "web-push": "^3.6.7"
+  },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.152",
+    "@types/web-push": "^3.6.3",
     "esbuild": "^0.25.9",
     "typescript": "^5.9.2"
   }

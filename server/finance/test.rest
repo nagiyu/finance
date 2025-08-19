@@ -1,8 +1,39 @@
 # @host = http://localhost:8080/2015-03-31/functions/function/invocations
 @host = 
 
-###
+### Send push notification
 POST {{host}}
 Content-Type: application/json
 
-{}
+{
+  "message": "Test notification from server finance",
+  "subscription": {
+    "endpoint": "https://fcm.googleapis.com/fcm/send/...",
+    "keys": {
+      "p256dh": "...",
+      "auth": "..."
+    }
+  }
+}
+
+### Test with missing message (should return 400)
+POST {{host}}
+Content-Type: application/json
+
+{
+  "subscription": {
+    "endpoint": "https://fcm.googleapis.com/fcm/send/...",
+    "keys": {
+      "p256dh": "...",
+      "auth": "..."
+    }
+  }
+}
+
+### Test with missing subscription (should return 400)
+POST {{host}}
+Content-Type: application/json
+
+{
+  "message": "Test notification"
+}
