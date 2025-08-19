@@ -16,8 +16,4 @@ export default class APIUtil {
   public static ReturnUnauthorized(): NextResponse {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-
-  public static ReturnInternalServerError(data: object): NextResponse {
-    return NextResponse.json(data, { status: 500 });
-  }
 }
