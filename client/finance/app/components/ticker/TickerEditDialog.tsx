@@ -16,6 +16,7 @@ import { ExchangeDataType } from "@/interfaces/data/ExchangeDataType";
 import { TickerDataType } from '@/interfaces/data/TickerDataType';
 
 import TickerAPIUtil from '@/app/tickers/TickerAPIUtil';
+import AdminEditDialog, { FieldConfig } from '../common/AdminEditDialog';
 
 interface TargetTicker {
     name: string,
@@ -42,98 +43,75 @@ export default function TickerEditDialog({
     createTicker,
     updateTicker
 }: TickerEditDialogProps) {
-    const [targetTicker, setTargetTicker] = React.useState<TargetTicker>({
-        name: '',
-        key: '',
-        exchange: ''
-    });
-    const [error, setError] = React.useState<string | null>(null);
 
-    useEffect(() => {
-        setTargetTicker({
-            name: ticker?.name || '',
-            key: ticker?.key || '',
-            exchange: ticker?.exchange || ''
-        });
-    }, [open]);
-
-    const onConfirm = async () => {
-        setError(null);
-        try {
-            if (targetTicker.name.trim() === '') {
-                ErrorUtil.throwError('Name is required');
+    const fieldConfigs: FieldConfig[] = [
+        {
+            name: 'name',
+            label: 'Name',
+            type: 'text',
+            required: true,
+            validation: (value: string) => {
+                if (!value || value.trim() === '') return 'Name is required';
+                return null;
             }
-
-            if (targetTicker.key.trim() === '') {
-                ErrorUtil.throwError('Key is required');
+        },
+        {
+            name: 'key',
+            label: 'Key',
+            type: 'text',
+            required: true,
+            validation: (value: string) => {
+                if (!value || value.trim() === '') return 'Key is required';
+                return null;
             }
-
-            if (targetTicker.exchange.trim() === '') {
-                ErrorUtil.throwError('Exchange is required');
-            }
-
-            if (isNew) {
-                const returnTicker = await TickerAPIUtil.create({
-                    name: targetTicker.name,
-                    key: targetTicker.key,
-                    exchange: targetTicker.exchange
-                });
-
-                createTicker(returnTicker);
-            } else {
-                if (!ticker) {
-                    ErrorUtil.throwError('Ticker not found');
-                }
-
-                const returnTicker = await TickerAPIUtil.update(ticker.id, {
-                    name: targetTicker.name,
-                    key: targetTicker.key,
-                    exchange: targetTicker.exchange,
-                    create: ticker.create || Date.now(),
-                });
-
-                updateTicker(returnTicker);
-            }
-
-            onClose();
-        } catch (e: unknown) {
-            if (e instanceof Error) {
-                setError(e.message);
-            } else {
-                setError("不明なエラーが発生しました");
+        },
+        {
+            name: 'exchange',
+            label: 'Exchange',
+            type: 'select',
+            required: true,
+            options: ExchangeUtil.dataToSelectOptions(exchanges),
+            validation: (value: string) => {
+                if (!value || value.trim() === '') return 'Exchange is required';
+                return null;
             }
         }
-    }
+    ];
+
+    const handleConfirm = async (formData: Record<string, any>) => {
+        if (isNew) {
+            const returnTicker = await TickerAPIUtil.create({
+                name: formData.name,
+                key: formData.key,
+                exchange: formData.exchange
+            });
+
+            createTicker(returnTicker);
+        } else {
+            if (!ticker) {
+                throw new Error('Ticker not found');
+            }
+
+            const returnTicker = await TickerAPIUtil.update(ticker.id, {
+                name: formData.name,
+                key: formData.key,
+                exchange: formData.exchange,
+                create: ticker.create || Date.now(),
+            });
+
+            updateTicker(returnTicker);
+        }
+    };
 
     return (
-        <BasicDialog
+        <AdminEditDialog
             open={open}
-            title={isNew ? 'Create' : 'Edit'}
             onClose={onClose}
-            onConfirm={onConfirm}
-            confirmText={isNew ? 'Create' : 'Update'}
-            closeText="Cancel"
-        >
-            {error && <ErrorAlert message={error} />}
-            <BasicStack>
-                <BasicTextField
-                    label='Name'
-                    value={targetTicker.name}
-                    onChange={(e) => setTargetTicker({ ...targetTicker, name: e.target.value })}
-                />
-                <BasicTextField
-                    label='Key'
-                    value={targetTicker.key}
-                    onChange={(e) => setTargetTicker({ ...targetTicker, key: e.target.value })}
-                />
-                <BasicSelect
-                    label='Exchange'
-                    options={ExchangeUtil.dataToSelectOptions(exchanges)}
-                    value={targetTicker.exchange}
-                    defaultValue={targetTicker.exchange}
-                    onChange={(value) => setTargetTicker({ ...targetTicker, exchange: value })}
-                />
-            </BasicStack>
-        </BasicDialog >
-    )
+            isNew={isNew}
+            title="Ticker"
+            data={ticker}
+            fields={fieldConfigs}
+            onConfirm={handleConfirm}
+        />
+    );
 }
