@@ -1,7 +1,7 @@
 import ErrorUtil from '@common/utils/ErrorUtil';
 import { AuthDataType } from '@common/interfaces/data/AuthDataType';
 
-import FetchServiceBase from '@client-common/services/FetchServiceBase.client';
+import FetchServiceBase from '@client-common/services/FetchServiceBase';
 
 export default class AuthFetchService extends FetchServiceBase<AuthDataType> {
   public constructor() {

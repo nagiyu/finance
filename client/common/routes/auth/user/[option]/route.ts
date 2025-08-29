@@ -25,7 +25,7 @@ async function handleGoogleOption() {
   const googleUserID = await AuthUtil.getGoogleUserIdFromSession();
 
   const authService = new SimpleAuthService();
-  const user = await authService.getByGoogleUserId(googleUserID);
+  const user = await authService.getByGoogleUserId(googleUserID, true);
 
   if (!user) {
     return APIUtil.ReturnNotFound('User not found');

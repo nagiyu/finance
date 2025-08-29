@@ -8,8 +8,8 @@ export default class AuthService<DataType extends AuthDataType, RecordType exten
     super(new AuthDataAccessor(), dataToRecord, recordToData);
   }
 
-  public async getByGoogleUserId(googleUserId: string): Promise<DataType | null> {
-    const users = await this.get();
+  public async getByGoogleUserId(googleUserId: string, useCache: boolean = false): Promise<DataType | null> {
+    const users = await this.get(useCache);
     return users.find(user => user.googleUserId === googleUserId) || null;
   }
 
