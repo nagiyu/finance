@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 
 import AccountSettingDialog from '@client-common/components/feedback/dialog/AccountSettingDialog';
 import AuthFetchService from '@client-common/services/auth/AuthFetchService.client';
+import LoadingPage from '@client-common/pages/LoadingPage';
 import UserIconAvatar from '@client-common/components/data/avatar/UserIconAvatar';
 
 interface AccountContentProps {
@@ -16,6 +17,7 @@ export default function AccountContent({
     isAuthenticated = false,
 }: AccountContentProps) {
     const [accountSettingDialogOpen, setAccountSettingDialogOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     const authFetchService = new AuthFetchService();
 
@@ -25,6 +27,8 @@ export default function AccountContent({
                 return;
             }
 
+            setIsLoading(true);
+
             try {
                 const user = await authFetchService.getUserByGoogle();
 
@@ -33,9 +37,15 @@ export default function AccountContent({
                 }
             } catch {
                 setAccountSettingDialogOpen(true);
+            } finally {
+                setIsLoading(false);
             }
         })();
     }, []);
+
+    if (isLoading) {
+        return <LoadingPage />;
+    }
 
     return (
         <>
