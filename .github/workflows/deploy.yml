@@ -8,6 +8,94 @@ on:
   workflow_dispatch:
 
 jobs:
+  deploy-proxy-server:
+    runs-on: ubuntu-latest
+
+    environment:
+      name: ${{ github.ref == 'refs/heads/master' && 'production' || 'development' }}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: AWS CLI install
+        run: |
+          cd /tmp
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip awscliv2.zip
+          sudo ./aws/install --update
+
+      - name: AWS set Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Get ProxyServer Secrets from AWS SecretsManager
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: |
+            PROXY_SERVER, ProxyServer
+          parse-json-secrets: true
+
+      - name: Get Project Secrets from Finance
+        if: ${{ startsWith(github.ref, 'refs/heads/master') }}
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: |
+            PROJECT, Finance
+          parse-json-secrets: true
+
+      - name: Get Project Secrets from DevFinance
+        if: ${{ !startsWith(github.ref, 'refs/heads/master') }}
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: |
+            PROJECT, DevFinance
+          parse-json-secrets: true
+
+      - name: Fix Nginx Settings
+        run: |
+          ENDPOINT=${{ secrets.PROJECT_CLIENT_LAMBDA_URL }}
+          ENDPOINT_HOST=$(echo "$ENDPOINT" | sed -E 's|^https://([^/]+).*|\1|')
+          ENDPOINT_URL="$ENDPOINT/"
+          CLIENT_BASE_URL=${{ secrets.PROJECT_CLIENT_BASE_URL }}
+          SERVER_NAME=$(echo "$CLIENT_BASE_URL" | sed -E 's|^https://([^/]+).*|\1|')
+          sed -i "s|xxx.nagiyu.com|$SERVER_NAME|g" client/finance/nginx.conf
+          sed -i "s|proxy_pass .*|proxy_pass $ENDPOINT_URL;|" client/finance/nginx.conf
+          sed -i "s|proxy_set_header Host .*|proxy_set_header Host $ENDPOINT_HOST;|" client/finance/nginx.conf
+          mv client/finance/nginx.conf client/finance/${{ github.ref == 'refs/heads/master' && 'finance.conf' || 'dev-finance.conf' }}
+
+      - name: Remove Nginx Settings
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ env.PROXY_SERVER_HOST }}
+          username: ${{ env.PROXY_SERVER_USERNAME }}
+          key: ${{ env.PROXY_SERVER_PRIVATE_KEY }}
+          port: ${{ env.PROXY_SERVER_SSH_PORT }}
+          script: |
+            rm -rf /etc/nginx/conf.d/${{ github.ref == 'refs/heads/master' && 'finance.conf' || 'dev-finance.conf' }}
+
+      - name: Upload Nginx Settings
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ env.PROXY_SERVER_HOST }}
+          username: ${{ env.PROXY_SERVER_USERNAME }}
+          key: ${{ env.PROXY_SERVER_PRIVATE_KEY }}
+          port: ${{ env.PROXY_SERVER_SSH_PORT }}
+          source: client/finance/${{ github.ref == 'refs/heads/master' && 'finance.conf' || 'dev-finance.conf' }}
+          target: /etc/nginx/conf.d/
+
+      - name: Restart Nginx
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ env.PROXY_SERVER_HOST }}
+          username: ${{ env.PROXY_SERVER_USERNAME }}
+          key: ${{ env.PROXY_SERVER_PRIVATE_KEY }}
+          port: ${{ env.PROXY_SERVER_SSH_PORT }}
+          script: |
+            sudo systemctl restart nginx
+
   deploy-client-finance:
     runs-on: ubuntu-latest
 
