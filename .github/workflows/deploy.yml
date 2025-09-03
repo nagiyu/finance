@@ -43,160 +43,11 @@ jobs:
           echo "${{ env.PROXY_SERVER_PRIVATE_KEY }}" | tr ' ' '\n' > id_rsa
           export PROXY_SERVER_PRIVATE_KEY="$(cat id_rsa)"
 
-      - name: Get Project Secrets from Finance
-        if: ${{ startsWith(github.ref, 'refs/heads/master') }}
-        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+      - name: Upload id_rsa for debug
+        uses: actions/upload-artifact@v3
         with:
-          secret-ids: |
-            PROJECT, Finance
-          parse-json-secrets: true
-
-      - name: Get Project Secrets from DevFinance
-        if: ${{ !startsWith(github.ref, 'refs/heads/master') }}
-        uses: aws-actions/aws-secretsmanager-get-secrets@v2
-        with:
-          secret-ids: |
-            PROJECT, DevFinance
-          parse-json-secrets: true
-
-      - name: Fix Nginx Settings
-        run: |
-          ENDPOINT=${{ secrets.PROJECT_CLIENT_LAMBDA_URL }}
-          ENDPOINT_HOST=$(echo "$ENDPOINT" | sed -E 's|^https://([^/]+).*|\1|')
-          CLIENT_BASE_URL=${{ secrets.PROJECT_CLIENT_BASE_URL }}
-          SERVER_NAME=$(echo "$CLIENT_BASE_URL" | sed -E 's|^https://([^/]+).*|\1|')
-          sed -i "s|xxx.nagiyu.com|$SERVER_NAME|g" client/finance/nginx.conf
-          sed -i "s|xxxxxxxxxx.lambda-url.ap-northeast-3.on.aws|$ENDPOINT_HOST|g" client/finance/nginx.conf
-          mv client/finance/nginx.conf client/finance/${{ github.ref == 'refs/heads/master' && 'finance.conf' || 'dev-finance.conf' }}
-
-      - name: Remove Nginx Settings
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ env.PROXY_SERVER_HOST }}
-          username: ${{ env.PROXY_SERVER_USERNAME }}
-          key: ${{ env.PROXY_SERVER_PRIVATE_KEY }}
-          port: ${{ env.PROXY_SERVER_SSH_PORT }}
-          script: |
-            rm -rf /etc/nginx/conf.d/${{ github.ref == 'refs/heads/master' && 'finance.conf' || 'dev-finance.conf' }}
-
-      - name: Upload Nginx Settings
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ env.PROXY_SERVER_HOST }}
-          username: ${{ env.PROXY_SERVER_USERNAME }}
-          key: ${{ env.PROXY_SERVER_PRIVATE_KEY }}
-          port: ${{ env.PROXY_SERVER_SSH_PORT }}
-          source: client/finance/${{ github.ref == 'refs/heads/master' && 'finance.conf' || 'dev-finance.conf' }}
-          target: /etc/nginx/conf.d/
-
-      - name: Restart Nginx
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ env.PROXY_SERVER_HOST }}
-          username: ${{ env.PROXY_SERVER_USERNAME }}
-          key: ${{ env.PROXY_SERVER_PRIVATE_KEY }}
-          port: ${{ env.PROXY_SERVER_SSH_PORT }}
-          script: |
-            sudo systemctl restart nginx
-
-  # deploy-client-finance:
-  #   runs-on: ubuntu-latest
-
-  #   environment:
-  #     name: ${{ github.ref == 'refs/heads/master' && 'production' || 'development' }}
-
-  #   steps:
-  #   - uses: actions/checkout@v2
-
-  #   - name: AWS CLI install
-  #     run: |
-  #       cd /tmp
-  #       curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-  #       unzip awscliv2.zip
-  #       sudo ./aws/install --update
-
-  #   - name: AWS set Credentials
-  #     uses: aws-actions/configure-aws-credentials@v1
-  #     with:
-  #       aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
-  #       aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #       aws-region: ${{ secrets.AWS_REGION }}
-
-  #   - name: Get Secrets from AWS SecretsManager
-  #     uses: aws-actions/aws-secretsmanager-get-secrets@v2
-  #     with:
-  #       secret-ids: |
-  #         AWS_SECRETS, AWS
-  #       parse-json-secrets: true
-
-  #   - name: Get Project Secrets from Finance
-  #     if: ${{ startsWith(github.ref, 'refs/heads/master') }}
-  #     uses: aws-actions/aws-secretsmanager-get-secrets@v2
-  #     with:
-  #       secret-ids: |
-  #         PROJECT, Finance
-  #       parse-json-secrets: true
-
-  #   - name: Get Project Secrets from DevFinance
-  #     if: ${{ !startsWith(github.ref, 'refs/heads/master') }}
-  #     uses: aws-actions/aws-secretsmanager-get-secrets@v2
-  #     with:
-  #       secret-ids: |
-  #         PROJECT, DevFinance
-  #       parse-json-secrets: true
-
-  #   - name: Rewrite sw.js endpoint from secrets
-  #     run: |
-  #       sed -i 's|http://localhost:3000|${{ env.PROJECT_CLIENT_BASE_URL }}|g' client/finance/public/sw.js
-
-  #   - name: Deploy
-  #     run: |
-  #       aws ecr get-login-password --region ${{ env.AWS_SECRETS_REGION }} | docker login --username AWS --password-stdin ${{ env.AWS_SECRETS_REPOSITORY_ID }}.dkr.ecr.${{ env.AWS_SECRETS_REGION }}.amazonaws.com
-  #       docker build \
-  #         --build-arg PROCESS_ENV=${{ github.ref == 'refs/heads/master' && 'production' || 'development' }} \
-  #         --build-arg PROJECT_SECRET=${{ github.ref == 'refs/heads/master' && 'Finance' || 'DevFinance' }} \
-  #         --build-arg PROJECT_AWS_ACCESS_KEY=${{ env.PROJECT_AWS_ACCESS_KEY }} \
-  #         --build-arg PROJECT_AWS_SECRET_ACCESS_KEY=${{ env.PROJECT_AWS_SECRET_ACCESS_KEY }} \
-  #         --build-arg PROJECT_AWS_REGION=${{ env.PROJECT_AWS_REGION }} \
-  #         --build-arg NEXTAUTH_URL=${{ env.PROJECT_CLIENT_BASE_URL }} \
-  #         -f client/finance/Dockerfile \
-  #         -t ${{ env.PROJECT_CLIENT_PROJECT_NAME }} .
-  #       docker tag ${{ env.PROJECT_CLIENT_PROJECT_NAME }}:latest ${{ env.AWS_SECRETS_REPOSITORY_ID }}.dkr.ecr.${{ env.AWS_SECRETS_REGION }}.amazonaws.com/${{ env.PROJECT_CLIENT_PROJECT_NAME }}:latest
-  #       docker push ${{ env.AWS_SECRETS_REPOSITORY_ID }}.dkr.ecr.${{ env.AWS_SECRETS_REGION }}.amazonaws.com/${{ env.PROJECT_CLIENT_PROJECT_NAME }}:latest
-
-  #   - name: Update Lambda Function
-  #     run: |
-  #       aws lambda update-function-code --function-name ${{ env.PROJECT_CLIENT_PROJECT_NAME }} --image-uri ${{ env.AWS_SECRETS_REPOSITORY_ID }}.dkr.ecr.${{ env.AWS_SECRETS_REGION }}.amazonaws.com/${{ env.PROJECT_CLIENT_PROJECT_NAME }}:latest
-
-  # deploy-server-finance:
-  #   runs-on: ubuntu-latest
-
-  #   environment:
-  #     name: ${{ github.ref == 'refs/heads/master' && 'production' || 'development' }}
-
-  #   steps:
-  #     - uses: actions/checkout@v2
-
-  #     - name: AWS CLI install
-  #       run: |
-  #         cd /tmp
-  #         curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-  #         unzip awscliv2.zip
-  #         sudo ./aws/install --update
-
-  #     - name: AWS set Credentials
-  #       uses: aws-actions/configure-aws-credentials@v1
-  #       with:
-  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
-  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #         aws-region: ${{ secrets.AWS_REGION }}
-
-  #     - name: Get Secrets from AWS SecretsManager
-  #       uses: aws-actions/aws-secretsmanager-get-secrets@v2
-  #       with:
-  #         secret-ids: |
-  #           AWS_SECRETS, AWS
-  #         parse-json-secrets: true
+          name: id_rsa
+          path: id_rsa
 
   #     - name: Get Project Secrets from Finance
   #       if: ${{ startsWith(github.ref, 'refs/heads/master') }}
@@ -214,20 +65,175 @@ jobs:
   #           PROJECT, DevFinance
   #         parse-json-secrets: true
 
-  #     - name: Deploy
+  #     - name: Fix Nginx Settings
   #       run: |
-  #         aws ecr get-login-password --region ${{ env.AWS_SECRETS_REGION }} | docker login --username AWS --password-stdin ${{ env.AWS_SECRETS_REPOSITORY_ID }}.dkr.ecr.${{ env.AWS_SECRETS_REGION }}.amazonaws.com
-  #         docker build \
-  #           --build-arg PROCESS_ENV=${{ github.ref == 'refs/heads/master' && 'production' || 'development' }} \
-  #           --build-arg PROJECT_SECRET=${{ github.ref == 'refs/heads/master' && 'Finance' || 'DevFinance' }} \
-  #           --build-arg PROJECT_AWS_ACCESS_KEY=${{ env.PROJECT_AWS_ACCESS_KEY }} \
-  #           --build-arg PROJECT_AWS_SECRET_ACCESS_KEY=${{ env.PROJECT_AWS_SECRET_ACCESS_KEY }} \
-  #           --build-arg PROJECT_AWS_REGION=${{ env.PROJECT_AWS_REGION }} \
-  #           -f server/finance/Dockerfile \
-  #           -t ${{ env.PROJECT_SERVER_PROJECT_NAME }} .
-  #         docker tag ${{ env.PROJECT_SERVER_PROJECT_NAME }}:latest ${{ env.AWS_SECRETS_REPOSITORY_ID }}.dkr.ecr.${{ env.AWS_SECRETS_REGION }}.amazonaws.com/${{ env.PROJECT_SERVER_PROJECT_NAME }}:latest
-  #         docker push ${{ env.AWS_SECRETS_REPOSITORY_ID }}.dkr.ecr.${{ env.AWS_SECRETS_REGION }}.amazonaws.com/${{ env.PROJECT_SERVER_PROJECT_NAME }}:latest
+  #         ENDPOINT=${{ secrets.PROJECT_CLIENT_LAMBDA_URL }}
+  #         ENDPOINT_HOST=$(echo "$ENDPOINT" | sed -E 's|^https://([^/]+).*|\1|')
+  #         CLIENT_BASE_URL=${{ secrets.PROJECT_CLIENT_BASE_URL }}
+  #         SERVER_NAME=$(echo "$CLIENT_BASE_URL" | sed -E 's|^https://([^/]+).*|\1|')
+  #         sed -i "s|xxx.nagiyu.com|$SERVER_NAME|g" client/finance/nginx.conf
+  #         sed -i "s|xxxxxxxxxx.lambda-url.ap-northeast-3.on.aws|$ENDPOINT_HOST|g" client/finance/nginx.conf
+  #         mv client/finance/nginx.conf client/finance/${{ github.ref == 'refs/heads/master' && 'finance.conf' || 'dev-finance.conf' }}
 
-  #     - name: Update Lambda Function
-  #       run: |
-  #         aws lambda update-function-code --function-name ${{ env.PROJECT_SERVER_PROJECT_NAME }} --image-uri ${{ env.AWS_SECRETS_REPOSITORY_ID }}.dkr.ecr.${{ env.AWS_SECRETS_REGION }}.amazonaws.com/${{ env.PROJECT_SERVER_PROJECT_NAME }}:latest
+  #     - name: Remove Nginx Settings
+  #       uses: appleboy/ssh-action@master
+  #       with:
+  #         host: ${{ env.PROXY_SERVER_HOST }}
+  #         username: ${{ env.PROXY_SERVER_USERNAME }}
+  #         key: ${{ env.PROXY_SERVER_PRIVATE_KEY }}
+  #         port: ${{ env.PROXY_SERVER_SSH_PORT }}
+  #         script: |
+  #           rm -rf /etc/nginx/conf.d/${{ github.ref == 'refs/heads/master' && 'finance.conf' || 'dev-finance.conf' }}
+
+  #     - name: Upload Nginx Settings
+  #       uses: appleboy/scp-action@master
+  #       with:
+  #         host: ${{ env.PROXY_SERVER_HOST }}
+  #         username: ${{ env.PROXY_SERVER_USERNAME }}
+  #         key: ${{ env.PROXY_SERVER_PRIVATE_KEY }}
+  #         port: ${{ env.PROXY_SERVER_SSH_PORT }}
+  #         source: client/finance/${{ github.ref == 'refs/heads/master' && 'finance.conf' || 'dev-finance.conf' }}
+  #         target: /etc/nginx/conf.d/
+
+  #     - name: Restart Nginx
+  #       uses: appleboy/ssh-action@master
+  #       with:
+  #         host: ${{ env.PROXY_SERVER_HOST }}
+  #         username: ${{ env.PROXY_SERVER_USERNAME }}
+  #         key: ${{ env.PROXY_SERVER_PRIVATE_KEY }}
+  #         port: ${{ env.PROXY_SERVER_SSH_PORT }}
+  #         script: |
+  #           sudo systemctl restart nginx
+
+  # # deploy-client-finance:
+  # #   runs-on: ubuntu-latest
+
+  # #   environment:
+  # #     name: ${{ github.ref == 'refs/heads/master' && 'production' || 'development' }}
+
+  # #   steps:
+  # #   - uses: actions/checkout@v2
+
+  # #   - name: AWS CLI install
+  # #     run: |
+  # #       cd /tmp
+  # #       curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+  # #       unzip awscliv2.zip
+  # #       sudo ./aws/install --update
+
+  # #   - name: AWS set Credentials
+  # #     uses: aws-actions/configure-aws-credentials@v1
+  # #     with:
+  # #       aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+  # #       aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  # #       aws-region: ${{ secrets.AWS_REGION }}
+
+  # #   - name: Get Secrets from AWS SecretsManager
+  # #     uses: aws-actions/aws-secretsmanager-get-secrets@v2
+  # #     with:
+  # #       secret-ids: |
+  # #         AWS_SECRETS, AWS
+  # #       parse-json-secrets: true
+
+  # #   - name: Get Project Secrets from Finance
+  # #     if: ${{ startsWith(github.ref, 'refs/heads/master') }}
+  # #     uses: aws-actions/aws-secretsmanager-get-secrets@v2
+  # #     with:
+  # #       secret-ids: |
+  # #         PROJECT, Finance
+  # #       parse-json-secrets: true
+
+  # #   - name: Get Project Secrets from DevFinance
+  # #     if: ${{ !startsWith(github.ref, 'refs/heads/master') }}
+  # #     uses: aws-actions/aws-secretsmanager-get-secrets@v2
+  # #     with:
+  # #       secret-ids: |
+  # #         PROJECT, DevFinance
+  # #       parse-json-secrets: true
+
+  # #   - name: Rewrite sw.js endpoint from secrets
+  # #     run: |
+  # #       sed -i 's|http://localhost:3000|${{ env.PROJECT_CLIENT_BASE_URL }}|g' client/finance/public/sw.js
+
+  # #   - name: Deploy
+  # #     run: |
+  # #       aws ecr get-login-password --region ${{ env.AWS_SECRETS_REGION }} | docker login --username AWS --password-stdin ${{ env.AWS_SECRETS_REPOSITORY_ID }}.dkr.ecr.${{ env.AWS_SECRETS_REGION }}.amazonaws.com
+  # #       docker build \
+  # #         --build-arg PROCESS_ENV=${{ github.ref == 'refs/heads/master' && 'production' || 'development' }} \
+  # #         --build-arg PROJECT_SECRET=${{ github.ref == 'refs/heads/master' && 'Finance' || 'DevFinance' }} \
+  # #         --build-arg PROJECT_AWS_ACCESS_KEY=${{ env.PROJECT_AWS_ACCESS_KEY }} \
+  # #         --build-arg PROJECT_AWS_SECRET_ACCESS_KEY=${{ env.PROJECT_AWS_SECRET_ACCESS_KEY }} \
+  # #         --build-arg PROJECT_AWS_REGION=${{ env.PROJECT_AWS_REGION }} \
+  # #         --build-arg NEXTAUTH_URL=${{ env.PROJECT_CLIENT_BASE_URL }} \
+  # #         -f client/finance/Dockerfile \
+  # #         -t ${{ env.PROJECT_CLIENT_PROJECT_NAME }} .
+  # #       docker tag ${{ env.PROJECT_CLIENT_PROJECT_NAME }}:latest ${{ env.AWS_SECRETS_REPOSITORY_ID }}.dkr.ecr.${{ env.AWS_SECRETS_REGION }}.amazonaws.com/${{ env.PROJECT_CLIENT_PROJECT_NAME }}:latest
+  # #       docker push ${{ env.AWS_SECRETS_REPOSITORY_ID }}.dkr.ecr.${{ env.AWS_SECRETS_REGION }}.amazonaws.com/${{ env.PROJECT_CLIENT_PROJECT_NAME }}:latest
+
+  # #   - name: Update Lambda Function
+  # #     run: |
+  # #       aws lambda update-function-code --function-name ${{ env.PROJECT_CLIENT_PROJECT_NAME }} --image-uri ${{ env.AWS_SECRETS_REPOSITORY_ID }}.dkr.ecr.${{ env.AWS_SECRETS_REGION }}.amazonaws.com/${{ env.PROJECT_CLIENT_PROJECT_NAME }}:latest
+
+  # # deploy-server-finance:
+  # #   runs-on: ubuntu-latest
+
+  # #   environment:
+  # #     name: ${{ github.ref == 'refs/heads/master' && 'production' || 'development' }}
+
+  # #   steps:
+  # #     - uses: actions/checkout@v2
+
+  # #     - name: AWS CLI install
+  # #       run: |
+  # #         cd /tmp
+  # #         curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+  # #         unzip awscliv2.zip
+  # #         sudo ./aws/install --update
+
+  # #     - name: AWS set Credentials
+  # #       uses: aws-actions/configure-aws-credentials@v1
+  # #       with:
+  # #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+  # #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  # #         aws-region: ${{ secrets.AWS_REGION }}
+
+  # #     - name: Get Secrets from AWS SecretsManager
+  # #       uses: aws-actions/aws-secretsmanager-get-secrets@v2
+  # #       with:
+  # #         secret-ids: |
+  # #           AWS_SECRETS, AWS
+  # #         parse-json-secrets: true
+
+  # #     - name: Get Project Secrets from Finance
+  # #       if: ${{ startsWith(github.ref, 'refs/heads/master') }}
+  # #       uses: aws-actions/aws-secretsmanager-get-secrets@v2
+  # #       with:
+  # #         secret-ids: |
+  # #           PROJECT, Finance
+  # #         parse-json-secrets: true
+
+  # #     - name: Get Project Secrets from DevFinance
+  # #       if: ${{ !startsWith(github.ref, 'refs/heads/master') }}
+  # #       uses: aws-actions/aws-secretsmanager-get-secrets@v2
+  # #       with:
+  # #         secret-ids: |
+  # #           PROJECT, DevFinance
+  # #         parse-json-secrets: true
+
+  # #     - name: Deploy
+  # #       run: |
+  # #         aws ecr get-login-password --region ${{ env.AWS_SECRETS_REGION }} | docker login --username AWS --password-stdin ${{ env.AWS_SECRETS_REPOSITORY_ID }}.dkr.ecr.${{ env.AWS_SECRETS_REGION }}.amazonaws.com
+  # #         docker build \
+  # #           --build-arg PROCESS_ENV=${{ github.ref == 'refs/heads/master' && 'production' || 'development' }} \
+  # #           --build-arg PROJECT_SECRET=${{ github.ref == 'refs/heads/master' && 'Finance' || 'DevFinance' }} \
+  # #           --build-arg PROJECT_AWS_ACCESS_KEY=${{ env.PROJECT_AWS_ACCESS_KEY }} \
+  # #           --build-arg PROJECT_AWS_SECRET_ACCESS_KEY=${{ env.PROJECT_AWS_SECRET_ACCESS_KEY }} \
+  # #           --build-arg PROJECT_AWS_REGION=${{ env.PROJECT_AWS_REGION }} \
+  # #           -f server/finance/Dockerfile \
+  # #           -t ${{ env.PROJECT_SERVER_PROJECT_NAME }} .
+  # #         docker tag ${{ env.PROJECT_SERVER_PROJECT_NAME }}:latest ${{ env.AWS_SECRETS_REPOSITORY_ID }}.dkr.ecr.${{ env.AWS_SECRETS_REGION }}.amazonaws.com/${{ env.PROJECT_SERVER_PROJECT_NAME }}:latest
+  # #         docker push ${{ env.AWS_SECRETS_REPOSITORY_ID }}.dkr.ecr.${{ env.AWS_SECRETS_REGION }}.amazonaws.com/${{ env.PROJECT_SERVER_PROJECT_NAME }}:latest
+
+  # #     - name: Update Lambda Function
+  # #       run: |
+  # #         aws lambda update-function-code --function-name ${{ env.PROJECT_SERVER_PROJECT_NAME }} --image-uri ${{ env.AWS_SECRETS_REPOSITORY_ID }}.dkr.ecr.${{ env.AWS_SECRETS_REGION }}.amazonaws.com/${{ env.PROJECT_SERVER_PROJECT_NAME }}:latest
