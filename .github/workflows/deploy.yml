@@ -38,6 +38,11 @@ jobs:
             PROXY_SERVER, ProxyServer
           parse-json-secrets: true
 
+      - name: Fix SSH Private Key Format
+        run: |
+          echo "${{ env.PROXY_SERVER_PRIVATE_KEY }}" | awk 'BEGIN{RS=" ";ORS="\n"}1' > id_rsa
+          export PROXY_SERVER_PRIVATE_KEY="$(cat id_rsa)"
+
       - name: Get Project Secrets from Finance
         if: ${{ startsWith(github.ref, 'refs/heads/master') }}
         uses: aws-actions/aws-secretsmanager-get-secrets@v2
