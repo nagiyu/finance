@@ -1,0 +1,118 @@
+name: Update Template
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  update-template:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install AWS CLI
+        run: |
+          cd /tmp
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip awscliv2.zip
+          sudo ./aws/install --update
+
+      - name: Configure AWS CLI
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Get Secrets from AWS SecretsManager
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: |
+            GitHub
+          parse-json-secrets: true
+
+      - name: Clone repository
+        uses: actions/checkout@v4
+        with:
+          repository: "{{ TEMPLATE_REPOSITORY }}"
+          token: ${{ env.GITHUB_PERSONAL_ACCESS_TOKEN }}
+
+      - name: Configure git user
+        run: |
+          git config user.name ${{ env.GITHUB_USERNAME }}
+          git config user.email ${{ env.GITHUB_EMAIL }}
+
+      - name: Set branch name
+        run: echo "BRANCH_NAME=feature/update-template-$(date +%Y%m%d-%H%M%S)" >> $GITHUB_ENV
+
+      - name: Create and checkout branch
+        run: git checkout -b ${{ env.BRANCH_NAME }}
+
+      - name: Setup git remote
+        run: |
+          git remote add source {{ SOURCE_REPOSITORY_URL }}
+          git fetch source
+
+      - name: Merge Source
+        run: git merge -X theirs --no-commit --no-ff source/{{ SOURCE_BRANCH }} --allow-unrelated-histories || true
+
+      - name: Reset specific files
+        run: |
+          git reset -- .github/workflows/apply-template.yml
+          git clean -f .github/workflows/apply-template.yml
+          git reset -- .github/workflows/deploy.yml
+          git clean -f .github/workflows/deploy.yml
+          git reset -- .github/workflows/update-template.yml
+          git clean -f .github/workflows/update-template.yml
+          git reset -- {{ EXCLUDE_PATHS }}
+          git clean -f {{ EXCLUDE_PATHS }}
+          git reset -- README.md
+          git restore README.md
+
+      - name: Resolve conflicts
+        run: |
+          if [ -f .git/MERGE_HEAD ]; then
+            # 削除競合を削除
+            git status --porcelain | grep '^DU ' | awk '{print $2}' | while read file; do
+              git rm -f "$file"
+            done
+
+            git diff --name-only --diff-filter=U | while read file; do
+              # "theirs"側にバージョンがなければ git rm、それ以外は checkout --theirs
+              if git show ":3:$file" > /dev/null 2>&1; then
+                git checkout --theirs "$file"
+                git add "$file"
+              else
+                git rm -f "$file"
+              fi
+            done
+          fi
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "changes_detected=true" >> $GITHUB_ENV
+            echo "Changes detected."
+          else
+            echo "changes_detected=false" >> $GITHUB_ENV
+            echo "No changes detected."
+          fi
+
+      - name: Commit and Push
+        if: env.changes_detected == 'true'
+        run: |
+          git commit -m "Update Template"
+          git push origin ${{ env.BRANCH_NAME }}
+
+      - name: Create Pull Request
+        if: env.changes_detected == 'true'
+        run: |
+          export GH_TOKEN="${{ env.GITHUB_PERSONAL_ACCESS_TOKEN }}"
+          gh pr create \
+            --title "[Draft] Update Template" \
+            --body "This is an automated draft PR to template." \
+            --base "{{ TARGET_BRANCH }}" \
+            --head ${{ env.BRANCH_NAME }} \
+            --draft || trueue

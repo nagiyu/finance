@@ -1,0 +1,44 @@
+{
+  "folders": [
+    {
+      "path": "."
+    },
+    {
+      "path": "../common",
+      "name": "server-common"
+    },
+    {
+      "path": "../../common",
+      "name": "common"
+    },
+    {
+      "path": "../../finance",
+      "name": "finance"
+    }
+  ],
+  "settings": {
+    "editor.renderWhitespace": "boundary",
+    "[shellscript]": {
+      "editor.tabSize": 2
+    },
+    "[typescript]": {
+      "editor.tabSize": 2
+    },
+    "[jsonc]": {
+      "editor.tabSize": 2
+    },
+    "[javascript]": {
+      "editor.tabSize": 2
+    },
+    "[html]": {
+      "editor.tabSize": 2
+    },
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "always"
+    },
+    "editor.formatOnSave": true,
+    "[markdown]": {
+      "editor.tabSize": 2
+    }
+  }
+}

@@ -8,6 +8,7 @@ export default class ErrorUtil {
    * @throws Throws an Error with the specified message.
    */
   public static throwError(message: string): never {
+    console.error(message);
     throw new Error(message);
   }
 }

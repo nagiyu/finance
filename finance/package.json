@@ -1,0 +1,12 @@
+{
+  "name": "finance",
+  "version": "1.0.0",
+  "dependencies": {
+    "@mathieuc/tradingview": "^3.5.1"
+  },
+  "devDependencies": {
+    "@types/mathieuc__tradingview": "^3.5.0",
+    "@types/node": "^20",
+    "bufferutil": "^4.0.9"
+  }
+}

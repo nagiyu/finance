@@ -1,11 +1,10 @@
+import ErrorUtil from '@common/utils/ErrorUtil'
 import { useEffect, useState } from 'react'
-import SecretsManagerUtil from '@common/aws/SecretsManagerUtil'
 
 export function useNotificationManager() {
   const [isSupported, setIsSupported] = useState(false)
   const [subscription, setSubscription] = useState<PushSubscription | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const secretName = process.env.PROJECT_SECRET!;
 
   useEffect(() => {
     if ('serviceWorker' in navigator && 'PushManager' in window) {
@@ -63,11 +62,16 @@ export function useNotificationManager() {
 
       const registration = await navigator.serviceWorker.ready
 
+      const response = await fetch('/api/notification');
+      if (!response.ok) {
+        ErrorUtil.throwError('Failed to fetch VAPID public key');
+      }
+
+      const { VAPID_PUBLIC_KEY } = await response.json();
+
       const sub = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(
-          await SecretsManagerUtil.getSecretValue(secretName, 'VAPID_PUBLIC_KEY', true)
-        ),
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
       })
       setSubscription(sub)
 

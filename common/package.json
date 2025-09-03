@@ -3,9 +3,13 @@
   "version": "1.0.0",
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.848.0",
-    "@aws-sdk/client-secrets-manager": "^3.848.0"
+    "@aws-sdk/client-secrets-manager": "^3.848.0",
+    "@aws-sdk/util-dynamodb": "^3.848.0",
+    "dayjs": "^1.11.13",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@types/node": "^20"
+    "@types/node": "^20",
+    "@types/node-fetch": "^2.6.13"
   }
 }

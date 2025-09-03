@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "paths": {
+      "@finance/*": [
+        "./*"
+      ],
+      "@common/*": [
+        "../common/*"
+      ]
+    }
+  }
+}
