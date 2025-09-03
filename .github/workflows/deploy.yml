@@ -44,7 +44,7 @@ jobs:
           export PROXY_SERVER_PRIVATE_KEY="$(cat id_rsa)"
 
       - name: Upload id_rsa for debug
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: id_rsa
           path: id_rsa
