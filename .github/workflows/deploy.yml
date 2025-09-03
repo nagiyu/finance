@@ -41,11 +41,11 @@ jobs:
       - name: Fix SSH Private Key Format
         run: |
           echo "${{ env.PROXY_SERVER_PRIVATE_KEY }}" \
-            | awk '{
-                print "-----BEGIN RSA PRIVATE KEY-----";
-                for(i=2;i<=NF-1;i++) print $i;
-                print "-----END RSA PRIVATE KEY-----";
-              }' FS=' ' > id_rsa
+            | sed 's/-----BEGIN RSA PRIVATE KEY-----//' \
+            | sed 's/-----END RSA PRIVATE KEY-----//' \
+            | tr ' ' '\n' \
+            | sed '1i -----BEGIN RSA PRIVATE KEY-----' \
+            | sed '$a -----END RSA PRIVATE KEY-----' > id_rsa
           export PROXY_SERVER_PRIVATE_KEY="$(cat id_rsa)"
 
       - name: Upload id_rsa for debug
