@@ -46,13 +46,6 @@ jobs:
             | sed 's/ -----END RSA PRIVATE KEY-----//' \
             | tr ' ' '\n' >> id_rsa
           echo "-----END RSA PRIVATE KEY-----" >> id_rsa
-          export PROXY_SERVER_PRIVATE_KEY="$(cat id_rsa)"
-
-      - name: Upload id_rsa for debug
-        uses: actions/upload-artifact@v4
-        with:
-          name: id_rsa
-          path: id_rsa
 
       - name: Get Project Secrets from Finance
         if: ${{ startsWith(github.ref, 'refs/heads/master') }}
@@ -85,7 +78,7 @@ jobs:
         with:
           host: ${{ env.PROXY_SERVER_HOST }}
           username: ${{ env.PROXY_SERVER_USERNAME }}
-          key: ${{ env.PROXY_SERVER_PRIVATE_KEY }}
+          key: id_rsa
           port: ${{ env.PROXY_SERVER_SSH_PORT }}
           script: |
             rm -rf /etc/nginx/conf.d/${{ github.ref == 'refs/heads/master' && 'finance.conf' || 'dev-finance.conf' }}
@@ -95,7 +88,7 @@ jobs:
         with:
           host: ${{ env.PROXY_SERVER_HOST }}
           username: ${{ env.PROXY_SERVER_USERNAME }}
-          key: ${{ env.PROXY_SERVER_PRIVATE_KEY }}
+          key: id_rsa
           port: ${{ env.PROXY_SERVER_SSH_PORT }}
           source: client/finance/${{ github.ref == 'refs/heads/master' && 'finance.conf' || 'dev-finance.conf' }}
           target: /etc/nginx/conf.d/
@@ -105,7 +98,7 @@ jobs:
         with:
           host: ${{ env.PROXY_SERVER_HOST }}
           username: ${{ env.PROXY_SERVER_USERNAME }}
-          key: ${{ env.PROXY_SERVER_PRIVATE_KEY }}
+          key: id_rsa
           port: ${{ env.PROXY_SERVER_SSH_PORT }}
           script: |
             sudo systemctl restart nginx
