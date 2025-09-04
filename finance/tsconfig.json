@@ -7,6 +7,7 @@
       "@common/*": [
         "../common/*"
       ]
-    }
+    },
+    "esModuleInterop": true
   }
 }

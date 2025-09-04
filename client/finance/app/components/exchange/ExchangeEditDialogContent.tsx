@@ -1,18 +1,46 @@
 import React from 'react';
 import BasicTextField from '@client-common/components/inputs/TextFields/BasicTextField';
-import BasicNumberField from '@client-common/components/inputs/TextFields/BasicNumberField';
+import BasicSelect from '@client-common/components/inputs/Selects/BasicSelect';
 import DirectionStack from '@client-common/components/Layout/Stacks/DirectionStack';
 import { ExchangeDataType } from '@/interfaces/data/ExchangeDataType';
+import { SelectOptionType } from '@client-common/interfaces/SelectOptionType';
 
 interface ExchangeEditDialogContentProps {
     item: ExchangeDataType;
     onItemChange: (item: ExchangeDataType) => void;
 }
 
+// Helper function to generate hour options (0-23)
+const generateHourOptions = (): SelectOptionType[] => {
+    const options: SelectOptionType[] = [];
+    for (let i = 0; i <= 23; i++) {
+        options.push({
+            value: i.toString(),
+            label: i.toString().padStart(2, '0')
+        });
+    }
+    return options;
+};
+
+// Helper function to generate minute options (0, 10, 20, 30, 40, 50)
+const generateMinuteOptions = (): SelectOptionType[] => {
+    const options: SelectOptionType[] = [];
+    for (let i = 0; i <= 50; i += 10) {
+        options.push({
+            value: i.toString(),
+            label: i.toString().padStart(2, '0')
+        });
+    }
+    return options;
+};
+
 export default function ExchangeEditDialogContent({
     item,
     onItemChange,
 }: ExchangeEditDialogContentProps) {
+    const hourOptions = generateHourOptions();
+    const minuteOptions = generateMinuteOptions();
+
     return (
         <>
             <BasicTextField
@@ -26,27 +54,31 @@ export default function ExchangeEditDialogContent({
                 onChange={(e) => onItemChange({ ...item, key: e.target.value })}
             />
             <DirectionStack>
-                <BasicNumberField
+                <BasicSelect
                     label='Start Hour'
-                    value={item.start.hour}
-                    onChange={(e) => onItemChange({ ...item, start: { ...item.start, hour: Number(e.target.value) } })}
+                    options={hourOptions}
+                    value={item.start.hour.toString()}
+                    onChange={(value) => onItemChange({ ...item, start: { ...item.start, hour: Number(value) } })}
                 />
-                <BasicNumberField
+                <BasicSelect
                     label='Start Minute'
-                    value={item.start.minute}
-                    onChange={(e) => onItemChange({ ...item, start: { ...item.start, minute: Number(e.target.value) } })}
+                    options={minuteOptions}
+                    value={item.start.minute.toString()}
+                    onChange={(value) => onItemChange({ ...item, start: { ...item.start, minute: Number(value) } })}
                 />
             </DirectionStack>
             <DirectionStack>
-                <BasicNumberField
+                <BasicSelect
                     label='End Hour'
-                    value={item.end.hour}
-                    onChange={(e) => onItemChange({ ...item, end: { ...item.end, hour: Number(e.target.value) } })}
+                    options={hourOptions}
+                    value={item.end.hour.toString()}
+                    onChange={(value) => onItemChange({ ...item, end: { ...item.end, hour: Number(value) } })}
                 />
-                <BasicNumberField
+                <BasicSelect
                     label='End Minute'
-                    value={item.end.minute}
-                    onChange={(e) => onItemChange({ ...item, end: { ...item.end, minute: Number(e.target.value) } })}
+                    options={minuteOptions}
+                    value={item.end.minute.toString()}
+                    onChange={(value) => onItemChange({ ...item, end: { ...item.end, minute: Number(value) } })}
                 />
             </DirectionStack>
         </>

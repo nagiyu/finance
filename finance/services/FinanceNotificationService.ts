@@ -1,6 +1,8 @@
 import CRUDServiceBase from '@common/services/CRUDServiceBase';
+import DateUtil from '@common/utils/DateUtil';
 import ErrorUtil from '@common/utils/ErrorUtil';
 import NotificationUtil from '@common/utils/NotificationUtil';
+import TimeUtil from '@common/utils/TimeUtil';
 import { SubscriptionType } from '@common/interfaces/SubscriptionType';
 import { TimeType } from '@common/interfaces/TimeType';
 
@@ -198,10 +200,9 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
   /**
    * Check if current time is within exchange operating hours
    */
-  private isWithinExchangeHours(exchange: ExchangeDataType, currentTime: Date = new Date()): boolean {
-    const currentHour = currentTime.getHours();
-    const currentMinute = currentTime.getMinutes();
-    const currentTotalMinutes = currentHour * 60 + currentMinute;
+  private isWithinExchangeHours(exchange: ExchangeDataType, currentTime: Date = DateUtil.getNowJSTAsDate()): boolean {
+    const currentJSTTime = TimeUtil.getJSTTime(currentTime);
+    const currentTotalMinutes = currentJSTTime.hour * 60 + currentJSTTime.minute;
     
     const startTotalMinutes = exchange.start.hour * 60 + exchange.start.minute;
     const endTotalMinutes = exchange.end.hour * 60 + exchange.end.minute;
@@ -219,11 +220,10 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
   /**
    * Check if current time is the start of exchange hours (for daily notifications)
    */
-  private isExchangeStartTime(exchange: ExchangeDataType, currentTime: Date = new Date()): boolean {
-    const currentHour = currentTime.getHours();
-    const currentMinute = currentTime.getMinutes();
+  private isExchangeStartTime(exchange: ExchangeDataType, currentTime: Date = DateUtil.getNowJSTAsDate()): boolean {
+    const currentJSTTime = TimeUtil.getJSTTime(currentTime);
     
-    return currentHour === exchange.start.hour && currentMinute === exchange.start.minute;
+    return currentJSTTime.hour === exchange.start.hour && currentJSTTime.minute === exchange.start.minute;
   }
 
   /**
@@ -241,7 +241,7 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
     exchange: ExchangeDataType, 
     conditionTypes: FinanceNotificationConditionType[]
   ): boolean {
-    const currentTime = new Date();
+    const currentTime = DateUtil.getNowJSTAsDate();
     
     // First check if we're within exchange hours
     if (!this.isWithinExchangeHours(exchange, currentTime)) {
