@@ -8,6 +8,7 @@ import { MyTickerDealType, MY_TICKER_DEAL_TYPE } from '@finance/types/MyTickerTy
 import BasicSelect from '@client-common/components/inputs/Selects/BasicSelect';
 import BasicDatePicker from '@client-common/components/inputs/Dates/BasicDatePicker';
 import BasicNumberField from '@client-common/components/inputs/TextFields/BasicNumberField';
+import CurrencyNumberField from '@client-common/components/inputs/TextFields/CurrencyNumberField';
 import { SelectOptionType } from '@client-common/interfaces/SelectOptionType';
 
 import ExchangeUtil from '@/utils/ExchangeUtil';
@@ -67,10 +68,11 @@ export default function MyTickerEditDialogContent({
                 value={new Date(item.date)}
                 onChange={(date) => onItemChange({ ...item, date: date ? DateUtil.toStartOfDay(date) : DateUtil.getTodayStartTimestamp() })}
             />
-            <BasicNumberField
+            <CurrencyNumberField
                 label='Price'
                 value={item.price}
                 onChange={(e) => onItemChange({ ...item, price: Number(e.target.value) })}
+                onValueChange={(value) => onItemChange({ ...item, price: value })}
             />
             <BasicNumberField
                 label='Quantity'

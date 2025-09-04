@@ -18,4 +18,5 @@ export interface FinanceNotificationRecordType extends FinanceRecordTypeBase {
   Conditions?: string; // JSON-stringified array
   TimeFrame: FinanceNotificationTimeFrameType;
   Frequency?: FinanceNotificationFrequencyType;
+  FirstNotificationSent?: boolean;
 }

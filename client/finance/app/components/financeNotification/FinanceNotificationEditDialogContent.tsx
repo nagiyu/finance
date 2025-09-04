@@ -8,7 +8,7 @@ import { FinanceNotificationConditionType, FINANCE_NOTIFICATION_CONDITION_TYPE, 
 import { FinanceNotificationDataType } from '@finance/interfaces/data/FinanceNotificationDataType';
 
 import BasicSelect from '@client-common/components/inputs/Selects/BasicSelect';
-import BasicNumberField from '@client-common/components/inputs/TextFields/BasicNumberField';
+import CurrencyNumberField from '@client-common/components/inputs/TextFields/CurrencyNumberField';
 import ControlledCheckbox from '@client-common/components/inputs/checkbox/ControlledCheckbox';
 import BasicRadioGroup from '@client-common/components/inputs/RadioGroups/BasicRadioGroup';
 
@@ -208,33 +208,39 @@ export default function FinanceNotificationEditDialogContent({
                 }}
             />
 
-            {/* Notification Frequency Selection */}
-            <BasicRadioGroup
-                label="通知頻度"
-                name="notificationFrequency" 
-                value={item.frequency || FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL}
-                options={[
-                    { 
-                        label: '1分ごと', 
-                        value: FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
-                        description: '価格条件は1分ごと、パターン条件は取引開始時のみ通知'
-                    },
-                    { 
-                        label: '取引開始時のみ', 
-                        value: FINANCE_NOTIFICATION_FREQUENCY.EXCHANGE_START_ONLY,
-                        description: 'すべての条件で取引開始時にのみ通知'
-                    }
-                ]}
-                row={false}
-                disabled={loading}
-                onChange={(e) => {
-                    const newFrequency = e.target.value as FinanceNotificationFrequencyType;
-                    onItemChange({
-                        ...item,
-                        frequency: newFrequency
-                    });
-                }}
-            />
+            {/* Notification Frequency Selection - only show when price conditions are selected */}
+            {needsConditionValue && (
+                <BasicSelect
+                    label="通知頻度"
+                    options={[
+                        { 
+                            label: '1分ごと', 
+                            value: FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
+                        },
+                        { 
+                            label: '10分ごと', 
+                            value: FINANCE_NOTIFICATION_FREQUENCY.TEN_MINUTE_LEVEL,
+                        },
+                        { 
+                            label: '1時間ごと', 
+                            value: FINANCE_NOTIFICATION_FREQUENCY.HOURLY_LEVEL,
+                        },
+                        { 
+                            label: '取引開始時のみ', 
+                            value: FINANCE_NOTIFICATION_FREQUENCY.EXCHANGE_START_ONLY,
+                        }
+                    ]}
+                    value={item.frequency || FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL}
+                    disabled={loading}
+                    onChange={(value) => {
+                        const newFrequency = value as FinanceNotificationFrequencyType;
+                        onItemChange({
+                            ...item,
+                            frequency: newFrequency
+                        });
+                    }}
+                />
+            )}
 
             {/* New mode-based condition selection */}
             <div style={{ marginTop: '16px' }}>
@@ -268,11 +274,12 @@ export default function FinanceNotificationEditDialogContent({
             </div>
             
             {needsConditionValue && (
-                <BasicNumberField
+                <CurrencyNumberField
                     label='目標価格'
                     value={item.conditionValue}
                     disabled={loading}
                     onChange={(value) => onItemChange({ ...item, conditionValue: Number(value.target.value) })}
+                    onValueChange={(value) => onItemChange({ ...item, conditionValue: value })}
                 />
             )}
         </>

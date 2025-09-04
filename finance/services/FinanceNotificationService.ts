@@ -106,6 +106,20 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
         };
 
         await NotificationUtil.sendPushNotification(endpoint, conditionMessage, subscription);
+
+        // Update first notification flag if this is the first notification for pattern conditions
+        if (!notification.firstNotificationSent) {
+          const hasDailyCondition = conditionTypes.some(type => this.isDailyCondition(type));
+          const isMinuteLevel = (notification.frequency || FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL) === FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL;
+          
+          if (hasDailyCondition && isMinuteLevel) {
+            console.log(`Marking first notification as sent for ${notification.id}`);
+            await this.update({
+              ...notification,
+              firstNotificationSent: true
+            });
+          }
+        }
       } catch (error) {
         if (error instanceof Error) {
           errors.push(`Error processing notification ${notification.id}: ${error.message}`);
@@ -136,6 +150,7 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
       Conditions: data.conditions,
       TimeFrame: data.timeFrame,
       Frequency: data.frequency,
+      FirstNotificationSent: data.firstNotificationSent,
       Create: data.create,
       Update: data.update,
     };
@@ -156,6 +171,7 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
       conditions: record.Conditions,
       timeFrame: record.TimeFrame,
       frequency: record.Frequency,
+      firstNotificationSent: record.FirstNotificationSent,
       create: record.Create,
       update: record.Update,
     };
@@ -251,28 +267,72 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
 
     // Check frequency preference
     const frequency = notification.frequency || FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL;
+    const hasDailyCondition = conditionTypes.some(type => this.isDailyCondition(type));
     
-    if (frequency === FINANCE_NOTIFICATION_FREQUENCY.EXCHANGE_START_ONLY) {
-      // Only send at exchange start
-      if (!this.isExchangeStartTime(exchange, currentTime)) {
-        console.log(`Notification ${notification.id} skipped - not exchange start time`);
-        return false;
-      }
-    } else {
-      // MINUTE_LEVEL frequency - check condition types
-      const hasDailyCondition = conditionTypes.some(type => this.isDailyCondition(type));
-      
-      if (hasDailyCondition) {
-        // For daily conditions, only notify at exchange start unless explicitly allowed
+    switch (frequency) {
+      case FINANCE_NOTIFICATION_FREQUENCY.EXCHANGE_START_ONLY:
+        // Only send at exchange start
         if (!this.isExchangeStartTime(exchange, currentTime)) {
-          console.log(`Notification ${notification.id} skipped - daily condition outside start time`);
+          console.log(`Notification ${notification.id} skipped - not exchange start time`);
           return false;
         }
-      }
-      // For minute-level conditions, always allow during exchange hours
+        break;
+        
+      case FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL:
+        // Every minute for price conditions, special logic for pattern conditions
+        if (hasDailyCondition) {
+          // Pattern conditions: first time OR exchange start time
+          if (!notification.firstNotificationSent) {
+            // First notification - allow during exchange hours
+            console.log(`Notification ${notification.id} - first notification for pattern condition`);
+            break;
+          } else if (!this.isExchangeStartTime(exchange, currentTime)) {
+            // Subsequent notifications only at exchange start
+            console.log(`Notification ${notification.id} skipped - pattern condition outside start time`);
+            return false;
+          }
+        }
+        // Price conditions: always allow during exchange hours (no additional restrictions)
+        break;
+        
+      case FINANCE_NOTIFICATION_FREQUENCY.TEN_MINUTE_LEVEL:
+        // Every 10 minutes (only at first batch processing of each 10-minute window)
+        if (!this.isTenMinuteInterval(currentTime)) {
+          console.log(`Notification ${notification.id} skipped - not at 10-minute interval`);
+          return false;
+        }
+        break;
+        
+      case FINANCE_NOTIFICATION_FREQUENCY.HOURLY_LEVEL:
+        // Every hour (only when minute is 0)
+        if (!this.isHourlyInterval(currentTime)) {
+          console.log(`Notification ${notification.id} skipped - not at hourly interval`);
+          return false;
+        }
+        break;
+        
+      default:
+        console.log(`Notification ${notification.id} - unknown frequency: ${frequency}`);
+        return false;
     }
     
     return true;
+  }
+
+  /**
+   * Check if current time is at a 10-minute interval (0, 10, 20, 30, 40, 50 minutes)
+   */
+  private isTenMinuteInterval(currentTime: Date): boolean {
+    const minutes = currentTime.getMinutes();
+    return minutes % 10 === 0;
+  }
+
+  /**
+   * Check if current time is at an hourly interval (minute is 0)
+   */
+  private isHourlyInterval(currentTime: Date): boolean {
+    const minutes = currentTime.getMinutes();
+    return minutes === 0;
   }
 
   private async checkCondition(conditionType: FinanceNotificationConditionType, target: string, exchangeKey: string, tickerKey: string, conditionValue: number): Promise<Condition> {

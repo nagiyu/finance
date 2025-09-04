@@ -57,6 +57,8 @@ export type FinanceNotificationTimeFrameType = typeof FINANCE_NOTIFICATION_TIME_
 export const FINANCE_NOTIFICATION_FREQUENCY = {
   EXCHANGE_START_ONLY: 'ExchangeStartOnly',
   MINUTE_LEVEL: 'MinuteLevel',
+  TEN_MINUTE_LEVEL: 'TenMinuteLevel',
+  HOURLY_LEVEL: 'HourlyLevel',
 } as const;
 
 export type FinanceNotificationFrequencyType = typeof FINANCE_NOTIFICATION_FREQUENCY[keyof typeof FINANCE_NOTIFICATION_FREQUENCY];

@@ -17,4 +17,6 @@ export interface FinanceNotificationDataType extends DataTypeBase {
   timeFrame: FinanceNotificationTimeFrameType;
   // Notification frequency control
   frequency?: FinanceNotificationFrequencyType;
+  // First notification flag for pattern conditions
+  firstNotificationSent?: boolean;
 }
