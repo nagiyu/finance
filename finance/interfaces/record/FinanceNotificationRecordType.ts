@@ -17,6 +17,7 @@ export interface FinanceNotificationRecordType extends FinanceRecordTypeBase {
   Mode?: FinanceNotificationModeType;
   Conditions?: string; // JSON-stringified array
   TimeFrame: FinanceNotificationTimeFrameType;
+  Session?: string; // Session type for price data
   Frequency?: FinanceNotificationFrequencyType;
   FirstNotificationSent?: boolean;
 }

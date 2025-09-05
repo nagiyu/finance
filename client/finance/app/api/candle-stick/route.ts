@@ -3,7 +3,13 @@ import { NextRequest, NextResponse } from "next/server";
 import APIUtil from '@client-common/utils/APIUtil';
 
 import FinanceAuthorizer from '@/services/finance/FinanceAuthorizer';
-import FinanceUtil from '@finance/utils/FinanceUtil';
+import FinanceUtil, { GetStockPriceDataOptions } from '@finance/utils/FinanceUtil';
+
+interface CandleStickRequest {
+  exchange: string;
+  ticker: string;
+  options?: GetStockPriceDataOptions;
+}
 
 export async function POST(req: NextRequest) {
   if (!await FinanceAuthorizer.isUser()) {
@@ -11,7 +17,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { exchange, ticker, options } = await req.json();
+    const { exchange, ticker, options }: CandleStickRequest = await req.json();
     
     const result = await FinanceUtil.getStockPriceData(exchange, ticker, options);
 

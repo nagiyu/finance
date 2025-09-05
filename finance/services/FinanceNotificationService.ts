@@ -69,7 +69,7 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
           try {
             const conditions: string[] = JSON.parse(notification.conditions);
             for (const conditionType of conditions) {
-              const condition = await this.checkCondition(conditionType as FinanceNotificationConditionType, `${exchangeKey}:${tickerKey}`, exchangeKey, tickerKey, notification.conditionValue);
+              const condition = await this.checkCondition(conditionType as FinanceNotificationConditionType, `${exchangeKey}:${tickerKey}`, exchangeKey, tickerKey, notification.conditionValue, notification.session);
               if (condition.met) {
                 conditionMet = true;
                 conditionMessage = condition.message;
@@ -79,13 +79,13 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
           } catch (error) {
             console.error('Error parsing conditions JSON:', error);
             // Fall back to legacy format
-            const condition = await this.checkCondition(notification.conditionType, `${exchangeKey}:${tickerKey}`, exchangeKey, tickerKey, notification.conditionValue);
+            const condition = await this.checkCondition(notification.conditionType, `${exchangeKey}:${tickerKey}`, exchangeKey, tickerKey, notification.conditionValue, notification.session);
             conditionMet = condition.met;
             conditionMessage = condition.message;
           }
         } else {
           // Legacy single condition format
-          const condition = await this.checkCondition(notification.conditionType, `${exchangeKey}:${tickerKey}`, exchangeKey, tickerKey, notification.conditionValue);
+          const condition = await this.checkCondition(notification.conditionType, `${exchangeKey}:${tickerKey}`, exchangeKey, tickerKey, notification.conditionValue, notification.session);
           conditionMet = condition.met;
           conditionMessage = condition.message;
         }
@@ -149,6 +149,7 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
       Mode: data.mode,
       Conditions: data.conditions,
       TimeFrame: data.timeFrame,
+      Session: data.session,
       Frequency: data.frequency,
       FirstNotificationSent: data.firstNotificationSent,
       Create: data.create,
@@ -170,6 +171,7 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
       mode: record.Mode,
       conditions: record.Conditions,
       timeFrame: record.TimeFrame,
+      session: record.Session,
       frequency: record.Frequency,
       firstNotificationSent: record.FirstNotificationSent,
       create: record.Create,
@@ -335,44 +337,44 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
     return minutes === 0;
   }
 
-  private async checkCondition(conditionType: FinanceNotificationConditionType, target: string, exchangeKey: string, tickerKey: string, conditionValue: number): Promise<Condition> {
+  private async checkCondition(conditionType: FinanceNotificationConditionType, target: string, exchangeKey: string, tickerKey: string, conditionValue: number, session?: string): Promise<Condition> {
     switch (conditionType) {
       case FINANCE_NOTIFICATION_CONDITION_TYPE.GREATER_THAN:
       case FINANCE_NOTIFICATION_CONDITION_TYPE.LESS_THAN:
-        return await this.checkPriceCondition(conditionType, target, exchangeKey, tickerKey, conditionValue);
+        return await this.checkPriceCondition(conditionType, target, exchangeKey, tickerKey, conditionValue, session);
 
       case FINANCE_NOTIFICATION_CONDITION_TYPE.THREE_RED_SOLDIERS:
-        return await this.checkThreeRedSoldiers(target, exchangeKey, tickerKey);
+        return await this.checkThreeRedSoldiers(target, exchangeKey, tickerKey, session);
 
       case FINANCE_NOTIFICATION_CONDITION_TYPE.THREE_RIVER_EVENING_STAR:
-        return await this.checkThreeRiverEveningStar(target, exchangeKey, tickerKey);
+        return await this.checkThreeRiverEveningStar(target, exchangeKey, tickerKey, session);
 
       case FINANCE_NOTIFICATION_CONDITION_TYPE.TWO_TAKURI_LINES:
-        return await this.checkTwoTakuriLines(target, exchangeKey, tickerKey);
+        return await this.checkTwoTakuriLines(target, exchangeKey, tickerKey, session);
 
       case FINANCE_NOTIFICATION_CONDITION_TYPE.SWALLOW_RETURN:
-        return await this.checkSwallowReturn(target, exchangeKey, tickerKey);
+        return await this.checkSwallowReturn(target, exchangeKey, tickerKey, session);
 
       case FINANCE_NOTIFICATION_CONDITION_TYPE.FIREWORKS:
-        return await this.checkFireworks(target, exchangeKey, tickerKey);
+        return await this.checkFireworks(target, exchangeKey, tickerKey, session);
 
       case FINANCE_NOTIFICATION_CONDITION_TYPE.OKAJI_THREE_CROWS:
-        return await this.checkOkajiThreeCrows(target, exchangeKey, tickerKey);
+        return await this.checkOkajiThreeCrows(target, exchangeKey, tickerKey, session);
 
       case FINANCE_NOTIFICATION_CONDITION_TYPE.FALLING_STONES:
-        return await this.checkFallingStones(target, exchangeKey, tickerKey);
+        return await this.checkFallingStones(target, exchangeKey, tickerKey, session);
 
       case FINANCE_NOTIFICATION_CONDITION_TYPE.BULLISH_HARAMI_CROSS:
-        return await this.checkBullishHaramiCross(target, exchangeKey, tickerKey);
+        return await this.checkBullishHaramiCross(target, exchangeKey, tickerKey, session);
 
       case FINANCE_NOTIFICATION_CONDITION_TYPE.HAWK_REVERSAL:
-        return await this.checkHawkReversal(target, exchangeKey, tickerKey);
+        return await this.checkHawkReversal(target, exchangeKey, tickerKey, session);
 
       case FINANCE_NOTIFICATION_CONDITION_TYPE.THREE_DARK_STARS:
-        return await this.checkThreeDarkStars(target, exchangeKey, tickerKey);
+        return await this.checkThreeDarkStars(target, exchangeKey, tickerKey, session);
 
       case FINANCE_NOTIFICATION_CONDITION_TYPE.SHOOTING_STAR:
-        return await this.checkShootingStar(target, exchangeKey, tickerKey);
+        return await this.checkShootingStar(target, exchangeKey, tickerKey, session);
 
       default:
         ErrorUtil.throwError(`Unknown condition type: ${conditionType}`);
@@ -381,8 +383,8 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
     return { met: false, message: '' };
   }
 
-  private async checkPriceCondition(conditionType: FinanceNotificationConditionType, target: string, exchangeKey: string, tickerKey: string, conditionValue: number): Promise<Condition> {
-    const currentPrice = await FinanceUtil.getCurrentStockPrice(exchangeKey, tickerKey);
+  private async checkPriceCondition(conditionType: FinanceNotificationConditionType, target: string, exchangeKey: string, tickerKey: string, conditionValue: number, session?: string): Promise<Condition> {
+    const currentPrice = await FinanceUtil.getCurrentStockPrice(exchangeKey, tickerKey, session);
 
     if (currentPrice === null) {
       return { met: false, message: `No stock data available for ${target}` };
@@ -407,9 +409,9 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
     return { met: false, message: '' };
   }
 
-  private async checkThreeRedSoldiers(target: string, exchangeKey: string, tickerKey: string): Promise<Condition> {
+  private async checkThreeRedSoldiers(target: string, exchangeKey: string, tickerKey: string, session?: string): Promise<Condition> {
     try {
-      const stockData = await FinanceUtil.getStockPriceData(exchangeKey, tickerKey, { count: 3 });
+      const stockData = await FinanceUtil.getStockPriceData(exchangeKey, tickerKey, { count: 3, session });
 
       if (!stockData || !Array.isArray(stockData) || stockData.length < 3) {
         return { met: false, message: `Insufficient data for ${target}` };
@@ -454,9 +456,9 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
     }
   }
 
-  private async checkThreeRiverEveningStar(target: string, exchangeKey: string, tickerKey: string): Promise<Condition> {
+  private async checkThreeRiverEveningStar(target: string, exchangeKey: string, tickerKey: string, session?: string): Promise<Condition> {
     try {
-      const stockData = await FinanceUtil.getStockPriceData(exchangeKey, tickerKey, { count: 3 });
+      const stockData = await FinanceUtil.getStockPriceData(exchangeKey, tickerKey, { count: 3, session });
 
       if (!stockData || !Array.isArray(stockData) || stockData.length < 3) {
         return { met: false, message: `Insufficient data for ${target}` };
@@ -502,9 +504,9 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
     return currentPrice < conditionValue;
   }
 
-  private async checkTwoTakuriLines(target: string, exchangeKey: string, tickerKey: string): Promise<Condition> {
+  private async checkTwoTakuriLines(target: string, exchangeKey: string, tickerKey: string, session?: string): Promise<Condition> {
     try {
-      const stockData = await FinanceUtil.getStockPriceData(exchangeKey, tickerKey, { count: 3 });
+      const stockData = await FinanceUtil.getStockPriceData(exchangeKey, tickerKey, { count: 3, session });
 
       if (!stockData || !Array.isArray(stockData) || stockData.length < 3) {
         return { met: false, message: `Insufficient data for ${target}` };
@@ -552,9 +554,9 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
     }
   }
 
-  private async checkSwallowReturn(target: string, exchangeKey: string, tickerKey: string): Promise<Condition> {
+  private async checkSwallowReturn(target: string, exchangeKey: string, tickerKey: string, session?: string): Promise<Condition> {
     try {
-      const stockData = await FinanceUtil.getStockPriceData(exchangeKey, tickerKey, { count: 4 });
+      const stockData = await FinanceUtil.getStockPriceData(exchangeKey, tickerKey, { count: 4, session });
 
       if (!stockData || !Array.isArray(stockData) || stockData.length < 4) {
         return { met: false, message: `Insufficient data for ${target}` };
@@ -584,9 +586,9 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
     }
   }
 
-  private async checkFireworks(target: string, exchangeKey: string, tickerKey: string): Promise<Condition> {
+  private async checkFireworks(target: string, exchangeKey: string, tickerKey: string, session?: string): Promise<Condition> {
     try {
-      const stockData = await FinanceUtil.getStockPriceData(exchangeKey, tickerKey, { count: 1 });
+      const stockData = await FinanceUtil.getStockPriceData(exchangeKey, tickerKey, { count: 1, session });
 
       if (!stockData || !Array.isArray(stockData) || stockData.length < 1) {
         return { met: false, message: `Insufficient data for ${target}` };
@@ -618,9 +620,9 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
     }
   }
 
-  private async checkOkajiThreeCrows(target: string, exchangeKey: string, tickerKey: string): Promise<Condition> {
+  private async checkOkajiThreeCrows(target: string, exchangeKey: string, tickerKey: string, session?: string): Promise<Condition> {
     try {
-      const stockData = await FinanceUtil.getStockPriceData(exchangeKey, tickerKey, { count: 3 });
+      const stockData = await FinanceUtil.getStockPriceData(exchangeKey, tickerKey, { count: 3, session });
 
       if (!stockData || !Array.isArray(stockData) || stockData.length < 3) {
         return { met: false, message: `Insufficient data for ${target}` };
@@ -647,9 +649,9 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
     }
   }
 
-  private async checkFallingStones(target: string, exchangeKey: string, tickerKey: string): Promise<Condition> {
+  private async checkFallingStones(target: string, exchangeKey: string, tickerKey: string, session?: string): Promise<Condition> {
     try {
-      const stockData = await FinanceUtil.getStockPriceData(exchangeKey, tickerKey, { count: 5 });
+      const stockData = await FinanceUtil.getStockPriceData(exchangeKey, tickerKey, { count: 5, session });
 
       if (!stockData || !Array.isArray(stockData) || stockData.length < 5) {
         return { met: false, message: `Insufficient data for ${target}` };
@@ -693,9 +695,9 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
     }
   }
 
-  private async checkBullishHaramiCross(target: string, exchangeKey: string, tickerKey: string): Promise<Condition> {
+  private async checkBullishHaramiCross(target: string, exchangeKey: string, tickerKey: string, session?: string): Promise<Condition> {
     try {
-      const stockData = await FinanceUtil.getStockPriceData(exchangeKey, tickerKey, { count: 3 });
+      const stockData = await FinanceUtil.getStockPriceData(exchangeKey, tickerKey, { count: 3, session });
 
       if (!stockData || !Array.isArray(stockData) || stockData.length < 3) {
         return { met: false, message: `Insufficient data for ${target}` };
@@ -731,9 +733,9 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
     }
   }
 
-  private async checkHawkReversal(target: string, exchangeKey: string, tickerKey: string): Promise<Condition> {
+  private async checkHawkReversal(target: string, exchangeKey: string, tickerKey: string, session?: string): Promise<Condition> {
     try {
-      const stockData = await FinanceUtil.getStockPriceData(exchangeKey, tickerKey, { count: 2 });
+      const stockData = await FinanceUtil.getStockPriceData(exchangeKey, tickerKey, { count: 2, session });
 
       if (!stockData || !Array.isArray(stockData) || stockData.length < 2) {
         return { met: false, message: `Insufficient data for ${target}` };
@@ -764,9 +766,9 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
     }
   }
 
-  private async checkThreeDarkStars(target: string, exchangeKey: string, tickerKey: string): Promise<Condition> {
+  private async checkThreeDarkStars(target: string, exchangeKey: string, tickerKey: string, session?: string): Promise<Condition> {
     try {
-      const stockData = await FinanceUtil.getStockPriceData(exchangeKey, tickerKey, { count: 3 });
+      const stockData = await FinanceUtil.getStockPriceData(exchangeKey, tickerKey, { count: 3, session });
 
       if (!stockData || !Array.isArray(stockData) || stockData.length < 3) {
         return { met: false, message: `Insufficient data for ${target}` };
@@ -794,9 +796,9 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
     }
   }
 
-  private async checkShootingStar(target: string, exchangeKey: string, tickerKey: string): Promise<Condition> {
+  private async checkShootingStar(target: string, exchangeKey: string, tickerKey: string, session?: string): Promise<Condition> {
     try {
-      const stockData = await FinanceUtil.getStockPriceData(exchangeKey, tickerKey, { count: 1 });
+      const stockData = await FinanceUtil.getStockPriceData(exchangeKey, tickerKey, { count: 1, session });
 
       if (!stockData || !Array.isArray(stockData) || stockData.length < 1) {
         return { met: false, message: `Insufficient data for ${target}` };

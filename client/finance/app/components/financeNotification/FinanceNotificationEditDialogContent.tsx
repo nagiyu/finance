@@ -14,6 +14,8 @@ import BasicRadioGroup from '@client-common/components/inputs/RadioGroups/BasicR
 
 import ExchangeUtil from '@/utils/ExchangeUtil';
 import TickerUtil from '@/utils/TickerUtil';
+import SessionUtil from '@/utils/SessionUtil';
+import SessionSelect from '@/app/components/common/SessionSelect';
 import { ExchangeDataType } from '@/interfaces/data/ExchangeDataType';
 import { TickerDataType } from '@/interfaces/data/TickerDataType';
 import { StateType } from '@/app/finance-notification/page';
@@ -153,14 +155,16 @@ export default function FinanceNotificationEditDialogContent({
             ? item.tickerId
             : (filteredTickers.length > 0 ? filteredTickers[0].id : '');
 
-        // Ensure new items have a default mode if not set
+        // Ensure new items have a default mode and session if not set
         const mode = item.mode || FINANCE_NOTIFICATION_MODE.BUY;
+        const session = item.session || SessionUtil.getDefaultSession();
 
         onItemChange({
             ...item,
             exchangeId: exchangeId,
             tickerId: tickerId,
             mode: mode,
+            session: session,
             conditions: item.conditions || JSON.stringify([])
         });
         onStateChange({ ...state, filteredTickers });
@@ -185,6 +189,13 @@ export default function FinanceNotificationEditDialogContent({
                 value={item.tickerId}
                 disabled={loading || !item.exchangeId}
                 onChange={(value) => onItemChange({ ...item, tickerId: value })}
+            />
+            
+            {/* Session Selection */}
+            <SessionSelect
+                value={item.session || SessionUtil.getDefaultSession()}
+                disabled={loading}
+                onChange={(value) => onItemChange({ ...item, session: value })}
             />
             
             {/* Mode Selection */}

@@ -15,6 +15,8 @@ export interface FinanceNotificationDataType extends DataTypeBase {
   mode?: FinanceNotificationModeType;
   conditions?: string; // JSON-stringified array of conditions
   timeFrame: FinanceNotificationTimeFrameType;
+  // Session type for price data (regular/extended)
+  session?: string;
   // Notification frequency control
   frequency?: FinanceNotificationFrequencyType;
   // First notification flag for pattern conditions

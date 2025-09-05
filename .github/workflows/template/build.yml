@@ -1,0 +1,162 @@
+name: Build
+
+on:
+  pull_request:
+    branches:
+      - master
+      - develop
+  workflow_dispatch:
+
+jobs:
+  build-client-{{ PROJECT_NAME }}:
+    runs-on: ubuntu-latest
+
+    environment:
+      name: development
+    
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: AWS CLI install
+      run: |
+        cd /tmp
+        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+        unzip awscliv2.zip
+        sudo ./aws/install --update
+
+    - name: AWS set Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: Get Secrets from AWS SecretsManager
+      uses: aws-actions/aws-secretsmanager-get-secrets@v2
+      with:
+        secret-ids: |
+          AWS_SECRETS, AWS
+        parse-json-secrets: true
+
+    - name: Get Project Secrets from {{ DEV_SECRET_NAME }}
+      uses: aws-actions/aws-secretsmanager-get-secrets@v2
+      with:
+        secret-ids: |
+          PROJECT, {{ DEV_SECRET_NAME }}
+        parse-json-secrets: true
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: |
+          common/package-lock.json
+          {{ PROJECT_NAME }}/package-lock.json
+          client/common/package-lock.json
+          client/{{ PROJECT_NAME }}/package-lock.json
+    
+    - name: Install dependencies for common
+      run: |
+        cd common
+        npm install
+    
+    - name: Install dependencies for {{ PROJECT_NAME }}
+      run: |
+        cd {{ PROJECT_NAME }}
+        npm install
+    
+    - name: Install dependencies for client/common
+      run: |
+        cd client/common
+        npm install
+    
+    - name: Install dependencies and build client/{{ PROJECT_NAME }}
+      env:
+        PROCESS_ENV: development
+        PROJECT_SECRET: {{ DEV_SECRET_NAME }}
+        PROJECT_AWS_ACCESS_KEY: ${{ env.PROJECT_AWS_ACCESS_KEY }}
+        PROJECT_AWS_SECRET_ACCESS_KEY: ${{ env.PROJECT_AWS_SECRET_ACCESS_KEY }}
+        PROJECT_AWS_REGION: ${{ env.PROJECT_AWS_REGION }}
+        NEXTAUTH_URL: ${{ env.PROJECT_CLIENT_BASE_URL }}
+      run: |
+        cd client/{{ PROJECT_NAME }}
+        npm install
+        npm run build
+        echo "✅ Client {{ PROJECT_NAME }} build completed successfully"
+
+  build-server-{{ PROJECT_NAME }}:
+    runs-on: ubuntu-latest
+
+    environment:
+      name: development
+    
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: AWS CLI install
+      run: |
+        cd /tmp
+        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+        unzip awscliv2.zip
+        sudo ./aws/install --update
+
+    - name: AWS set Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: Get Secrets from AWS SecretsManager
+      uses: aws-actions/aws-secretsmanager-get-secrets@v2
+      with:
+        secret-ids: |
+          AWS_SECRETS, AWS
+        parse-json-secrets: true
+
+    - name: Get Project Secrets from {{ DEV_SECRET_NAME }}
+      uses: aws-actions/aws-secretsmanager-get-secrets@v2
+      with:
+        secret-ids: |
+          PROJECT, {{ DEV_SECRET_NAME }}
+        parse-json-secrets: true
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: |
+          common/package-lock.json
+          {{ PROJECT_NAME }}/package-lock.json
+          server/common/package-lock.json
+          server/{{ PROJECT_NAME }}/package-lock.json
+    
+    - name: Install dependencies for common
+      run: |
+        cd common
+        npm install
+    
+    - name: Install dependencies for {{ PROJECT_NAME }}
+      run: |
+        cd {{ PROJECT_NAME }}
+        npm install
+    
+    - name: Install dependencies for server/common
+      run: |
+        cd server/common
+        npm install
+    
+    - name: Install dependencies and build server/{{ PROJECT_NAME }}
+      env:
+        PROCESS_ENV: development
+        PROJECT_SECRET: {{ DEV_SECRET_NAME }}
+        PROJECT_AWS_ACCESS_KEY: ${{ env.PROJECT_AWS_ACCESS_KEY }}
+        PROJECT_AWS_SECRET_ACCESS_KEY: ${{ env.PROJECT_AWS_SECRET_ACCESS_KEY }}
+        PROJECT_AWS_REGION: ${{ env.PROJECT_AWS_REGION }}
+      run: |
+        cd server/{{ PROJECT_NAME }}
+        npm install
+        npm run build
+        echo "✅ Server {{ PROJECT_NAME }} build completed successfully"

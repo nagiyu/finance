@@ -10,6 +10,14 @@ export default abstract class DataAccessorBase<T extends RecordTypeBase> {
     this.dataType = dataType;
   }
 
+  public getTableName(): string {
+    return this.tableName;
+  }
+
+  public getDataType(): string {
+    return this.dataType;
+  }
+
   public async get(): Promise<T[]> {
     return await DynamoDBUtil.getAllByDataType<T>(this.tableName, this.dataType);
   }

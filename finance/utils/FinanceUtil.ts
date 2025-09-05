@@ -8,6 +8,7 @@ export type { TimeFrame } from '@mathieuc/tradingview';
 export interface GetStockPriceDataOptions {
   count?: number;      // 取得件数（デフォルト: 30）
   timeframe?: TimeFrame;  // タイムフレーム（デフォルト: '1'）
+  session?: string;    // セッション（デフォルト: 'regular', 'extended' for pre/after-market）
 }
 
 export default class FinanceUtil {
@@ -27,6 +28,7 @@ export default class FinanceUtil {
     const market = `${exchange}:${ticker}`;
     const count = options?.count ?? 30;
     const timeframe: TimeFrame = options?.timeframe ?? '1';
+    const session = options?.session ?? 'regular';
 
     const result = await new Promise((resolve, reject) => {
       const client = new TradingView.Client();
@@ -34,6 +36,7 @@ export default class FinanceUtil {
 
       chart.setMarket(market, {
         timeframe: timeframe,
+        session: session,
       });
 
       chart.onError((...err) => { // Listen for errors (can avoid crash)
@@ -83,9 +86,9 @@ export default class FinanceUtil {
    * Get the current stock price for a given exchange and ticker
    * Returns the latest close price
    */
-  public static async getCurrentStockPrice(exchange: string, ticker: string): Promise<number | null> {
+  public static async getCurrentStockPrice(exchange: string, ticker: string, session?: string): Promise<number | null> {
     try {
-      const stockData = await this.getStockPriceData(exchange, ticker, { count: 1 });
+      const stockData = await this.getStockPriceData(exchange, ticker, { count: 1, session });
 
       if (!stockData || !Array.isArray(stockData) || stockData.length === 0) {
         return null;

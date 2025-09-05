@@ -20,7 +20,8 @@ export default abstract class CRUDServiceBase<DataType extends DataTypeBase, Rec
     this.dataToRecord = dataToRecord;
     this.recordToData = recordToData;
     this.useCache = useCache;
-    this.cacheKey = dataAccessor.constructor.name;
+    // Create more specific cache key to prevent collisions
+    this.cacheKey = `${dataAccessor.constructor.name}_${dataAccessor.getTableName()}_${dataAccessor.getDataType()}`;
   }
 
   public async get(): Promise<DataType[]> {

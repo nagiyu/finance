@@ -22,6 +22,43 @@ import ExchangeFetchService from '@/services/exchange/ExchangeFetchService.clien
 import Graph from '@/app/components/graph';
 import TickerFetchService from '@/services/ticker/TickerFetchService.client';
 
+interface SessionOption {
+  value: string;
+  label: string;
+}
+
+class SessionUtil {
+  // Available session options with user-friendly labels
+  private static readonly SESSION_OPTIONS: SessionOption[] = [
+    { value: "regular", label: "通常時間" },
+    { value: "extended", label: "時間外取引含む" },
+  ];
+
+  /**
+   * Convert session options to SelectOption format for use with BasicSelect component
+   */
+  public static toSelectOptions(): SelectOptionType[] {
+    return this.SESSION_OPTIONS.map(option => ({
+      label: option.label,
+      value: option.value
+    }));
+  }
+
+  /**
+   * Get the default session
+   */
+  public static getDefaultSession(): string {
+    return "regular";
+  }
+
+  /**
+   * Validate if a string is a valid session
+   */
+  public static isValidSession(value: string): boolean {
+    return this.SESSION_OPTIONS.some(option => option.value === value);
+  }
+}
+
 interface TimeFrameOption {
   value: TimeFrame;
   label: string;
@@ -77,7 +114,8 @@ export default function Home() {
   const [tickerOptions, setTickerOptions] = useState<SelectOptionType[]>([]);
   const [exchange, setExchange] = useState('');
   const [ticker, setTicker] = useState('');
-  const [timeframe, setTimeframe] = useState<string>(TimeFrameUtil.getDefaultTimeFrame());
+  const [timeframe, setTimeframe] = useState<TimeFrame>(TimeFrameUtil.getDefaultTimeFrame());
+  const [session, setSession] = useState<string>(SessionUtil.getDefaultSession());
 
   const exchangeFetchService = new ExchangeFetchService();
   const tickerFetchService = new TickerFetchService();
@@ -128,9 +166,14 @@ export default function Home() {
             <BasicSelect label='Exchange' options={exchangeOptions} value={exchange} onChange={(value) => setExchange(value)} />
             <BasicSelect label='Ticker' options={tickerOptions} value={ticker} onChange={(value) => setTicker(value)} />
           </DirectionStack>
-          <Graph exchange={getExchangeKey(exchange)} ticker={getTickerKey(ticker)} timeframe={timeframe} />
+          <Graph exchange={getExchangeKey(exchange)} ticker={getTickerKey(ticker)} timeframe={timeframe} session={session} />
           <DirectionStack>
-            <BasicSelect label='時間軸' options={TimeFrameUtil.toSelectOptions()} value={timeframe} onChange={(value) => setTimeframe(value)} />
+            <BasicSelect label='時間軸' options={TimeFrameUtil.toSelectOptions()} value={timeframe} onChange={(value) => {
+              if (TimeFrameUtil.isValidTimeFrame(value)) {
+                setTimeframe(value);
+              }
+            }} />
+            <BasicSelect label='取引時間' options={SessionUtil.toSelectOptions()} value={session} onChange={(value) => setSession(value)} />
           </DirectionStack>
         </BasicStack>
       }

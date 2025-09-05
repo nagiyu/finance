@@ -86,6 +86,7 @@ export default function FinanceNotificationPage() {
         conditionType: FINANCE_NOTIFICATION_CONDITION_TYPE.GREATER_THAN,
         conditionValue: 0,
         timeFrame: FINANCE_NOTIFICATION_TIME_FRAME.ONE_MINUTE,
+        session: 'extended', // Default to extended (時間外取引含む) as specified
         frequency: FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
         create: Date.now(),
         update: Date.now(),
