@@ -42,6 +42,7 @@ const conditionLabels: Record<FinanceNotificationConditionType, string> = {
     [FINANCE_NOTIFICATION_CONDITION_TYPE.OKAJI_THREE_CROWS]: '岡時三羽',
     [FINANCE_NOTIFICATION_CONDITION_TYPE.FALLING_STONES]: '小石崩れ',
     [FINANCE_NOTIFICATION_CONDITION_TYPE.BULLISH_HARAMI_CROSS]: '陽の両はらみ',
+    [FINANCE_NOTIFICATION_CONDITION_TYPE.BEARISH_HARAMI_CROSS]: '陰の両はらみ',
     [FINANCE_NOTIFICATION_CONDITION_TYPE.HAWK_REVERSAL]: '鷹かえし',
     [FINANCE_NOTIFICATION_CONDITION_TYPE.THREE_DARK_STARS]: '陰の三つ星',
     [FINANCE_NOTIFICATION_CONDITION_TYPE.SHOOTING_STAR]: '流れ星',
@@ -81,7 +82,9 @@ const getConditionDescription = (conditionType: FinanceNotificationConditionType
         case FINANCE_NOTIFICATION_CONDITION_TYPE.FALLING_STONES:
             return '大陽線の後、徐々に安値を切り下げる下降ウェッジの売りシグナルを検出した時に通知します';
         case FINANCE_NOTIFICATION_CONDITION_TYPE.BULLISH_HARAMI_CROSS:
-            return '２本目のローソク足の実体に1本目と3本目が収まっている売りシグナルを検出した時に通知します';
+            return '大陽線の翌営業日に出た陽線が、前営業日の大陽線の実体の範囲内に納まる買いシグナルを検出した時に通知します';
+        case FINANCE_NOTIFICATION_CONDITION_TYPE.BEARISH_HARAMI_CROSS:
+            return '大陰線の翌営業日に出た陰線が、前営業日の大陰線の実体の範囲内に納まる売りシグナルを検出した時に通知します';
         case FINANCE_NOTIFICATION_CONDITION_TYPE.HAWK_REVERSAL:
             return '上昇中に陰線が前のローソク足を包み込んだ売りシグナルを検出した時に通知します';
         case FINANCE_NOTIFICATION_CONDITION_TYPE.THREE_DARK_STARS:
