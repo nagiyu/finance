@@ -38,6 +38,13 @@ jobs:
             AWS_SECRETS, AWS
           parse-json-secrets: true
 
+      - name: Get Secrets from Google AdSense
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: |
+            GOOGLE_ADSENSE, GoogleAdSense
+          parse-json-secrets: true
+
       - name: Get Project Secrets from Sample
         if: ${{ startsWith(github.ref, 'refs/heads/master') }}
         uses: aws-actions/aws-secretsmanager-get-secrets@v2
@@ -57,6 +64,10 @@ jobs:
       - name: Rewrite sw.js endpoint from secrets
         run: |
           sed -i 's|http://localhost:3000|${{ env.PROJECT_CLIENT_BASE_URL }}|g' client/sample/public/sw.js
+
+      - name: Rewrite ads.txt content from secrets
+        run: |
+          sed -i 's|{{ PublisherID }}|${{ env.GOOGLE_ADSENSE_PUBLISHER_ID }}|g' client/sample/public/ads.txt
 
       - name: Deploy
         run: |

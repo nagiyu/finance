@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import Script from 'next/script';
 
 import { Geist, Geist_Mono } from 'next/font/google';
 
@@ -11,6 +12,7 @@ import NotificationSettingButton from '@client-common/components/inputs/buttons/
 import SessionUtil from '@client-common/utils/SessionUtil.server';
 import SignInButton from '@client-common/components/inputs/Buttons/SignInButton';
 import SignoutButton from '@client-common/components/inputs/Buttons/SignOutButton';
+import AdSenseUtil from '@client-common/utils/AdSenseUtil.server';
 
 interface CommonLayoutProps {
     title: string;
@@ -21,6 +23,10 @@ interface CommonLayoutProps {
 
     // Notification
     enableNotification?: boolean;
+
+    // Google Adsense
+    enableAdSense?: boolean;
+    enableAutoAds?: boolean;
 
     children: React.ReactNode;
 }
@@ -44,6 +50,8 @@ export default async function CommonLayout({
     menuItems = [],
     enableAuthentication = false,
     enableNotification = false,
+    enableAdSense = false,
+    enableAutoAds = true,
     children
 }: CommonLayoutProps) {
     const authenticatedContent = async (): Promise<React.ReactNode> => {
@@ -62,10 +70,23 @@ export default async function CommonLayout({
         return <LinkMenu menuItems={menuItems} />;
     }
 
+    // Get AdSense config dynamically if enabled
+    const adsenseConfig = enableAdSense ? await AdSenseUtil.getAdSenseConfig(enableAutoAds) : null;
+
     return (
         <html lang='ja'>
             <head>
                 <link rel='manifest' href='/manifest.webmanifest' />
+                {adsenseConfig && (
+                    <>
+                        <Script
+                            id="adsense"
+                            strategy="afterInteractive"
+                            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-${adsenseConfig.publisherId}`}
+                            crossOrigin="anonymous"
+                        ></Script>
+                    </>
+                )}
             </head>
             <body className={`${geistSans.variable} ${geistMono.variable}`}>
                 <BasicAppBar
