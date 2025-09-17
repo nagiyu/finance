@@ -55,6 +55,7 @@ describe('FinanceNotificationService', () => {
         tickerId: TickerServiceMock.MockTickerName,
         conditionList: [
           {
+            id: 'test-condition-1',
             mode: FINANCE_NOTIFICATION_CONDITION_MODE.BUY,
             conditionName: 'GreaterThan',
             frequency: FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,

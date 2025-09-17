@@ -143,13 +143,25 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
           }
         }
 
-        notification.conditionList.forEach(condition => {
-          if (!condition.firstNotificationSent) {
-            condition.firstNotificationSent = true;
-          }
-        });
+        // Only update firstNotificationSent flags if any conditions were processed
+        const needsUpdate = notification.conditionList.some(condition => !condition.firstNotificationSent);
+        
+        if (needsUpdate) {
+          // Get the latest data to ensure we don't overwrite recent changes
+          const latestNotification = await super.getById(notification.id);
+          
+          if (latestNotification) {
+            // Update only the firstNotificationSent flags on the latest data
+            latestNotification.conditionList.forEach(latestCondition => {
+              const processedCondition = notification.conditionList.find(c => c.id === latestCondition.id);
+              if (processedCondition && !processedCondition.firstNotificationSent) {
+                latestCondition.firstNotificationSent = true;
+              }
+            });
 
-        await super.update(notification.id, { conditionList: notification.conditionList });
+            await super.update(notification.id, { conditionList: latestNotification.conditionList });
+          }
+        }
       } catch (error) {
         if (error instanceof Error) {
           errors.push(`Error processing notification ${notification.id}: ${error.message}`);
