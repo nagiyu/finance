@@ -153,6 +153,25 @@ The system uses a fallback mechanism to ensure backward compatibility during mig
 3. Gradual migration of patterns from legacy methods to dedicated checkers
 4. Once all patterns are migrated, legacy methods can be removed
 
+## Performance Optimization
+
+### Parallel Condition Checking
+
+The system supports parallel execution of condition checks to improve performance:
+
+- Multiple conditions for a single notification are checked concurrently
+- Uses `Promise.allSettled()` to execute all condition checks in parallel
+- Maintains the same logical behavior: first met condition triggers notification
+- Reduces total execution time when multiple conditions need to be evaluated
+- Individual condition failures don't affect other parallel checks
+
+### Execution Flow
+
+1. **Timing Filter**: Conditions are first filtered based on frequency constraints (sequential)
+2. **Parallel Execution**: All qualifying conditions are checked simultaneously
+3. **Result Processing**: Results are processed to find the first met condition
+4. **Error Handling**: Individual condition errors are logged but don't fail the entire check
+
 ## Benefits
 
 - **Separation of Concerns**: Each condition type has its own dedicated checker
@@ -160,3 +179,4 @@ The system uses a fallback mechanism to ensure backward compatibility during mig
 - **Testability**: Individual checkers can be tested in isolation
 - **Maintainability**: Condition logic is organized and easier to maintain
 - **Consistency**: Standardized interfaces ensure consistent behavior across checkers
+- **Performance**: Parallel execution reduces overall condition checking time

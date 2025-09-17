@@ -7,6 +7,23 @@ import APIUtil from '@client-common/utils/APIUtil';
 
 import FinanceAuthorizer from '@/services/finance/FinanceAuthorizer';
 
+export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  if (!await FinanceAuthorizer.isUser()) {
+    return APIUtil.ReturnUnauthorized();
+  }
+
+  const id = (await params).id;
+
+  const service = new MyTickerService();
+  const myTicker = await service.getById(id);
+
+  if (!myTicker) {
+    return APIUtil.ReturnNotFound('MyTicker not found');
+  }
+
+  return APIUtil.ReturnSuccess(myTicker);
+}
+
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   if (!await FinanceAuthorizer.isUser()) {
     return APIUtil.ReturnUnauthorized();
@@ -14,18 +31,11 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
   const id = (await params).id;
   const body: MyTickerDataType = await request.json();
-  const now = Date.now();
-
-  const requestData: MyTickerDataType = {
-    ...body,
-    id,
-    update: now,
-  };
 
   const service = new MyTickerService();
-  await service.update(requestData);
+  const result = await service.update(id, body);
 
-  return APIUtil.ReturnSuccess(requestData);
+  return APIUtil.ReturnSuccess(result);
 }
 
 export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {

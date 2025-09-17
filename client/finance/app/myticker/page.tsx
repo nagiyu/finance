@@ -98,7 +98,7 @@ export default function MyTickerPage() {
         if (currentUser) {
             return currentUser;
         }
-        
+
         try {
             const user = await authFetchService.getUserByGoogle();
             setCurrentUser(user);
@@ -113,11 +113,11 @@ export default function MyTickerPage() {
         const user = await getCurrentUser();
         const result = await myTickerFetchService.get();
         const userTransactions = result.filter(item => item.userId === user.id);
-        
+
         // Update summary when data is fetched
         const newSummary = MyTickerSummaryUtil.calculateSummary(userTransactions, exchanges, tickers);
         setSummary(newSummary);
-        
+
         return userTransactions;
     };
 
@@ -147,26 +147,26 @@ export default function MyTickerPage() {
     const onCreate = async (item: MyTickerDataType): Promise<MyTickerDataType> => {
         const fixedItem = await fixItem(item, true);
         const result = await myTickerFetchService.create(fixedItem);
-        
+
         // Refresh summary after creating new transaction
         await refreshSummary();
-        
+
         return result;
     };
 
     const onUpdate = async (item: MyTickerDataType): Promise<MyTickerDataType> => {
         const fixedItem = await fixItem(item, false);
         const result = await myTickerFetchService.update(fixedItem);
-        
+
         // Refresh summary after updating transaction
         await refreshSummary();
-        
+
         return result;
     };
 
     const onDelete = async (id: string): Promise<void> => {
         await myTickerFetchService.delete(id);
-        
+
         // Refresh summary after deleting transaction
         await refreshSummary();
     };
@@ -184,7 +184,7 @@ export default function MyTickerPage() {
             try {
                 // Initialize user information first
                 await getCurrentUser();
-                
+
                 const [exchangeData, tickerData] = await Promise.all([
                     exchangeFetchService.get(),
                     tickerFetchService.get()

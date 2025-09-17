@@ -1,20 +1,37 @@
 import { NextRequest } from 'next/server';
 
-import CommonUtil from '@common/utils/CommonUtil';
+import NotificationService from '@common/services/NotificationService';
 
+import ConditionService from '@finance/services/ConditionService';
+import ExchangeService from '@finance/services/ExchangeService';
+import FinanceNotificationDataAccessor from '@finance/services/FinanceNotificationDataAccessor';
 import FinanceNotificationService from '@finance/services/FinanceNotificationService';
+import TickerService from '@finance/services/TickerService';
 import { FinanceNotificationDataType } from '@finance/interfaces/data/FinanceNotificationDataType';
 
 import APIUtil from '@client-common/utils/APIUtil';
 
 import FinanceAuthorizer from '@/services/finance/FinanceAuthorizer';
 
+const dataAccessor = new FinanceNotificationDataAccessor();
+const exchangeService = new ExchangeService();
+const tickerService = new TickerService();
+const conditionService = new ConditionService();
+const notificationService = new NotificationService();
+
+const service = new FinanceNotificationService(
+  dataAccessor,
+  exchangeService,
+  tickerService,
+  conditionService,
+  notificationService
+);
+
 export async function GET() {
   if (!await FinanceAuthorizer.isUser()) {
     return APIUtil.ReturnUnauthorized();
   }
 
-  const service = new FinanceNotificationService();
   const notifications = await service.get();
 
   return APIUtil.ReturnSuccess(notifications);
@@ -26,17 +43,8 @@ export async function POST(request: NextRequest) {
   }
 
   const body: FinanceNotificationDataType = await request.json();
-  const now = Date.now();
 
-  const requestData: FinanceNotificationDataType = {
-    ...body,
-    id: CommonUtil.generateUUID(),
-    create: now,
-    update: now,
-  };
+  const result = await service.create(body);
 
-  const service = new FinanceNotificationService();
-  await service.create(requestData);
-
-  return APIUtil.ReturnSuccess(requestData);
+  return APIUtil.ReturnSuccess(result);
 }

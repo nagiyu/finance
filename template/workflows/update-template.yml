@@ -3,7 +3,7 @@ name: Update Template
 on:
   push:
     branches:
-      - master
+      - {{ SOURCE_BRANCH }}
   workflow_dispatch:
 
 jobs:
@@ -59,12 +59,8 @@ jobs:
 
       - name: Reset specific files
         run: |
-          git reset -- .github/workflows/apply-template.yml
-          git clean -f .github/workflows/apply-template.yml
-          git reset -- .github/workflows/deploy.yml
-          git clean -f .github/workflows/deploy.yml
-          git reset -- .github/workflows/update-template.yml
-          git clean -f .github/workflows/update-template.yml
+          git reset -- .github/workflows
+          git clean -f .github/workflows
           git reset -- {{ EXCLUDE_PATHS }}
           git clean -f {{ EXCLUDE_PATHS }}
           git reset -- README.md

@@ -1,7 +1,5 @@
 import { NextRequest } from 'next/server';
 
-import CommonUtil from '@common/utils/CommonUtil';
-
 import MyTickerService from '@finance/services/MyTickerService';
 import { MyTickerDataType } from '@finance/interfaces/data/MyTickerDataType';
 
@@ -26,17 +24,9 @@ export async function POST(request: NextRequest) {
   }
 
   const body: MyTickerDataType = await request.json();
-  const now = Date.now();
-
-  const requestData: MyTickerDataType = {
-    ...body,
-    id: CommonUtil.generateUUID(),
-    create: now,
-    update: now,
-  };
 
   const service = new MyTickerService();
-  await service.create(requestData);
+  const result = await service.create(body);
 
-  return APIUtil.ReturnSuccess(requestData);
+  return APIUtil.ReturnSuccess(result);
 }

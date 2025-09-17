@@ -1,0 +1,45 @@
+{
+  "folders": [
+    {
+      "path": ".",
+      "name": "client-sample"
+    },
+    {
+      "path": "../common",
+      "name": "client-common"
+    },
+    {
+      "path": "../../common",
+      "name": "common"
+    },
+    {
+      "path": "../../sample",
+      "name": "sample"
+    }
+  ],
+  "settings": {
+    "editor.renderWhitespace": "boundary",
+    "[shellscript]": {
+      "editor.tabSize": 2
+    },
+    "[typescript]": {
+      "editor.tabSize": 2
+    },
+    "[jsonc]": {
+      "editor.tabSize": 2
+    },
+    "[javascript]": {
+      "editor.tabSize": 2
+    },
+    "[html]": {
+      "editor.tabSize": 2
+    },
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "always"
+    },
+    "editor.formatOnSave": true,
+    "[markdown]": {
+      "editor.tabSize": 2
+    }
+  }
+}

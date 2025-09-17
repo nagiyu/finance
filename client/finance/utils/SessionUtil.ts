@@ -1,15 +1,20 @@
+import ErrorUtil from '@common/utils/ErrorUtil';
+
+import { ExchangeSessionType } from '@finance/types/ExchangeTypes';
+import { EXCHANGE_SESSION } from '@finance/consts/ExchangeConsts';
+
 import { SelectOptionType } from '@client-common/interfaces/SelectOptionType';
 
 interface SessionOption {
-  value: string;
+  value: ExchangeSessionType;
   label: string;
 }
 
 export default class SessionUtil {
   // Available session options with user-friendly labels
   private static readonly SESSION_OPTIONS: SessionOption[] = [
-    { value: "regular", label: "通常時間" },
-    { value: "extended", label: "時間外取引含む" },
+    { value: EXCHANGE_SESSION.REGULAR, label: '通常時間' },
+    { value: EXCHANGE_SESSION.EXTENDED, label: '時間外取引含む' },
   ];
 
   /**
@@ -25,8 +30,8 @@ export default class SessionUtil {
   /**
    * Get the default session (extended as specified in requirements)
    */
-  public static getDefaultSession(): string {
-    return "extended";
+  public static getDefaultSession(): ExchangeSessionType {
+    return EXCHANGE_SESSION.EXTENDED;
   }
 
   /**
@@ -34,5 +39,16 @@ export default class SessionUtil {
    */
   public static isValidSession(value: string): boolean {
     return this.SESSION_OPTIONS.some(option => option.value === value);
+  }
+
+  public static formatSession(session: ExchangeSessionType): string {
+    switch (session) {
+      case EXCHANGE_SESSION.REGULAR:
+        return '通常時間';
+      case EXCHANGE_SESSION.EXTENDED:
+        return '時間外取引含む';
+      default:
+        ErrorUtil.throwError(`Unknown session type: ${session}`);
+    }
   }
 }

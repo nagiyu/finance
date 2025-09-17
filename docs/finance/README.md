@@ -40,8 +40,17 @@ Finance モジュールは以下の主要機能を提供します：
 **機能:**
 - 株価条件の監視
 - 条件達成時の通知送信
-- 通知頻度の管理（日次、分次レベル）
+- **条件ごとの通知頻度管理** (新機能)
+  - 価格条件 (指定価格を上回る/下回る)
+  - パターン条件 (赤三兵、陰の三つ星など)
+  - 各条件で独立して頻度設定可能
 - 複数の通知条件タイプ対応
+
+**通知頻度オプション:**
+- 1分ごと: 毎分チェック
+- 10分ごと: 10分間隔でチェック  
+- 1時間ごと: 1時間間隔でチェック
+- 取引開始時のみ: 取引開始時のみチェック
 
 #### ExchangeService
 取引所データの管理を行うサービスです。
@@ -130,3 +139,4 @@ Finance Module
 - [Server Documentation](./server/README.md) - Lambda functions and API endpoints
 - [Client Documentation](./client/README.md) - Next.js application and UI components
 - [Common Module](../common/README.md) - Shared utilities and services
+- **[条件ごとの通知頻度設定機能](./per-condition-frequency.md)** - 新機能: 条件別通知頻度設定

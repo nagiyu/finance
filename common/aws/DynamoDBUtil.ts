@@ -5,6 +5,9 @@ import ErrorUtil from '@common/utils/ErrorUtil';
 import SecretsManagerUtil from '@common/aws/SecretsManagerUtil';
 import { RecordTypeBase } from '@common/aws/interfaces/DynamoDB/RecordTypeBase';
 
+/**
+ * @deprecated Use DynamoDBService instead
+ */
 export default class DynamoDBUtil {
   /**
    * Creates a DynamoDBClient based on the environment.

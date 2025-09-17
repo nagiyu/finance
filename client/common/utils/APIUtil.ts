@@ -28,4 +28,9 @@ export default class APIUtil {
   public static ReturnInternalServerError(data: object): NextResponse {
     return NextResponse.json(data, { status: 500 });
   }
+
+  public static ReturnInternalServerErrorWithError(error: any): NextResponse {
+    const msg = error instanceof Error ? error.message : String(error);
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
 }

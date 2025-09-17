@@ -14,9 +14,9 @@ export interface ConditionCheckParams {
 }
 
 export abstract class BaseConditionChecker {
-  abstract readonly conditionType: FinanceNotificationConditionType;
+  public abstract readonly conditionType: FinanceNotificationConditionType;
 
-  abstract check(params: ConditionCheckParams): Promise<Condition>;
+  public abstract check(params: ConditionCheckParams): Promise<Condition>;
 
   protected createCondition(met: boolean, message: string): Condition {
     return { met, message };

@@ -7,22 +7,18 @@ import { FINANCE_RECORD_DATA_TYPE } from '@finance/types/FinanceRecordDataType';
 
 export default class TickerService extends CRUDServiceBase<TickerDataType, TickerRecordType> {
   public constructor() {
-    super(new TickerDataAccessor(), TickerService.dataToRecord, TickerService.recordToData);
+    super(new TickerDataAccessor());
   }
 
-  private static dataToRecord(data: TickerDataType): TickerRecordType {
+  protected dataToRecord(data: Partial<TickerDataType>): Partial<TickerRecordType> {
     return {
-      ID: data.id,
-      DataType: FINANCE_RECORD_DATA_TYPE.TICKER,
       Name: data.name,
       Key: data.key,
       Exchange: data.exchange,
-      Create: data.create,
-      Update: data.update,
     };
   }
 
-  private static recordToData(record: TickerRecordType): TickerDataType {
+  protected recordToData(record: TickerRecordType): TickerDataType {
     return {
       id: record.ID,
       name: record.Name,

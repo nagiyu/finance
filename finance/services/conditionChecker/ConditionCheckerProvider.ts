@@ -14,6 +14,7 @@ import { BearishHaramiCrossConditionChecker } from './BearishHaramiCrossConditio
 import { HawkReversalConditionChecker } from './HawkReversalConditionChecker';
 import { ThreeDarkStarsConditionChecker } from './ThreeDarkStarsConditionChecker';
 import { ShootingStarConditionChecker } from './ShootingStarConditionChecker';
+import { SansenAkenomyojoConditionChecker } from './SansenAkenomyojoConditionChecker';
 
 export interface ConditionCheckerProviderOptions {
   fallbackHandler?: (conditionType: FinanceNotificationConditionType, params: ConditionCheckParams) => Promise<Condition>;
@@ -45,6 +46,7 @@ export class ConditionCheckerProvider {
       new HawkReversalConditionChecker(),
       new ThreeDarkStarsConditionChecker(),
       new ShootingStarConditionChecker(),
+      new SansenAkenomyojoConditionChecker()
     ];
 
     for (const checker of checkerInstances) {
@@ -61,16 +63,16 @@ export class ConditionCheckerProvider {
     params: ConditionCheckParams
   ): Promise<Condition> {
     const checker = this.getChecker(conditionType);
-    
+
     if (checker) {
       return await checker.check(params);
     }
-    
+
     // Use fallback handler if available
     if (this.fallbackHandler) {
       return await this.fallbackHandler(conditionType, params);
     }
-    
+
     // Default fallback
     return {
       met: false,

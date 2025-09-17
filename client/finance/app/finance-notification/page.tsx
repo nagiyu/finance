@@ -4,7 +4,8 @@
 
 import React, { useEffect, useState } from 'react';
 
-import { FINANCE_NOTIFICATION_CONDITION_TYPE, FINANCE_NOTIFICATION_TIME_FRAME, FINANCE_NOTIFICATION_MODE, FINANCE_NOTIFICATION_FREQUENCY } from '@finance/types/FinanceNotificationType';
+import ErrorUtil from '@common/utils/ErrorUtil';
+
 import { FinanceNotificationDataType } from '@finance/interfaces/data/FinanceNotificationDataType';
 
 import AdminManagement from '@client-common/components/admin/AdminManagement';
@@ -12,7 +13,6 @@ import NotificationUtil from '@client-common/utils/NotificationUtil.client';
 import TerminalUtil from '@client-common/utils/TerminalUtil.client';
 import { Column } from '@client-common/components/data/table/BasicTable';
 
-import ErrorUtil from '@common/utils/ErrorUtil';
 import ExchangeFetchService from '@/services/exchange/ExchangeFetchService.client';
 import FinanceNotificationEditDialogContent from '@/app/components/financeNotification/FinanceNotificationEditDialogContent';
 import FinanceNotificationFetchService from '@/services/financeNotification/FinanceNotificationFetchService.client';
@@ -49,25 +49,6 @@ export default function FinanceNotificationPage() {
             format: (cell) => cell ? tickers.find(ticker => ticker.id === cell)?.name : ''
         },
         {
-            id: 'mode',
-            label: 'Mode',
-            format: (cell) => {
-                if (cell) {
-                    return cell === 'Buy' ? '買い' : '売り';
-                }
-                return 'シンプル';
-            }
-        },
-        {
-            id: 'conditionType',
-            label: 'Conditions',
-            // We'll need to modify this later when we can access the full row
-        },
-        {
-            id: 'conditionValue',
-            label: 'Target Price'
-        },
-        {
             id: 'action',
             label: 'Action'
         }
@@ -81,13 +62,7 @@ export default function FinanceNotificationPage() {
         subscriptionKeysAuth: '',
         exchangeId: '',
         tickerId: '',
-        mode: FINANCE_NOTIFICATION_MODE.BUY,
-        conditions: JSON.stringify([]),
-        conditionType: FINANCE_NOTIFICATION_CONDITION_TYPE.GREATER_THAN,
-        conditionValue: 0,
-        timeFrame: FINANCE_NOTIFICATION_TIME_FRAME.ONE_MINUTE,
-        session: 'extended', // Default to extended (時間外取引含む) as specified
-        frequency: FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
+        conditionList: [],
         create: Date.now(),
         update: Date.now(),
     };
@@ -121,9 +96,6 @@ export default function FinanceNotificationPage() {
         item.subscriptionKeysP256dh = subscription.keys.p256dh;
         item.subscriptionKeysAuth = subscription.keys.auth;
 
-        // TODO: 実装するまでは固定値
-        item.timeFrame = FINANCE_NOTIFICATION_TIME_FRAME.ONE_MINUTE;
-
         const now = Date.now();
 
         if (isNew) {
@@ -156,29 +128,6 @@ export default function FinanceNotificationPage() {
 
         if (!item.tickerId.trim()) {
             return 'Ticker is required.';
-        }
-
-        // Validate based on mode (always in mode-based system now)
-        if (!item.conditions) {
-            return 'At least one condition must be selected.';
-        }
-        
-        try {
-            const conditions = JSON.parse(item.conditions);
-            if (!Array.isArray(conditions) || conditions.length === 0) {
-                return 'At least one condition must be selected.';
-            }
-            
-            // Check if price-based conditions are selected and require condition value
-            const needsValue = conditions.some((c: string) => 
-                c === FINANCE_NOTIFICATION_CONDITION_TYPE.GREATER_THAN || 
-                c === FINANCE_NOTIFICATION_CONDITION_TYPE.LESS_THAN);
-            
-            if (needsValue && item.conditionValue <= 0) {
-                return 'Target price must be greater than 0 for price-based conditions.';
-            }
-        } catch (error) {
-            return 'Invalid conditions format.';
         }
 
         return null;

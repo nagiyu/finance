@@ -1,76 +1,92 @@
 import CacheUtil from '@common/utils/CacheUtil';
 import DataAccessorBase from '@common/services/DataAccessorBase';
+import ErrorUtil from '@common/utils/ErrorUtil';
 import { DataTypeBase } from '@common/interfaces/data/DataTypeBase';
-import { RecordTypeBase } from '@common/aws/interfaces/DynamoDB/RecordTypeBase';
+import { RecordTypeBase } from '@common/interfaces/record/RecordTypeBase';
 
 export default abstract class CRUDServiceBase<DataType extends DataTypeBase, RecordType extends RecordTypeBase> {
   private readonly dataAccessor: DataAccessorBase<RecordType>;
-  private readonly dataToRecord: (data: DataType) => RecordType;
-  private readonly recordToData: (record: RecordType) => DataType;
   private readonly useCache: boolean;
   private readonly cacheKey: string;
 
   protected constructor(
     dataAccessor: DataAccessorBase<RecordType>,
-    dataToRecord: (data: DataType) => RecordType,
-    recordToData: (record: RecordType) => DataType,
     useCache: boolean = true
   ) {
     this.dataAccessor = dataAccessor;
-    this.dataToRecord = dataToRecord;
-    this.recordToData = recordToData;
     this.useCache = useCache;
-    // Create more specific cache key to prevent collisions
-    this.cacheKey = `${dataAccessor.constructor.name}_${dataAccessor.getTableName()}_${dataAccessor.getDataType()}`;
+    this.cacheKey = `${this.dataAccessor.getTableName()}_${this.dataAccessor.getDataType()}`;
   }
 
   public async get(): Promise<DataType[]> {
     if (this.useCache) {
-      const cachedData = this.getCache();
-
-      if (cachedData) {
-        return cachedData;
-      }
+      return await this.getCache();
     }
 
     const data = await this.dataAccessor.get();
-    const mappedData = data.map(this.recordToData);
 
-    if (this.useCache) {
-      CacheUtil.set(this.cacheKey, mappedData);
-    }
-
-    return mappedData;
+    return data.map(this.recordToData);
   }
 
-  public async create(item: DataType): Promise<void> {
-    await this.dataAccessor.create(this.dataToRecord(item));
+  public async getById(id: string): Promise<DataType | null> {
+    if (this.useCache) {
+      const cachedData = await this.getCache();
+      const item = cachedData.find(i => i.id === id);
+      return item || null;
+    }
+
+    const data = await this.dataAccessor.getById(id);
+
+    if (!data) {
+      return null;
+    }
+
+    return this.recordToData(data);
+  }
+
+  public async create(creates: Partial<DataType>): Promise<DataType> {
+    const data = await this.dataAccessor.create(this.dataToRecord(creates));
+    const item = this.recordToData(data);
 
     if (this.useCache) {
-      const cachedData = this.getCache() || [];
+      const cachedData = await this.getCache();
       cachedData.push(item);
       CacheUtil.set(this.cacheKey, cachedData);
     }
+
+    return item;
   }
 
-  public async update(item: DataType): Promise<void> {
-    await this.dataAccessor.update(this.dataToRecord(item));
+  public async update(id: string, updates: Partial<DataType>): Promise<DataType> {
+    const data = await this.dataAccessor.update(id, this.dataToRecord(updates));
+
+    if (!data) {
+      ErrorUtil.throwError(`Failed to update item with id: ${id}`);
+    }
+
+    const item = this.recordToData(data);
 
     if (this.useCache) {
-      const cachedData = this.getCache() || [];
+      const cachedData = await this.getCache();
       const index = cachedData.findIndex(i => i.id === item.id);
+
       if (index !== -1) {
         cachedData[index] = item;
-        CacheUtil.set(this.cacheKey, cachedData);
+      } else {
+        cachedData.push(item);
       }
+
+      CacheUtil.set(this.cacheKey, cachedData);
     }
+
+    return item;
   }
 
   public async delete(id: string): Promise<void> {
     await this.dataAccessor.delete(id);
 
     if (this.useCache) {
-      const cachedData = this.getCache() || [];
+      const cachedData = await this.getCache();
       const updatedData = cachedData.filter(i => i.id !== id);
       CacheUtil.set(this.cacheKey, updatedData);
     }
@@ -87,11 +103,22 @@ export default abstract class CRUDServiceBase<DataType extends DataTypeBase, Rec
     CacheUtil.set(this.cacheKey, mappedData);
   }
 
-  private getCache(): DataType[] | null {
-    if (this.useCache) {
-      return CacheUtil.get<DataType[]>(this.cacheKey);
+  protected abstract dataToRecord(data: Partial<DataType>): Partial<RecordType>;
+
+  protected abstract recordToData(record: RecordType): DataType;
+
+  private async getCache(): Promise<DataType[]> {
+    const cachedData = CacheUtil.get<DataType[]>(this.cacheKey);
+
+    if (cachedData) {
+      return cachedData;
     }
 
-    return null;
+    const data = await this.dataAccessor.get();
+    const mappedData = data.map(this.recordToData);
+
+    CacheUtil.set(this.cacheKey, mappedData);
+
+    return mappedData;
   }
 }

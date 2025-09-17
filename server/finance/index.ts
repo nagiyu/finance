@@ -1,13 +1,31 @@
 import SecretsManagerUtil from '@common/aws/SecretsManagerUtil';
 import ErrorUtil from '@common/utils/ErrorUtil';
+import NotificationService from '@common/services/NotificationService';
 
 import FinanceNotificationService from '@finance/services/FinanceNotificationService';
+import FinanceNotificationDataAccessor from '@finance/services/FinanceNotificationDataAccessor';
+import ExchangeService from '@finance/services/ExchangeService';
+import TickerService from '@finance/services/TickerService';
+import ConditionService from '@finance/services/ConditionService';
 
 export const handler = async () => {
   const errors: string[] = [];
 
   try {
-    const financeNotificationService = new FinanceNotificationService();
+    // Initialize all required services for FinanceNotificationService
+    const financeNotificationDataAccessor = new FinanceNotificationDataAccessor();
+    const exchangeService = new ExchangeService();
+    const tickerService = new TickerService();
+    const conditionService = new ConditionService();
+    const notificationService = new NotificationService();
+    
+    const financeNotificationService = new FinanceNotificationService(
+      financeNotificationDataAccessor,
+      exchangeService,
+      tickerService,
+      conditionService,
+      notificationService
+    );
 
     // Get client base URL from AWS Secrets Manager
     const baseUrl = await SecretsManagerUtil.getSecretValue(process.env.PROJECT_SECRET!, 'CLIENT_BASE_URL');

@@ -6,13 +6,11 @@ import { MyTickerRecordType } from '@finance/interfaces/record/MyTickerRecordTyp
 
 export default class MyTickerService extends CRUDServiceBase<MyTickerDataType, MyTickerRecordType> {
   public constructor() {
-    super(new MyTickerDataAccessor(), MyTickerService.dataToRecord, MyTickerService.recordToData);
+    super(new MyTickerDataAccessor());
   }
 
-  private static dataToRecord(data: MyTickerDataType): MyTickerRecordType {
+  protected dataToRecord(data: Partial<MyTickerDataType>): Partial<MyTickerRecordType> {
     return {
-      ID: data.id,
-      DataType: 'MyTicker',
       UserID: data.userId,
       ExchangeID: data.exchangeId,
       TickerID: data.tickerId,
@@ -20,12 +18,10 @@ export default class MyTickerService extends CRUDServiceBase<MyTickerDataType, M
       Date: data.date,
       Price: data.price,
       Quantity: data.quantity,
-      Create: data.create,
-      Update: data.update,
     };
   }
 
-  private static recordToData(record: MyTickerRecordType): MyTickerDataType {
+  protected recordToData(record: MyTickerRecordType): MyTickerDataType {
     return {
       id: record.ID,
       userId: record.UserID,
