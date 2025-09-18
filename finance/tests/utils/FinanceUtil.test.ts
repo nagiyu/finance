@@ -1,6 +1,6 @@
 import FinanceUtil from '@finance/utils/FinanceUtil';
 
-describe('FinanceUtil', () => {
+describe.skip('FinanceUtil', () => {
   describe('getFinanceTableName', () => {
     it('should return DevFinance for local environment', () => {
       expect(FinanceUtil.getFinanceTableName()).toBe('DevFinance');

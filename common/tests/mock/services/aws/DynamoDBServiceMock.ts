@@ -53,4 +53,8 @@ export default class DynamoDBServiceMock<T extends RecordTypeBase> extends Dynam
   public override async delete(id: string, dataType: string): Promise<void> {
     this.items = this.items.filter(item => !(item.ID === id && item.DataType === dataType));
   }
+
+  public clearData(): void {
+    this.items = [];
+  }
 }

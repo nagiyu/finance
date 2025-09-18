@@ -84,6 +84,7 @@ export default function FinanceNotificationConditionEditDialogContent({
 
     useEffect(() => {
         if (!item.conditionName) return;
+        if (conditionInfo.name !== item.conditionName) return;
 
         if (!conditionInfo.enableTargetPrice) {
             onItemChange({
@@ -91,10 +92,14 @@ export default function FinanceNotificationConditionEditDialogContent({
                 targetPrice: null,
             });
         } else {
-            onItemChange({
-                ...item,
-                targetPrice: 1,
-            });
+            // Only set targetPrice to 1 if it's a new item and targetPrice is null
+            // For existing items, preserve the current targetPrice value
+            if (isNew && item.targetPrice === null) {
+                onItemChange({
+                    ...item,
+                    targetPrice: 1,
+                });
+            }
         }
     }, [conditionInfo]);
 
@@ -149,10 +154,10 @@ export default function FinanceNotificationConditionEditDialogContent({
                     });
                 }}
             />
-            {item.targetPrice !== null && (
+            {conditionInfo.enableTargetPrice && (
                 <CurrencyNumberField
                     label='目標価格'
-                    value={item.targetPrice}
+                    value={item.targetPrice !== null ? item.targetPrice : 0}
                     disabled={loading}
                     onChange={(value) => {
                         onItemChange({

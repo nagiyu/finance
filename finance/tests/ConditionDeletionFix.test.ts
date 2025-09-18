@@ -3,59 +3,61 @@
  * during notification processing
  */
 
+jest.mock('@finance/utils/FinanceUtil', () => {
+  return {
+    __esModule: true,
+    default: require('@finance/tests/mocks/utils/FinanceUtilMock').default
+  };
+});
+
+import ConditionService from '@finance/services/ConditionService';
+import ExchangeServiceMock from '@finance/tests/mocks/services/ExchangeServiceMock';
+import FinanceNotificationDataAccessorMock from '@finance/tests/mocks/services/FinanceNotificationDataAccessorMock';
 import FinanceNotificationService from '../services/FinanceNotificationService';
+import FinanceUtilMock from '@finance/tests/mocks/utils/FinanceUtilMock';
+import TickerServiceMock from '@finance/tests/mocks/services/TickerServiceMock';
 
-// Mock the dependencies
-const mockDataAccessor = {
-  getById: jest.fn(),
-  update: jest.fn(),
-  get: jest.fn()
-};
-
-const mockExchangeService = {
-  getById: jest.fn().mockResolvedValue({
-    id: 'exchange-1',
-    key: 'NASDAQ',
-    name: 'NASDAQ',
-    start: { hour: 9, minute: 30 },
-    end: { hour: 16, minute: 0 }
-  })
-};
-
-const mockTickerService = {
-  getById: jest.fn().mockResolvedValue({
-    id: 'ticker-1',
-    key: 'AAPL',
-    name: 'Apple Inc.'
-  })
-};
-
-const mockConditionService = {
-  checkCondition: jest.fn().mockResolvedValue({ met: false, message: '' })
-};
-
+// Mock NotificationService
 const mockNotificationService = {
   sendPushNotification: jest.fn()
 };
 
 describe('FinanceNotificationService - Condition Deletion Fix', () => {
   let service: FinanceNotificationService;
+  let superGetByIdSpy: jest.SpyInstance;
+  let superUpdateSpy: jest.SpyInstance;
+  const dataAccessor = new FinanceNotificationDataAccessorMock();
+  const exchangeService = new ExchangeServiceMock();
+  const tickerService = new TickerServiceMock();
+  const conditionService = new ConditionService(exchangeService, tickerService);
 
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
+    // Setup mock stock price data  
+    FinanceUtilMock.StockPriceDataMock = [
+      {
+        date: '2025-01-01 00:00',
+        data: [1000, 960, 950, 1010]
+      }
+    ];
+
     service = new FinanceNotificationService(
-      mockDataAccessor as any,
-      mockExchangeService as any,
-      mockTickerService as any,
-      mockConditionService as any,
+      dataAccessor,
+      exchangeService,
+      tickerService,
+      conditionService,
       mockNotificationService as any
     );
 
     // Mock the base class methods
-    (service as any).get = jest.fn();
-    (service as any).getById = jest.fn();
-    (service as any).update = jest.fn();
+    jest.spyOn(service, 'get').mockImplementation(jest.fn());
+    superGetByIdSpy = jest.spyOn(Object.getPrototypeOf(Object.getPrototypeOf(service)), 'getById').mockImplementation(jest.fn());
+    superUpdateSpy = jest.spyOn(Object.getPrototypeOf(Object.getPrototypeOf(service)), 'update').mockImplementation(jest.fn());
+
+    // Mock the time-related private methods to ensure conditions are always checked
+    jest.spyOn(service as any, 'isWithinExchangeHours').mockReturnValue(true);
+    jest.spyOn(service as any, 'isExchangeStartTime').mockReturnValue(true);
   });
 
   it('should preserve condition deletions during notification processing', async () => {
@@ -73,7 +75,7 @@ describe('FinanceNotificationService - Condition Deletion Fix', () => {
           id: 'condition-1',
           mode: 'Buy' as any,
           conditionName: 'GreaterThan',
-          frequency: 'MinuteLevel' as any,
+          frequency: 'ExchangeStartOnly' as any,
           session: 'extended' as any,
           targetPrice: 100,
           firstNotificationSent: false
@@ -82,7 +84,7 @@ describe('FinanceNotificationService - Condition Deletion Fix', () => {
           id: 'condition-2',
           mode: 'Sell' as any,
           conditionName: 'LessThan',
-          frequency: 'MinuteLevel' as any,
+          frequency: 'ExchangeStartOnly' as any,
           session: 'extended' as any,
           targetPrice: 50,
           firstNotificationSent: false
@@ -100,7 +102,7 @@ describe('FinanceNotificationService - Condition Deletion Fix', () => {
           id: 'condition-2',
           mode: 'Sell' as any,
           conditionName: 'LessThan',
-          frequency: 'MinuteLevel' as any,
+          frequency: 'ExchangeStartOnly' as any,
           session: 'extended' as any,
           targetPrice: 50,
           firstNotificationSent: false
@@ -109,15 +111,15 @@ describe('FinanceNotificationService - Condition Deletion Fix', () => {
     };
 
     // Mock the service methods
-    (service as any).get.mockResolvedValue([originalNotification]);
-    (service as any).getById.mockResolvedValue(latestNotification);
-    (service as any).update.mockResolvedValue(latestNotification);
+    (service.get as jest.Mock).mockResolvedValue([originalNotification]);
+    superGetByIdSpy.mockResolvedValue(latestNotification);
+    superUpdateSpy.mockResolvedValue(latestNotification);
 
     // Execute the notification method
     await service.notification('https://example.com/endpoint');
 
     // Verify that update was called with the latest condition list (preserving deletion)
-    expect((service as any).update).toHaveBeenCalledWith(
+    expect(superUpdateSpy).toHaveBeenCalledWith(
       'notification-1',
       {
         conditionList: [
@@ -125,7 +127,7 @@ describe('FinanceNotificationService - Condition Deletion Fix', () => {
             id: 'condition-2',
             mode: 'Sell',
             conditionName: 'LessThan',
-            frequency: 'MinuteLevel',
+            frequency: 'ExchangeStartOnly',
             session: 'extended',
             targetPrice: 50,
             firstNotificationSent: true // This should be updated to true
@@ -135,7 +137,7 @@ describe('FinanceNotificationService - Condition Deletion Fix', () => {
     );
 
     // Verify getById was called to get latest data
-    expect((service as any).getById).toHaveBeenCalledWith('notification-1');
+    expect(superGetByIdSpy).toHaveBeenCalledWith('notification-1');
   });
 
   it('should handle empty condition list after all conditions are deleted', async () => {
@@ -153,7 +155,7 @@ describe('FinanceNotificationService - Condition Deletion Fix', () => {
           id: 'condition-1',
           mode: 'Buy' as any,
           conditionName: 'GreaterThan',
-          frequency: 'MinuteLevel' as any,
+          frequency: 'ExchangeStartOnly' as any,
           session: 'extended' as any,
           targetPrice: 100,
           firstNotificationSent: false
@@ -170,15 +172,15 @@ describe('FinanceNotificationService - Condition Deletion Fix', () => {
     };
 
     // Mock the service methods
-    (service as any).get.mockResolvedValue([originalNotification]);
-    (service as any).getById.mockResolvedValue(latestNotification);
-    (service as any).update.mockResolvedValue(latestNotification);
+    (service.get as jest.Mock).mockResolvedValue([originalNotification]);
+    superGetByIdSpy.mockResolvedValue(latestNotification);
+    superUpdateSpy.mockResolvedValue(latestNotification);
 
     // Execute the notification method
     await service.notification('https://example.com/endpoint');
 
     // Verify that update was called with empty condition list
-    expect((service as any).update).toHaveBeenCalledWith(
+    expect(superUpdateSpy).toHaveBeenCalledWith(
       'notification-1',
       {
         conditionList: []
@@ -201,7 +203,7 @@ describe('FinanceNotificationService - Condition Deletion Fix', () => {
           id: 'condition-1',
           mode: 'Buy' as any,
           conditionName: 'GreaterThan',
-          frequency: 'MinuteLevel' as any,
+          frequency: 'ExchangeStartOnly' as any,
           session: 'extended' as any,
           targetPrice: 100,
           firstNotificationSent: true // Already sent
@@ -212,13 +214,13 @@ describe('FinanceNotificationService - Condition Deletion Fix', () => {
     };
 
     // Mock the service methods
-    (service as any).get.mockResolvedValue([originalNotification]);
+    (service.get as jest.Mock).mockResolvedValue([originalNotification]);
 
     // Execute the notification method
     await service.notification('https://example.com/endpoint');
 
     // Verify that update was not called since no conditions need updating
-    expect((service as any).update).not.toHaveBeenCalled();
-    expect((service as any).getById).not.toHaveBeenCalled();
+    expect(superUpdateSpy).not.toHaveBeenCalled();
+    expect(superGetByIdSpy).not.toHaveBeenCalled();
   });
 });

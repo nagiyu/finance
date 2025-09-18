@@ -1,6 +1,6 @@
 name: Apply Template
 
-on:
+"on":
   schedule:
     - cron: '0 9 * * *'
   workflow_dispatch:
@@ -42,65 +42,149 @@ jobs:
       - name: Set branch name
         run: echo "BRANCH_NAME=feature/update-template-$(date +%Y%m%d-%H%M%S)" >> $GITHUB_ENV
 
-      - name: Create and checkout branch
-        run: git checkout -b ${{ env.BRANCH_NAME }}
-
       - name: Setup git remote
         run: |
           git remote add template "{{ TEMPLATE_REPOSITORY_URL }}"
           git fetch template
 
+      - name: Get current commit hash
+        run: echo "CURRENT_COMMIT=$(git rev-parse HEAD)" >> $GITHUB_ENV
+
+      - name: Get template commit hash
+        run: echo "TEMPLATE_COMMIT=$(git rev-parse template/{{ TEMPLATE_BRANCH }})" >> $GITHUB_ENV
+
+      - name: Check if template has updates
+        id: template_check
+        run: |
+          # Check if we already have the latest template changes
+          if git merge-base --is-ancestor template/{{ TEMPLATE_BRANCH }} HEAD; then
+            echo "template_has_updates=false" >> $GITHUB_ENV
+            echo "Template is already up to date"
+          else
+            echo "template_has_updates=true" >> $GITHUB_ENV
+            echo "Template has updates available"
+          fi
+
+      - name: Create and checkout branch
+        if: env.template_has_updates == 'true'
+        run: git checkout -b ${{ env.BRANCH_NAME }}
+
       - name: Merge Template
-        run: git merge -X theirs --no-commit template/{{ TEMPLATE_BRANCH }} --allow-unrelated-histories || true
+        if: env.template_has_updates == 'true'
+        run: |
+          # Attempt merge with better error handling
+          if ! git merge -X theirs --no-commit template/{{ TEMPLATE_BRANCH }} --allow-unrelated-histories; then
+            echo "Merge had conflicts, will resolve them in next step"
+          fi
 
       - name: Reset specific files
+        if: env.template_has_updates == 'true'
         run: |
-          git reset -- README.md
-          git restore README.md
+          # Reset files that should not be updated from template
+          if git ls-files --error-unmatch README.md >/dev/null 2>&1; then
+            git reset -- README.md
+            git restore README.md
+          fi
 
       - name: Resolve conflicts
+        if: env.template_has_updates == 'true'
         run: |
+          # Check if we have a merge in progress
           if [ -f .git/MERGE_HEAD ]; then
-            # 削除競合を削除
+            echo "Resolving merge conflicts..."
+            
+            # Handle deletion conflicts (files deleted in one branch but modified in another)
             git status --porcelain | grep '^DU ' | awk '{print $2}' | while read file; do
+              echo "Removing file with deletion conflict: $file"
               git rm -f "$file"
             done
 
+            # Handle modification conflicts
             git diff --name-only --diff-filter=U | while read file; do
-              # "theirs"側にバージョンがなければ git rm、それ以外は checkout --theirs
+              echo "Resolving conflict in: $file"
+              # Check if the template version exists
               if git show ":3:$file" > /dev/null 2>&1; then
+                # Template version exists, use it
                 git checkout --theirs "$file"
                 git add "$file"
+                echo "Used template version for: $file"
               else
+                # Template version doesn't exist, remove the file
                 git rm -f "$file"
+                echo "Removed file (no template version): $file"
               fi
             done
+            
+            # Add any remaining untracked files that might be new from template
+            git add .
+          else
+            echo "No merge conflicts to resolve"
           fi
 
       - name: Check for changes
         id: changes
         run: |
-          if [ -n "$(git status --porcelain)" ]; then
+          # More comprehensive change detection
+          if [ "${{ env.template_has_updates }}" = "false" ]; then
+            echo "changes_detected=false" >> $GITHUB_ENV
+            echo "No template updates available."
+          elif [ -n "$(git status --porcelain)" ]; then
             echo "changes_detected=true" >> $GITHUB_ENV
-            echo "Changes detected."
+            echo "Changes detected from template update:"
+            git status --porcelain
+            echo "Diff summary:"
+            git diff --cached --name-only || echo "No staged changes"
+            git diff --name-only || echo "No unstaged changes"
           else
             echo "changes_detected=false" >> $GITHUB_ENV
-            echo "No changes detected."
+            echo "Template was checked but no actual changes resulted."
           fi
 
       - name: Commit and Push
         if: env.changes_detected == 'true'
         run: |
-          git commit -m "Update from Template"
-          git push origin ${{ env.BRANCH_NAME }}
+          # Ensure we have something to commit
+          if [ -n "$(git status --porcelain)" ]; then
+            git commit -m "Update from Template
+
+            Template commit: ${{ env.TEMPLATE_COMMIT }}
+            Applied at: $(date -u)"
+            git push origin ${{ env.BRANCH_NAME }}
+          else
+            echo "No changes to commit despite changes_detected=true"
+            exit 1
+          fi
 
       - name: Create Pull Request
         if: env.changes_detected == 'true'
         run: |
           export GH_TOKEN="${{ env.GITHUB_PERSONAL_ACCESS_TOKEN }}"
           gh pr create \
-            --title "[Draft] Update from Template" \
-            --body "This is an automated draft PR from template." \
+            --title "[Draft] Update from Template $(date +%Y-%m-%d)" \
+            --body "This is an automated draft PR from template.
+            
+            **Template Details:**
+            - Repository: {{ TEMPLATE_REPOSITORY_URL }}
+            - Commit: ${{ env.TEMPLATE_COMMIT }}
+            - Applied at: $(date -u)
+            
+            **Changes:**
+            Please review the changes and merge if appropriate." \
             --base "{{ TARGET_BRANCH }}" \
             --head ${{ env.BRANCH_NAME }} \
-            --draft || true
+            --draft || {
+              echo "Failed to create PR, but continuing..."
+              echo "Branch ${{ env.BRANCH_NAME }} has been pushed with updates."
+            }
+
+      - name: Workflow Summary
+        if: always()
+        run: |
+          echo "## Template Application Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- Template updates available: ${{ env.template_has_updates }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Changes detected: ${{ env.changes_detected }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Current commit: ${{ env.CURRENT_COMMIT }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Template commit: ${{ env.TEMPLATE_COMMIT }}" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ env.changes_detected }}" = "true" ]; then
+            echo "- Branch created: ${{ env.BRANCH_NAME }}" >> $GITHUB_STEP_SUMMARY
+          fi

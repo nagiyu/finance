@@ -1,0 +1,68 @@
+name: Unit Tests
+
+on:
+  pull_request:
+    branches:
+      - master
+      - develop
+  push:
+    branches:
+      - master
+      - develop
+  workflow_dispatch:
+
+jobs:
+  test-common:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: common/package-lock.json
+    
+    - name: Install dependencies for common
+      run: |
+        cd common
+        npm install
+    
+    - name: Run unit tests for common
+      run: |
+        cd common
+        npm test
+        echo "✅ Common module unit tests completed successfully"
+
+  test-finance:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: |
+          common/package-lock.json
+          finance/package-lock.json
+    
+    - name: Install dependencies for common
+      run: |
+        cd common
+        npm install
+    
+    - name: Install dependencies for finance
+      run: |
+        cd finance
+        npm install
+    
+    - name: Run unit tests for finance
+      run: |
+        cd finance
+        npm test
+        echo "✅ Finance module unit tests completed successfully"
