@@ -40,6 +40,7 @@ Finance モジュールは以下の主要機能を提供します：
 **機能:**
 - 株価条件の監視
 - 条件達成時の通知送信
+- **スマート通知ナビゲーション**: 通知クリック時に該当のExchangeとTickerが選択されたトップ画面に遷移
 - **条件ごとの通知頻度管理** (新機能)
   - 価格条件 (指定価格を上回る/下回る)
   - パターン条件 (赤三兵、陰の三つ星など)
@@ -114,6 +115,19 @@ import FinanceNotificationService from '@finance/services/FinanceNotificationSer
 
 const notificationService = new FinanceNotificationService();
 await notificationService.notification('https://example.com/api/notifications');
+```
+
+### スマート通知ナビゲーション
+通知をクリックした時、該当のExchangeとTickerが自動的に選択されたトップ画面に遷移する機能を提供します。
+
+**仕組み:**
+1. 通知送信時にexchangeIdとtickerIdをメッセージデータに含める
+2. Service Workerが通知クリックを検知し、URLパラメータとして追加
+3. ホーム画面がURLパラメータを読み取り、該当のExchangeとTickerを自動選択
+
+**URL例:**
+```
+https://your-app.com/?exchangeId=NYSE&tickerId=AAPL-NYSE
 ```
 
 ## アーキテクチャ

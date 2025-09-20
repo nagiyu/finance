@@ -82,6 +82,8 @@ jobs:
         run: |
           # Reset files that should not be updated from template
           if git ls-files --error-unmatch README.md >/dev/null 2>&1; then
+            git reset -- .github/workflows
+            git restore .github/workflows
             git reset -- README.md
             git restore README.md
           fi

@@ -3,6 +3,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 
 import { TimeFrame } from '@finance/utils/FinanceUtil';
 
@@ -108,6 +109,7 @@ class TimeFrameUtil {
 }
 
 export default function Home() {
+  const searchParams = useSearchParams();
   const [exchanges, setExchanges] = useState<ExchangeDataType[]>([]);
   const [tickers, setTickers] = useState<TickerDataType[]>([]);
   const [exchangeOptions, setExchangeOptions] = useState<SelectOptionType[]>([]);
@@ -116,6 +118,7 @@ export default function Home() {
   const [ticker, setTicker] = useState('');
   const [timeframe, setTimeframe] = useState<TimeFrame>(TimeFrameUtil.getDefaultTimeFrame());
   const [session, setSession] = useState<string>(SessionUtil.getDefaultSession());
+  const [urlParamsProcessed, setUrlParamsProcessed] = useState(false);
 
   const exchangeFetchService = new ExchangeFetchService();
   const tickerFetchService = new TickerFetchService();
@@ -147,16 +150,29 @@ export default function Home() {
   }, [tickers, exchange])
 
   useEffect(() => {
-    if (exchangeOptions.length > 0) {
-      setExchange(exchangeOptions[0].value);
+    if (exchangeOptions.length > 0 && !urlParamsProcessed) {
+      // Check for URL parameters first
+      const exchangeIdFromUrl = searchParams.get('exchangeId');
+      if (exchangeIdFromUrl && exchangeOptions.some(opt => opt.value === exchangeIdFromUrl)) {
+        setExchange(exchangeIdFromUrl);
+      } else {
+        setExchange(exchangeOptions[0].value);
+      }
+      setUrlParamsProcessed(true);
     }
-  }, [exchangeOptions]);
+  }, [exchangeOptions, searchParams, urlParamsProcessed]);
 
   useEffect(() => {
-    if (tickerOptions.length > 0) {
-      setTicker(tickerOptions[0].value);
+    if (tickerOptions.length > 0 && urlParamsProcessed) {
+      // Check for URL parameters first
+      const tickerIdFromUrl = searchParams.get('tickerId');
+      if (tickerIdFromUrl && tickerOptions.some(opt => opt.value === tickerIdFromUrl)) {
+        setTicker(tickerIdFromUrl);
+      } else {
+        setTicker(tickerOptions[0].value);
+      }
     }
-  }, [tickerOptions]);
+  }, [tickerOptions, searchParams, urlParamsProcessed]);
 
   return (
     <Auth

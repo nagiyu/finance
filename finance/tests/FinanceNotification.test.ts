@@ -29,6 +29,7 @@ describe('FinanceNotificationService', () => {
 
   beforeEach(() => {
     dataAccessor = new FinanceNotificationDataAccessorMock();
+    notificationService.clearMessages();
     service = new FinanceNotificationService(
       dataAccessor,
       new ExchangeServiceMock(),
@@ -73,6 +74,43 @@ describe('FinanceNotificationService', () => {
       const messages = notificationService.getMessages();
 
       expect(messages.length).toBe(1);
+      expect(messages[0]).toContain('(通知頻度: 1分ごと)');
+    });
+
+    it('should include different frequency information in notification', async () => {
+      FinanceUtilMock.StockPriceDataMock = [
+        {
+          date: '2025-01-01 00:00',
+          data: [1000, 960, 950, 1010]
+        }
+      ];
+
+      await service.create({
+        terminalId: CommonUtil.generateUUID(),
+        subscriptionEndpoint: 'http://localhost:3000/endpoint',
+        subscriptionKeysP256dh: 'p256dh',
+        subscriptionKeysAuth: 'auth',
+        exchangeId: ExchangeServiceMock.MockExchangeName,
+        tickerId: TickerServiceMock.MockTickerName,
+        conditionList: [
+          {
+            id: 'test-condition-2',
+            mode: FINANCE_NOTIFICATION_CONDITION_MODE.BUY,
+            conditionName: 'GreaterThan',
+            frequency: FINANCE_NOTIFICATION_FREQUENCY.TEN_MINUTE_LEVEL,
+            session: EXCHANGE_SESSION.EXTENDED,
+            targetPrice: 950,
+            firstNotificationSent: false
+          }
+        ]
+      });
+
+      await service.notification('http://localhost:3000/endpoint');
+
+      const messages = notificationService.getMessages();
+
+      expect(messages.length).toBe(1);
+      expect(messages[0]).toContain('(通知頻度: 10分ごと)');
     });
   });
 

@@ -8,6 +8,10 @@ export default class NotificationServiceMock implements NotificationServiceType 
     return this.messageList;
   }
 
+  public clearMessages(): void {
+    this.messageList = [];
+  }
+
   public async sendPushNotification(endpoint: string, message: string, subscription: SubscriptionType): Promise<void> {
     console.log(`Notification: ${message}`);
     this.messageList.push(message);

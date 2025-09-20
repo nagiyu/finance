@@ -93,6 +93,25 @@ Finance Notification システムで、各条件ごとに通知頻度を個別�
 - 旧形式のデータも引き続き動作
 - 段階的な移行が可能
 
+## 通知メッセージ
+
+### メッセージ形式
+
+通知が送信される際、メッセージには設定された頻度情報が含まれます。
+
+```
+{銘柄名} shows {条件名} pattern - signal detected (通知頻度: {頻度})
+```
+
+### 例
+
+- **1分ごと**: `AAPL shows GreaterThan pattern - signal detected (通知頻度: 1分ごと)`
+- **10分ごと**: `GOOGL shows LessThan pattern - signal detected (通知頻度: 10分ごと)`
+- **1時間ごと**: `MSFT shows Pattern pattern - signal detected (通知頻度: 1時間ごと)`
+- **取引開始時のみ**: `TSLA shows Pattern pattern - signal detected (通知頻度: 取引開始時のみ)`
+
+これにより、受信した通知がどの頻度設定で送信されたかを確認することができます。
+
 ## 使用例
 
 ### 買い条件の設定例
