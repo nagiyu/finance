@@ -10,12 +10,12 @@ ARG PROJECT_AWS_REGION
 
 WORKDIR /app
 
-COPY common ./common
+COPY typescript-common ./typescript-common
 COPY finance ./finance
 COPY server/common ./server/common
 COPY server/finance ./server/finance
 
-WORKDIR /app/common
+WORKDIR /app/typescript-common
 RUN npm install
 
 WORKDIR /app/finance

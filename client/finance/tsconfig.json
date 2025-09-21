@@ -30,7 +30,7 @@
         "../../common/*"
       ],
       "@client-common/*": [
-        "../common/*"
+        "../typescript-common/*"
       ],
       "@finance/*": [
         "../../finance/*"

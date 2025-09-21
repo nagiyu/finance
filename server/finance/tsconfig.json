@@ -9,7 +9,7 @@
         "../../common/*"
       ],
       "@server-common/*": [
-        "../common/*"
+        "../typescript-common/*"
       ],
       "@finance/*": [
         "../../finance/*"

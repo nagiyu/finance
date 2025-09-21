@@ -17,6 +17,10 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: Update Submodules
+      run: |
+        git submodule update --init --recursive
+
     - name: AWS CLI install
       run: |
         cd /tmp
@@ -85,6 +89,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+
+      - name: Update Submodules
+        run: |
+          git submodule update --init --recursive
 
       - name: AWS CLI install
         run: |

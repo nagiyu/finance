@@ -5,7 +5,7 @@
         "./*"
       ],
       "@common/*": [
-        "../common/*"
+        "../typescript-common/*"
       ]
     },
     "esModuleInterop": true
