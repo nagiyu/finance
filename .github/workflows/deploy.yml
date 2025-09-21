@@ -15,11 +15,10 @@ jobs:
       name: ${{ github.ref == 'refs/heads/master' && 'production' || 'development' }}
 
     steps:
-    - uses: actions/checkout@v2
-
-    - name: Update Submodules
-      run: |
-        git submodule update --init --recursive
+    - name: Checkout repository (with submodules)
+      uses: actions/checkout@v4
+      with:
+        submodules: true
 
     - name: AWS CLI install
       run: |
@@ -88,11 +87,10 @@ jobs:
       name: ${{ github.ref == 'refs/heads/master' && 'production' || 'development' }}
 
     steps:
-      - uses: actions/checkout@v2
-
-      - name: Update Submodules
-        run: |
-          git submodule update --init --recursive
+      - name: Checkout repository (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: true
 
       - name: AWS CLI install
         run: |
