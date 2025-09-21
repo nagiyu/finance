@@ -76,9 +76,8 @@ jobs:
 
       - name: Create Pull Request
         if: env.submodule_changes == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_PERSONAL_ACCESS_TOKEN }}
         run: |
+          export GH_TOKEN="${{ env.GITHUB_PERSONAL_ACCESS_TOKEN }}"
           gh pr create \
             --title "[Draft] Update typescript-common submodule to ${{ env.LATEST_TAG }}" \
             --body "Automated PR: typescript-common submodule updated to ${{ env.LATEST_TAG }}" \
