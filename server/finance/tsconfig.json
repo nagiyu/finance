@@ -6,10 +6,10 @@
         "./*"
       ],
       "@common/*": [
-        "../../common/*"
+        "../../typescript-common/*"
       ],
       "@server-common/*": [
-        "../typescript-common/*"
+        "../common/*"
       ],
       "@finance/*": [
         "../../finance/*"
