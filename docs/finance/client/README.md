@@ -220,7 +220,7 @@ npm run dev
     "baseUrl": ".",
     "paths": {
       "@/*": ["./app/*"],
-      "@client-common/*": ["../common/*"],
+      "@client-common/*": ["../typescript-common/*"],
       "@finance/*": ["../../finance/*"],
       "@common/*": ["../../common/*"]
     }

@@ -15,7 +15,10 @@ jobs:
       name: development
     
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout repository (with submodules)
+      uses: actions/checkout@v4
+      with:
+        submodules: true
 
     - name: AWS CLI install
       run: |
@@ -51,14 +54,14 @@ jobs:
         node-version: '20'
         cache: 'npm'
         cache-dependency-path: |
-          common/package-lock.json
+          typescript-common/package-lock.json
           finance/package-lock.json
           client/common/package-lock.json
           client/finance/package-lock.json
     
-    - name: Install dependencies for common
+    - name: Install dependencies for typescript-common
       run: |
-        cd common
+        cd typescript-common
         npm install
     
     - name: Install dependencies for finance
@@ -92,7 +95,10 @@ jobs:
       name: development
     
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout repository (with submodules)
+      uses: actions/checkout@v4
+      with:
+        submodules: true
 
     - name: AWS CLI install
       run: |
@@ -128,14 +134,14 @@ jobs:
         node-version: '20'
         cache: 'npm'
         cache-dependency-path: |
-          common/package-lock.json
+          typescript-common/package-lock.json
           finance/package-lock.json
           server/common/package-lock.json
           server/finance/package-lock.json
     
-    - name: Install dependencies for common
+    - name: Install dependencies for typescript-common
       run: |
-        cd common
+        cd typescript-common
         npm install
     
     - name: Install dependencies for finance
