@@ -44,6 +44,7 @@ export default function FinanceNotificationConditionEditDialogContent({
         isBuyCondition: false,
         isSellCondition: false,
         enableTargetPrice: false,
+        enableTimeFrame: false,
     });
 
     const conditionFetchService = new FinanceNotificationConditionFetchService();
@@ -176,7 +177,7 @@ export default function FinanceNotificationConditionEditDialogContent({
             />
             {conditionInfo.enableTimeFrame && (
                 <TimeFrameSelect
-                    value={item.timeframe}
+                    value={item.timeframe !== null ? item.timeframe : TimeFrameUtil.getDefaultTimeFrame()}
                     disabled={loading}
                     onChange={(value) => {
                         onItemChange({
