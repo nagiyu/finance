@@ -12,6 +12,7 @@ import GreaterThanCondition from '@finance/conditions/GreaterThanCondition';
 import LessThanCondition from '@finance/conditions/LessThanCondition';
 import SansenAkenomyojoCondition from '@finance/conditions/SansenAkenomyojoCondition';
 import SansenYoinomyojoCondition from '@finance/conditions/SansenYoinomyojoCondition';
+import SanzonCondition from '@finance/conditions/SanzonCondition';
 import TickerServiceMock from '@finance/tests/mocks/services/TickerServiceMock';
 import { EXCHANGE_SESSION } from '@finance/consts/ExchangeConsts';
 
@@ -243,6 +244,65 @@ describe('ConditionTest', () => {
           date: '2025-01-03 00:00',
           data: [1020, 960, 950, 1025] // large bearish candle [open, close, low, high] - close < open, large body
         }
+      ];
+
+      const result = await service.checkCondition(conditionKey, 'MOCK_EXCHANGE', 'MOCK_TICKER', EXCHANGE_SESSION.EXTENDED);
+
+      expect(result.met).toBe(true);
+      expect(result.message).not.toBe('');
+    });
+  });
+
+  describe('三尊', () => {
+    const conditionKey = 'Sanzon';
+
+    it('Not Contains in Buy Condition List', () => {
+      const conditionList = service.getBuyConditionList();
+      expect(conditionList).not.toContain(conditionKey);
+    });
+
+    it('Contains in Sell Condition List', () => {
+      const conditionList = service.getSellConditionList();
+      expect(conditionList).toContain(conditionKey);
+    });
+
+    it('Get Condition Info', () => {
+      const info = service.getConditionInfo(conditionKey);
+      expect(info.name).toBe('三尊');
+      expect(info.description).not.toBe('');
+      expect(info.isBuyCondition).toBe(false);
+      expect(info.isSellCondition).toBe(true);
+    });
+
+    it('Get Condition', () => {
+      const ConditionClass = service.getCondition(conditionKey);
+      expect(ConditionClass).toBe(SanzonCondition);
+    });
+
+    it('Check Condition', async () => {
+      // Clear head and shoulders pattern
+      FinanceUtilMock.StockPriceDataMock = [
+        // Left shoulder setup and peak
+        { date: '2025-01-01 00:00', data: [1000, 1010, 990, 1020] },
+        { date: '2025-01-02 00:00', data: [1010, 1030, 1005, 1070] }, // Left shoulder peak: high=1070
+        { date: '2025-01-03 00:00', data: [1030, 1020, 1010, 1035] }, // Down
+        { date: '2025-01-04 00:00', data: [1020, 1015, 1005, 1025] }, // Valley 1: low=1005
+        
+        // Head setup and peak  
+        { date: '2025-01-05 00:00', data: [1015, 1030, 1010, 1035] },
+        { date: '2025-01-06 00:00', data: [1030, 1060, 1025, 1100] }, // Head peak: high=1100 (highest)
+        { date: '2025-01-07 00:00', data: [1060, 1040, 1030, 1065] }, // Down
+        { date: '2025-01-08 00:00', data: [1040, 1020, 1010, 1045] }, // Valley 2: low=1010
+        
+        // Right shoulder setup and peak
+        { date: '2025-01-09 00:00', data: [1020, 1040, 1015, 1045] },
+        { date: '2025-01-10 00:00', data: [1040, 1050, 1035, 1075] }, // Right shoulder peak: high=1075 (similar to left)
+        { date: '2025-01-11 00:00', data: [1050, 1030, 1025, 1055] }, // Down
+        
+        // Breaking neckline (neckline = (1005 + 1010) / 2 = 1007.5)
+        { date: '2025-01-12 00:00', data: [1030, 1010, 1000, 1035] },
+        { date: '2025-01-13 00:00', data: [1010, 995, 985, 1015] },   // Breaking below neckline: close=995
+        { date: '2025-01-14 00:00', data: [995, 980, 975, 1000] }
       ];
 
       const result = await service.checkCondition(conditionKey, 'MOCK_EXCHANGE', 'MOCK_TICKER', EXCHANGE_SESSION.EXTENDED);
