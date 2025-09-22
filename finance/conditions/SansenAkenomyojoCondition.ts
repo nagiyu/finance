@@ -1,5 +1,6 @@
 import ConditionBase, { ConditionInfo } from '@finance/conditions/ConditionBase';
 import { ExchangeSessionType } from '@finance/types/ExchangeTypes';
+import { TimeFrame } from '@finance/utils/FinanceUtil';
 import ErrorUtil from '@common/utils/ErrorUtil';
 
 export const SansenAkenomyojoConditionInfo: ConditionInfo = {
@@ -14,10 +15,16 @@ export default class SansenAkenomyojoCondition extends ConditionBase {
   public async checkCondition(
     exchangeId: string,
     tickerId: string,
-    session?: ExchangeSessionType
+    session?: ExchangeSessionType,
+    targetPrice?: number | null,
+    timeframe?: TimeFrame
   ): Promise<boolean> {
     try {
-      const stockData = await this.getStockPriceData(exchangeId, tickerId, { count: 3, session });
+      const stockData = await this.getStockPriceData(exchangeId, tickerId, { 
+        count: 3, 
+        session,
+        timeframe: timeframe || '1'
+      });
 
       if (!stockData || !Array.isArray(stockData) || stockData.length < 3) {
         return false;

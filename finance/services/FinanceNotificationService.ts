@@ -47,6 +47,10 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
 
     creates.conditionList.forEach(condition => {
       condition.firstNotificationSent = false;
+      // Set default timeframe if not specified (for backward compatibility)
+      if (!condition.timeframe) {
+        condition.timeframe = '1';
+      }
     });
     return await super.create(creates);
   }
@@ -73,6 +77,10 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
 
     updates.conditionList.forEach(condition => {
       condition.firstNotificationSent = false;
+      // Set default timeframe if not specified (for backward compatibility)
+      if (!condition.timeframe) {
+        condition.timeframe = '1';
+      }
     });
     return await super.update(id, updates);
   }
@@ -128,13 +136,17 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
         // Start all condition checks in parallel
         const conditionPromises = conditionsToCheck.map(async (condition) => {
           try {
+            // Set default timeframe if not specified (for backward compatibility)
+            const timeframe = condition.timeframe || '1';
+            
             return await this.conditionService.checkCondition(
               condition.conditionName,
               exchange.id,
               ticker.id,
               condition.session,
               condition.targetPrice,
-              condition.frequency
+              condition.frequency,
+              timeframe
             );
           } catch (error) {
             console.error(`Error checking condition ${condition.conditionName}:`, error);

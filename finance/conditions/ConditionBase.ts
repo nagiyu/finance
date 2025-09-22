@@ -1,7 +1,7 @@
 import ErrorUtil from '@common/utils/ErrorUtil';
 
 import ExchangeService from '@finance/services/ExchangeService';
-import FinanceUtil, { GetStockPriceDataOptions } from '@finance/utils/FinanceUtil';
+import FinanceUtil, { GetStockPriceDataOptions, TimeFrame } from '@finance/utils/FinanceUtil';
 import TickerService from '@finance/services/TickerService';
 import { ExchangeSessionType } from '@finance/types/ExchangeTypes';
 
@@ -56,13 +56,15 @@ export default abstract class ConditionBase {
    * @param tickerId Ticker ID
    * @param session Exchange session (optional)
    * @param targetPrice Target price (optional)
+   * @param timeframe Timeframe for candlestick data (optional, defaults to '1')
    * @returns True if the condition is met, false otherwise
    */
   public abstract checkCondition(
     exchangeId: string,
     tickerId: string,
     session?: ExchangeSessionType,
-    targetPrice?: number | null
+    targetPrice?: number | null,
+    timeframe?: TimeFrame
   ): Promise<boolean>;
 
   /**

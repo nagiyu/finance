@@ -64,6 +64,7 @@ describe('FinanceNotificationService', () => {
             frequency: FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
             session: EXCHANGE_SESSION.EXTENDED,
             targetPrice: 950,
+            timeframe: '1',
             firstNotificationSent: false
           }
         ]
@@ -100,6 +101,7 @@ describe('FinanceNotificationService', () => {
             frequency: FINANCE_NOTIFICATION_FREQUENCY.TEN_MINUTE_LEVEL,
             session: EXCHANGE_SESSION.EXTENDED,
             targetPrice: 950,
+            timeframe: '1',
             firstNotificationSent: false
           }
         ]
@@ -131,6 +133,7 @@ describe('FinanceNotificationService', () => {
             frequency: FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
             session: EXCHANGE_SESSION.EXTENDED,
             targetPrice: 950,
+            timeframe: '1',
             firstNotificationSent: false
           }
         ]
@@ -163,6 +166,7 @@ describe('FinanceNotificationService', () => {
             frequency: FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
             session: EXCHANGE_SESSION.EXTENDED,
             targetPrice: 950,
+            timeframe: '1',
             firstNotificationSent: false
           }
         ]
@@ -194,6 +198,7 @@ describe('FinanceNotificationService', () => {
             frequency: FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
             session: EXCHANGE_SESSION.EXTENDED,
             targetPrice: 950,
+            timeframe: '1',
             firstNotificationSent: false
           }
         ]
@@ -231,6 +236,7 @@ describe('FinanceNotificationService', () => {
             frequency: FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
             session: EXCHANGE_SESSION.EXTENDED,
             targetPrice: 950,
+            timeframe: '1',
             firstNotificationSent: false
           }
         ]
@@ -251,6 +257,7 @@ describe('FinanceNotificationService', () => {
             frequency: FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
             session: EXCHANGE_SESSION.EXTENDED,
             targetPrice: 1000, // Different target price
+            timeframe: '1',
             firstNotificationSent: false
           }
         ]
@@ -276,6 +283,7 @@ describe('FinanceNotificationService', () => {
             frequency: FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
             session: EXCHANGE_SESSION.EXTENDED,
             targetPrice: 950,
+            timeframe: '1',
             firstNotificationSent: false
           }
         ]
@@ -296,6 +304,7 @@ describe('FinanceNotificationService', () => {
             frequency: FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
             session: EXCHANGE_SESSION.EXTENDED,
             targetPrice: 950,
+            timeframe: '1',
             firstNotificationSent: false
           }
         ]
@@ -313,6 +322,7 @@ describe('FinanceNotificationService', () => {
             frequency: FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
             session: EXCHANGE_SESSION.EXTENDED,
             targetPrice: 950,
+            timeframe: '1',
             firstNotificationSent: false
           }
         ]
@@ -339,6 +349,7 @@ describe('FinanceNotificationService', () => {
             frequency: FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
             session: EXCHANGE_SESSION.EXTENDED,
             targetPrice: 950,
+            timeframe: '1',
             firstNotificationSent: false
           }
         ]
@@ -359,6 +370,7 @@ describe('FinanceNotificationService', () => {
             frequency: FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
             session: EXCHANGE_SESSION.EXTENDED,
             targetPrice: 950,
+            timeframe: '1',
             firstNotificationSent: false
           }
         ]
@@ -376,6 +388,7 @@ describe('FinanceNotificationService', () => {
             frequency: FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
             session: EXCHANGE_SESSION.EXTENDED,
             targetPrice: 950,
+            timeframe: '1',
             firstNotificationSent: false
           }
         ]
