@@ -58,6 +58,29 @@ const [session, setSession] = useState<string>('regular');
 
 ### UI Components
 
+#### Finance Notification Condition Edit Dialog
+金融通知条件の作成・編集を行うダイアログコンポーネント
+
+**機能:**
+- 条件の選択時に詳細な説明を表示
+- 条件の種類（買い・売り）に応じた適切な条件一覧の表示
+- 通知頻度、セッション、時間枠などの詳細設定
+
+**条件説明表示:**
+条件を選択すると、選択した条件の詳細説明が条件選択欄の下に表示されます。これにより、ユーザーは各条件の動作を理解してから設定を行うことができます。
+
+```typescript
+// 条件情報の例
+{
+  name: "指定価格を上回る",
+  description: "株価が指定した価格を上回った時に通知します。",
+  isBuyCondition: true,
+  isSellCondition: true,
+  enableTargetPrice: true,
+  enableTimeFrame: false
+}
+```
+
 #### TimeFrameUtil
 時間軸選択のためのユーティリティクラス
 

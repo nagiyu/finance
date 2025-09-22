@@ -153,6 +153,19 @@ export default function FinanceNotificationConditionEditDialogContent({
                     });
                 }}
             />
+            {item.conditionName && conditionInfo.description && (
+                <div style={{
+                    marginTop: '8px',
+                    padding: '12px',
+                    backgroundColor: '#f5f5f5',
+                    borderRadius: '4px',
+                    fontSize: '0.875rem',
+                    lineHeight: '1.4',
+                    color: '#666'
+                }}>
+                    <strong>条件の説明:</strong> {conditionInfo.description}
+                </div>
+            )}
             <BasicSelect
                 label='通知頻度'
                 options={FrequencyUtil.getFrequencyOptions()}
