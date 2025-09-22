@@ -37,7 +37,7 @@ export interface FinanceNotificationCondition {
   /**
    * Timeframe for candlestick data used in condition checking
    */
-  timeframe: TimeFrame;
+  timeframe?: TimeFrame | null;
 
   /**
    * Target price for conditions that require it (e.g., GreaterThan, LessThan)

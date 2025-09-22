@@ -33,6 +33,11 @@ export interface ConditionInfo {
    * Indicates if the condition requires a target price.
    */
   enableTargetPrice: boolean;
+
+  /**
+   * Indicates if the condition supports timeframe configuration.
+   */
+  enableTimeFrame: boolean;
 }
 
 /**

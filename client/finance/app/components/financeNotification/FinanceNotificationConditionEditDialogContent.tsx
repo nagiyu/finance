@@ -105,6 +105,22 @@ export default function FinanceNotificationConditionEditDialogContent({
                 });
             }
         }
+
+        if (!conditionInfo.enableTimeFrame) {
+            onItemChange({
+                ...item,
+                timeframe: null,
+            });
+        } else {
+            // Only set timeframe to default if it's a new item and timeframe is null
+            // For existing items, preserve the current timeframe value
+            if (isNew && !item.timeframe) {
+                onItemChange({
+                    ...item,
+                    timeframe: TimeFrameUtil.getDefaultTimeFrame(),
+                });
+            }
+        }
     }, [conditionInfo]);
 
     return (
@@ -158,16 +174,18 @@ export default function FinanceNotificationConditionEditDialogContent({
                     });
                 }}
             />
-            <TimeFrameSelect
-                value={item.timeframe}
-                disabled={loading}
-                onChange={(value) => {
-                    onItemChange({
-                        ...item,
-                        timeframe: value,
-                    });
-                }}
-            />
+            {conditionInfo.enableTimeFrame && (
+                <TimeFrameSelect
+                    value={item.timeframe}
+                    disabled={loading}
+                    onChange={(value) => {
+                        onItemChange({
+                            ...item,
+                            timeframe: value,
+                        });
+                    }}
+                />
+            )}
             {conditionInfo.enableTargetPrice && (
                 <CurrencyNumberField
                     label='目標価格'

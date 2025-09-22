@@ -51,7 +51,10 @@ class TimeFrameUtil {
   /**
    * Format timeframe value for display
    */
-  public static formatTimeFrame(value: TimeFrame): string {
+  public static formatTimeFrame(value: TimeFrame | null | undefined): string {
+    if (!value) {
+      return '設定なし';
+    }
     const option = this.TIMEFRAME_OPTIONS.find(option => option.value === value);
     return option ? option.label : value;
   }
