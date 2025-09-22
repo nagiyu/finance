@@ -22,7 +22,7 @@ export default class SanzonCondition extends ConditionBase {
   ): Promise<boolean> {
     try {
       const stockData = await this.getStockPriceData(exchangeId, tickerId, { 
-        count: 20, // Need more data points to identify the pattern
+        count: 15, // Simpler pattern with fewer data points
         session,
         timeframe: timeframe || '1'
       });
@@ -32,114 +32,87 @@ export default class SanzonCondition extends ConditionBase {
       }
 
       // Get the most recent candles
-      const candles = stockData.slice(-20);
+      const candles = stockData.slice(-15);
       
-      // Simplified approach: look for the pattern in the data
-      const result = this.detectHeadAndShouldersPattern(candles);
-      console.log('Pattern detection result:', result);
-      return result;
+      // Simple approach: find 3 distinct peaks and check the pattern
+      return this.detectSimpleHeadAndShouldersPattern(candles);
     } catch (error) {
-      console.error('Error in SanzonCondition:', error);
       ErrorUtil.throwError(`Error checking condition ${SanzonConditionInfo.name}`, error);
     }
   }
 
   /**
-   * Simplified head and shoulders pattern detection
+   * Simple head and shoulders pattern detection
+   * Look for 3 clear peaks where middle one is highest
    */
-  private detectHeadAndShouldersPattern(candles: any[]): boolean {
-    // Find significant highs (peaks) in the data
-    const peaks: { index: number; price: number }[] = [];
+  private detectSimpleHeadAndShouldersPattern(candles: any[]): boolean {
+    // Very simple approach - just check if the pattern exists anywhere in the data
+    // Look for: Peak1 < Peak2 > Peak3 where Peak2 is highest and Peak1~Peak3 are similar
     
+    // Find peaks (where high is greater than neighbors)
+    const peaks = [];
     for (let i = 1; i < candles.length - 1; i++) {
-      const prev = candles[i - 1];
-      const current = candles[i];
-      const next = candles[i + 1];
+      const prevHigh = candles[i - 1].data[3];
+      const currentHigh = candles[i].data[3];
+      const nextHigh = candles[i + 1].data[3];
       
-      const prevHigh = prev.data[3];
-      const currentHigh = current.data[3];
-      const nextHigh = next.data[3];
-      
-      // Simple peak detection
       if (currentHigh > prevHigh && currentHigh > nextHigh) {
         peaks.push({ index: i, price: currentHigh });
       }
     }
 
-    console.log('Peaks found:', peaks);
-
     if (peaks.length < 3) {
-      console.log('Not enough peaks:', peaks.length);
       return false;
     }
 
-    // Look for the pattern in recent peaks
+    // Check each combination of 3 consecutive peaks
     for (let i = 0; i <= peaks.length - 3; i++) {
-      const leftShoulder = peaks[i];
+      const left = peaks[i];
       const head = peaks[i + 1];
-      const rightShoulder = peaks[i + 2];
+      const right = peaks[i + 2];
 
-      console.log('Testing pattern:', { leftShoulder, head, rightShoulder });
-
-      // Head should be higher than both shoulders
-      if (head.price <= leftShoulder.price || head.price <= rightShoulder.price) {
-        console.log('Head not highest');
-        continue;
-      }
-
-      // Shoulders should be roughly similar (within 15% difference)
-      const shoulderDiff = Math.abs(leftShoulder.price - rightShoulder.price) / Math.max(leftShoulder.price, rightShoulder.price);
-      if (shoulderDiff > 0.15) {
-        console.log('Shoulders too different:', shoulderDiff);
-        continue;
-      }
-
-      // Find valleys between peaks for neckline
-      const valley1 = this.findLowestBetween(candles, leftShoulder.index, head.index);
-      const valley2 = this.findLowestBetween(candles, head.index, rightShoulder.index);
-
-      console.log('Valleys:', { valley1, valley2 });
-
-      if (valley1 === null || valley2 === null) {
-        console.log('No valleys found');
-        continue;
-      }
-
-      // Calculate neckline
-      const neckline = (valley1.price + valley2.price) / 2;
-
-      // Check if we've broken below the neckline
-      const currentPrice = candles[candles.length - 1].data[1]; // closing price
-      
-      console.log('Neckline:', neckline, 'Current price:', currentPrice, 'Threshold:', neckline * 0.98);
-      
-      if (currentPrice < neckline * 0.98) { // 2% buffer below neckline
-        console.log('Pattern detected!');
-        return true;
+      // Head must be highest
+      if (head.price > left.price && head.price > right.price) {
+        // Shoulders should be similar (within 25% for flexibility)
+        const diff = Math.abs(left.price - right.price) / Math.max(left.price, right.price);
+        if (diff <= 0.25) {
+          // Find valleys between peaks for neckline calculation
+          const valley1 = this.findLowestBetween(candles, left.index, head.index);
+          const valley2 = this.findLowestBetween(candles, head.index, right.index);
+          
+          if (valley1 !== null && valley2 !== null) {
+            const neckline = (valley1 + valley2) / 2;
+            const currentClose = candles[candles.length - 1].data[1];
+            
+            // Pattern confirmed if current price is below neckline
+            if (currentClose < neckline) {
+              return true;
+            }
+          }
+        }
       }
     }
 
-    console.log('No pattern found');
     return false;
   }
 
   /**
-   * Find the lowest point between two indices
+   * Find the lowest low price between two indices
    */
-  private findLowestBetween(candles: any[], startIndex: number, endIndex: number): { price: number; index: number } | null {
+  private findLowestBetween(candles: any[], startIndex: number, endIndex: number): number | null {
     if (startIndex >= endIndex) {
       return null;
     }
 
-    let lowest = { price: Number.MAX_VALUE, index: -1 };
+    let lowest = Number.MAX_VALUE;
     
     for (let i = startIndex + 1; i < endIndex; i++) {
       const low = candles[i].data[2]; // low price
-      if (low < lowest.price) {
-        lowest = { price: low, index: i };
+      if (low < lowest) {
+        lowest = low;
       }
     }
 
-    return lowest.index === -1 ? null : lowest;
+    return lowest === Number.MAX_VALUE ? null : lowest;
   }
 }

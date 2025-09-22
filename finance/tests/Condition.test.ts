@@ -280,29 +280,34 @@ describe('ConditionTest', () => {
     });
 
     it('Check Condition', async () => {
-      // Clear head and shoulders pattern
+      // Very explicit head and shoulders pattern
       FinanceUtilMock.StockPriceDataMock = [
-        // Left shoulder setup and peak
+        // Lead up to left shoulder
         { date: '2025-01-01 00:00', data: [1000, 1010, 990, 1020] },
-        { date: '2025-01-02 00:00', data: [1010, 1030, 1005, 1070] }, // Left shoulder peak: high=1070
-        { date: '2025-01-03 00:00', data: [1030, 1020, 1010, 1035] }, // Down
-        { date: '2025-01-04 00:00', data: [1020, 1015, 1005, 1025] }, // Valley 1: low=1005
+        // Left shoulder peak at index 1
+        { date: '2025-01-02 00:00', data: [1010, 1030, 1005, 1070] }, // Peak: high=1070
+        // Valley after left shoulder  
+        { date: '2025-01-03 00:00', data: [1030, 1020, 1000, 1035] }, // Valley: low=1000
+        { date: '2025-01-04 00:00', data: [1020, 1025, 1015, 1030] },
         
-        // Head setup and peak  
-        { date: '2025-01-05 00:00', data: [1015, 1030, 1010, 1035] },
-        { date: '2025-01-06 00:00', data: [1030, 1060, 1025, 1100] }, // Head peak: high=1100 (highest)
-        { date: '2025-01-07 00:00', data: [1060, 1040, 1030, 1065] }, // Down
-        { date: '2025-01-08 00:00', data: [1040, 1020, 1010, 1045] }, // Valley 2: low=1010
+        // Head peak at index 4 (highest)
+        { date: '2025-01-05 00:00', data: [1025, 1040, 1020, 1100] }, // Head Peak: high=1100 (highest)
+        // Valley after head
+        { date: '2025-01-06 00:00', data: [1040, 1030, 1005, 1045] }, // Valley: low=1005
+        { date: '2025-01-07 00:00', data: [1030, 1035, 1025, 1040] },
         
-        // Right shoulder setup and peak
-        { date: '2025-01-09 00:00', data: [1020, 1040, 1015, 1045] },
-        { date: '2025-01-10 00:00', data: [1040, 1050, 1035, 1075] }, // Right shoulder peak: high=1075 (similar to left)
-        { date: '2025-01-11 00:00', data: [1050, 1030, 1025, 1055] }, // Down
+        // Right shoulder peak at index 7 (similar to left)
+        { date: '2025-01-08 00:00', data: [1035, 1045, 1030, 1075] }, // Peak: high=1075 (similar to left 1070)
+        // Down from right shoulder
+        { date: '2025-01-09 00:00', data: [1045, 1035, 1025, 1050] },
+        { date: '2025-01-10 00:00', data: [1035, 1020, 1015, 1040] },
         
-        // Breaking neckline (neckline = (1005 + 1010) / 2 = 1007.5)
-        { date: '2025-01-12 00:00', data: [1030, 1010, 1000, 1035] },
-        { date: '2025-01-13 00:00', data: [1010, 995, 985, 1015] },   // Breaking below neckline: close=995
-        { date: '2025-01-14 00:00', data: [995, 980, 975, 1000] }
+        // Break below neckline (neckline = (1000 + 1005) / 2 = 1002.5)
+        { date: '2025-01-11 00:00', data: [1020, 1010, 1000, 1025] },
+        { date: '2025-01-12 00:00', data: [1010, 1000, 990, 1015] },
+        { date: '2025-01-13 00:00', data: [1000, 995, 985, 1005] },   // Break: close=995 < neckline=1002.5
+        { date: '2025-01-14 00:00', data: [995, 980, 975, 1000] },
+        { date: '2025-01-15 00:00', data: [980, 970, 965, 985] }      // Added 15th item
       ];
 
       const result = await service.checkCondition(conditionKey, 'MOCK_EXCHANGE', 'MOCK_TICKER', EXCHANGE_SESSION.EXTENDED);
