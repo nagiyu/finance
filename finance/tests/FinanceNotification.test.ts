@@ -17,6 +17,7 @@ import TickerServiceMock from '@finance/tests/mocks/services/TickerServiceMock';
 import { EXCHANGE_SESSION } from '@finance/consts/ExchangeConsts';
 import { FINANCE_NOTIFICATION_CONDITION_MODE, FINANCE_NOTIFICATION_FREQUENCY } from '@finance/consts/FinanceNotificationConst';
 import { FINANCE_RECORD_DATA_TYPE } from '@finance/types/FinanceRecordDataType';
+import type { TimeFrame } from '@finance/utils/FinanceUtil';
 
 describe('FinanceNotificationService', () => {
   let service: FinanceNotificationService;
@@ -64,7 +65,7 @@ describe('FinanceNotificationService', () => {
             frequency: FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
             session: EXCHANGE_SESSION.EXTENDED,
             targetPrice: 950,
-            timeframe: '1',
+            timeframe: '1' as TimeFrame,
             firstNotificationSent: false
           }
         ]
@@ -101,7 +102,7 @@ describe('FinanceNotificationService', () => {
             frequency: FINANCE_NOTIFICATION_FREQUENCY.TEN_MINUTE_LEVEL,
             session: EXCHANGE_SESSION.EXTENDED,
             targetPrice: 950,
-            timeframe: '1',
+            timeframe: '1' as TimeFrame,
             firstNotificationSent: false
           }
         ]
@@ -133,7 +134,7 @@ describe('FinanceNotificationService', () => {
             frequency: FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
             session: EXCHANGE_SESSION.EXTENDED,
             targetPrice: 950,
-            timeframe: '1',
+            timeframe: '1' as TimeFrame,
             firstNotificationSent: false
           }
         ]
@@ -166,7 +167,7 @@ describe('FinanceNotificationService', () => {
             frequency: FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
             session: EXCHANGE_SESSION.EXTENDED,
             targetPrice: 950,
-            timeframe: '1',
+            timeframe: '1' as TimeFrame,
             firstNotificationSent: false
           }
         ]
@@ -198,7 +199,7 @@ describe('FinanceNotificationService', () => {
             frequency: FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
             session: EXCHANGE_SESSION.EXTENDED,
             targetPrice: 950,
-            timeframe: '1',
+            timeframe: '1' as TimeFrame,
             firstNotificationSent: false
           }
         ]
@@ -236,7 +237,7 @@ describe('FinanceNotificationService', () => {
             frequency: FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
             session: EXCHANGE_SESSION.EXTENDED,
             targetPrice: 950,
-            timeframe: '1',
+            timeframe: '1' as TimeFrame,
             firstNotificationSent: false
           }
         ]
@@ -257,7 +258,7 @@ describe('FinanceNotificationService', () => {
             frequency: FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
             session: EXCHANGE_SESSION.EXTENDED,
             targetPrice: 1000, // Different target price
-            timeframe: '1',
+            timeframe: '1' as TimeFrame,
             firstNotificationSent: false
           }
         ]
@@ -283,7 +284,7 @@ describe('FinanceNotificationService', () => {
             frequency: FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
             session: EXCHANGE_SESSION.EXTENDED,
             targetPrice: 950,
-            timeframe: '1',
+            timeframe: '1' as TimeFrame,
             firstNotificationSent: false
           }
         ]
@@ -304,7 +305,7 @@ describe('FinanceNotificationService', () => {
             frequency: FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
             session: EXCHANGE_SESSION.EXTENDED,
             targetPrice: 950,
-            timeframe: '1',
+            timeframe: '1' as TimeFrame,
             firstNotificationSent: false
           }
         ]
@@ -322,7 +323,7 @@ describe('FinanceNotificationService', () => {
             frequency: FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
             session: EXCHANGE_SESSION.EXTENDED,
             targetPrice: 950,
-            timeframe: '1',
+            timeframe: '1' as TimeFrame,
             firstNotificationSent: false
           }
         ]
@@ -349,7 +350,7 @@ describe('FinanceNotificationService', () => {
             frequency: FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
             session: EXCHANGE_SESSION.EXTENDED,
             targetPrice: 950,
-            timeframe: '1',
+            timeframe: '1' as TimeFrame,
             firstNotificationSent: false
           }
         ]
@@ -370,7 +371,7 @@ describe('FinanceNotificationService', () => {
             frequency: FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
             session: EXCHANGE_SESSION.EXTENDED,
             targetPrice: 950,
-            timeframe: '1',
+            timeframe: '1' as TimeFrame,
             firstNotificationSent: false
           }
         ]
@@ -388,7 +389,7 @@ describe('FinanceNotificationService', () => {
             frequency: FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
             session: EXCHANGE_SESSION.EXTENDED,
             targetPrice: 950,
-            timeframe: '1',
+            timeframe: '1' as TimeFrame,
             firstNotificationSent: false
           }
         ]
