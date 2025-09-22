@@ -64,7 +64,7 @@ export default abstract class ConditionBase {
     tickerId: string,
     session?: ExchangeSessionType,
     targetPrice?: number | null,
-    timeframe?: TimeFrame
+    timeframe?: TimeFrame | null
   ): Promise<boolean>;
 
   /**

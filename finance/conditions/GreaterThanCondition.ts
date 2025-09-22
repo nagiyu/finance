@@ -17,7 +17,7 @@ export default class GreaterThanCondition extends ConditionBase {
     tickerId: string,
     session?: ExchangeSessionType,
     targetPrice?: number | null,
-    timeframe?: TimeFrame
+    timeframe?: TimeFrame | null
   ): Promise<boolean> {
     if (targetPrice === null || targetPrice === undefined) {
       ErrorUtil.throwError('Target price is required for GreaterThanCondition');

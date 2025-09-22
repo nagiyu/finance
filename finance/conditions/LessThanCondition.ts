@@ -16,7 +16,7 @@ export default class LessThanCondition extends ConditionBase {
     tickerId: string,
     session?: ExchangeSessionType,
     targetPrice?: number | null,
-    timeframe?: TimeFrame
+    timeframe?: TimeFrame | null
   ): Promise<boolean> {
     if (targetPrice === null || targetPrice === undefined) {
       throw new Error('Target price is required for LessThanCondition');

@@ -113,12 +113,7 @@ export default function FinanceNotificationEditDialogContent({
     };
 
     const onConditionEditClick = (condition: FinanceNotificationCondition) => {
-        // Ensure backward compatibility: set default timeframe if missing
-        const conditionWithTimeframe = {
-            ...condition,
-            timeframe: condition.timeframe || TimeFrameUtil.getDefaultTimeFrame()
-        };
-        setCondition(conditionWithTimeframe);
+        setCondition(condition);
         setIsNewCondition(false);
         setEditConditionDialogOpen(true);
     };
@@ -167,8 +162,6 @@ export default function FinanceNotificationEditDialogContent({
     const conditionListToTable = (conditions: FinanceNotificationCondition[]): FinanceNotificationConditionTableType[] => {
         return conditions.map((condition) => ({
             ...condition,
-            // Ensure backward compatibility: set default timeframe if missing
-            timeframe: condition.timeframe || TimeFrameUtil.getDefaultTimeFrame(),
             action: (
                 <DirectionStack>
                     <ContainedButton label='Edit' onClick={() => onConditionEditClick(condition)} />

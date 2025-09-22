@@ -17,7 +17,7 @@ export default class SansenAkenomyojoCondition extends ConditionBase {
     tickerId: string,
     session?: ExchangeSessionType,
     targetPrice?: number | null,
-    timeframe?: TimeFrame
+    timeframe?: TimeFrame | null
   ): Promise<boolean> {
     try {
       const stockData = await this.getStockPriceData(exchangeId, tickerId, { 

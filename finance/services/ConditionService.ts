@@ -130,7 +130,7 @@ export default class ConditionService {
     session?: ExchangeSessionType,
     targetPrice?: number | null,
     frequency?: FinanceNotificationFrequencyType,
-    timeframe?: TimeFrame
+    timeframe?: TimeFrame | null
   ): Promise<ConditionResult> {
     const ConditionClass = this.getCondition(conditionName);
     const condition = new ConditionClass(this.exchangeService, this.tickerService);
