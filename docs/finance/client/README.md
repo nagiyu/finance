@@ -45,6 +45,7 @@ client/finance/
 - 時間軸・セッション設定
 - リアルタイムチャート表示
 - 認証状態管理
+- 条件ステータス表示（画面下部）
 
 **State管理:**
 ```typescript
@@ -55,6 +56,24 @@ const [ticker, setTicker] = useState('');
 const [timeframe, setTimeframe] = useState<TimeFrame>('1');
 const [session, setSession] = useState<string>('regular');
 ```
+
+#### Condition Status (`app/components/ConditionStatus.tsx`)
+
+選択されたExchange、Ticker、時間軸に基づいて、指定価格が不要な条件の評価結果を表示するコンポーネントです。
+
+**主要機能:**
+- 目標価格が不要な条件（enableTargetPrice: false）の自動評価
+- 買いシグナル・売りシグナルの視覚的表示
+- 条件名のみの簡潔な表示（説明文は非表示）
+- 条件が満たされた場合のみ表示
+
+**表示される条件:**
+- 三川明けの明星（買いシグナル）
+- 三川宵の明星（売りシグナル）
+
+**API連携:**
+- `/api/finance-notification/conditions/check` - 条件評価API
+- `ConditionCheckService` - クライアントサービス
 
 ### UI Components
 

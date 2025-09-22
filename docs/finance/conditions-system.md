@@ -153,6 +153,52 @@ export default class MyPatternCondition extends ConditionBase {
 }
 ```
 
+## リアルタイム条件評価
+
+### ホームページでの条件表示
+
+ホームページでは、目標価格が不要な条件（`enableTargetPrice: false`）の評価結果をリアルタイムで表示します。
+
+#### API エンドポイント
+
+**`/api/finance-notification/conditions/check`**
+
+指定されたExchange、Ticker、時間軸、セッションに対して評価可能な条件をチェックします。
+
+```typescript
+// リクエストパラメータ
+{
+  exchangeId: string;
+  tickerId: string;
+  timeframe?: string;
+  session?: string;
+}
+
+// レスポンス
+{
+  conditions: [
+    {
+      name: string;
+      key: string;
+      isBuyCondition: boolean;
+      isSellCondition: boolean;
+    }
+  ]
+}
+```
+
+#### ConditionService の拡張
+
+`ConditionService` に `getEvaluableConditionList()` メソッドを追加し、目標価格が不要な条件一覧を取得できるようになりました。
+
+```typescript
+public getEvaluableConditionList(): string[] {
+  return Object.entries(this.conditionMap)
+    .filter(([, value]) => !value.info.enableTargetPrice)
+    .map(([key]) => key);
+}
+```
+
 ## FinanceNotificationServiceとの統合
 
 `FinanceNotificationService`は`ConditionService`を使用して条件をチェックします：
