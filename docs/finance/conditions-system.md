@@ -1,15 +1,15 @@
-# Conditions System
+# 条件システム
 
-## Overview
+## 概要
 
-The Conditions System provides a modular and extensible way to check various financial notification conditions. The system separates concerns by providing individual condition classes for each condition type, managed through the `ConditionService`.
+条件システムは、様々な金融通知条件をチェックするためのモジュラーで拡張可能な方法を提供します。このシステムは、`ConditionService`によって管理される各条件タイプごとに個別の条件クラスを提供することで、関心事を分離します。
 
-## Architecture
+## アーキテクチャ
 
-### Base Components
+### 基本コンポーネント
 
 #### ConditionBase
-Abstract base class that all conditions extend. Provides common functionality and ensures consistent implementation patterns.
+すべての条件が継承する抽象基底クラス。共通機能を提供し、一貫した実装パターンを保証します。
 
 ```typescript
 abstract class ConditionBase {
@@ -26,44 +26,44 @@ abstract class ConditionBase {
     timeframe?: TimeFrame | null
   ): Promise<boolean>;
 
-  // Helper methods for data access
+  // データアクセス用のヘルパーメソッド
   protected getStockPriceData(exchangeId: string, tickerId: string, options?: GetStockPriceDataOptions): Promise<any>;
   protected getCurrentStockPrice(exchangeId: string, tickerId: string, session?: string): Promise<number | null>;
 }
 ```
 
 #### ConditionInfo
-Interface that defines metadata about each condition:
+各条件のメタデータを定義するインターフェース：
 
 ```typescript
 interface ConditionInfo {
-  name: string;                    // Human-readable name
-  description: string;             // Detailed description
-  isBuyCondition: boolean;         // Whether it's a buy signal
-  isSellCondition: boolean;        // Whether it's a sell signal
-  enableTargetPrice: boolean;      // Whether target price is required
-  enableTimeFrame: boolean;        // Whether timeframe is configurable
+  name: string;                    // 人間が読める名前
+  description: string;             // 詳細な説明
+  isBuyCondition: boolean;         // 買いシグナルかどうか
+  isSellCondition: boolean;        // 売りシグナルかどうか
+  enableTargetPrice: boolean;      // 目標価格が必要かどうか
+  enableTimeFrame: boolean;        // 時間枠が設定可能かどうか
 }
 ```
 
 #### ConditionResult
-Interface representing the result of a condition check:
+条件チェックの結果を表すインターフェース：
 
 ```typescript
 interface ConditionResult {
-  met: boolean;     // Whether the condition was satisfied
-  message?: string; // Optional descriptive message for notifications
+  met: boolean;     // 条件が満たされたかどうか
+  message?: string; // 通知用のオプションメッセージ
 }
 ```
 
 ### ConditionService
 
-The `ConditionService` manages all conditions and provides a unified interface for condition checking.
+`ConditionService`はすべての条件を管理し、条件チェックのための統一されたインターフェースを提供します。
 
 ```typescript
 const conditionService = new ConditionService(exchangeService, tickerService);
 
-// Check a condition
+// 条件をチェック
 const result = await conditionService.checkCondition(
   conditionName,
   exchangeId,
@@ -75,49 +75,49 @@ const result = await conditionService.checkCondition(
 );
 ```
 
-## Available Conditions
+## 利用可能な条件
 
-### Price-based Conditions
+### 価格ベースの条件
 
 #### GreaterThanCondition
-Checks if the current stock price is greater than a specified threshold.
-- Requires target price
-- Supports all timeframes
+現在の株価が指定された閾値より大きいかどうかをチェックします。
+- 目標価格が必要
+- すべての時間枠をサポート
 
 #### LessThanCondition
-Checks if the current stock price is less than a specified threshold.
-- Requires target price
-- Supports all timeframes
+現在の株価が指定された閾値より小さいかどうかをチェックします。
+- 目標価格が必要
+- すべての時間枠をサポート
 
-### Pattern-based Conditions
+### パターンベースの条件
 
 #### SansenAkenomyojoCondition (三川明けの明星)
-Detects the "Morning Star" pattern - a bullish reversal pattern with three candles:
-1. Long bearish candle
-2. Small bullish candle with gap up
-3. Another bullish candle
+「明けの明星」パターンを検出 - 3本のローソク足による強気反転パターン：
+1. 長い陰線
+2. ギャップアップした小さな陽線
+3. もう一つの陽線
 
-This pattern indicates selling pressure is weakening and buying pressure is strengthening.
+このパターンは売り圧力が弱まり、買い圧力が強まっていることを示します。
 
 #### SansenYoinomyojoCondition (三川宵の明星)
-Detects the "Evening Star" pattern - a bearish reversal pattern similar to Morning Star but inverted.
+「宵の明星」パターンを検出 - 明けの明星と似ているが反転した弱気反転パターン。
 
-## Creating New Conditions
+## 新しい条件の作成
 
-To add a new condition:
+新しい条件を追加するには：
 
-1. Create a new class extending `ConditionBase`
-2. Export a `ConditionInfo` object with metadata
-3. Implement the `checkCondition` method
-4. Add the condition to `ConditionService.conditionMap`
-5. Update this documentation
+1. `ConditionBase`を継承する新しいクラスを作成
+2. メタデータを含む`ConditionInfo`オブジェクトをエクスポート
+3. `checkCondition`メソッドを実装
+4. `ConditionService.conditionMap`に条件を追加
+5. このドキュメントを更新
 
-Example:
+例：
 
 ```typescript
 export const MyPatternConditionInfo: ConditionInfo = {
-  name: 'My Pattern',
-  description: 'Description of the pattern...',
+  name: 'マイパターン',
+  description: 'パターンの説明...',
   isBuyCondition: true,
   isSellCondition: false,
   enableTargetPrice: false,
@@ -143,31 +143,31 @@ export default class MyPatternCondition extends ConditionBase {
         return false;
       }
 
-      // Implement pattern detection logic
+      // パターン検出ロジックを実装
       return this.detectPattern(stockData);
     } catch (error) {
-      console.error('Error checking pattern:', error);
+      console.error('パターンチェックエラー:', error);
       return false;
     }
   }
 }
 ```
 
-## Integration with FinanceNotificationService
+## FinanceNotificationServiceとの統合
 
-The `FinanceNotificationService` uses the `ConditionService` to check conditions:
+`FinanceNotificationService`は`ConditionService`を使用して条件をチェックします：
 
-1. **Timing Filter**: Conditions are filtered based on frequency constraints
-2. **Parallel Execution**: All qualifying conditions are checked simultaneously using `Promise.allSettled()`
-3. **Result Processing**: Results are processed to find the first met condition
-4. **Notification**: If a condition is met, a push notification is sent
+1. **タイミングフィルター**: 頻度制約に基づいて条件をフィルタリング
+2. **並列実行**: `Promise.allSettled()`を使用してすべての条件を同時にチェック
+3. **結果処理**: 最初に満たされた条件を見つけるために結果を処理
+4. **通知**: 条件が満たされた場合、プッシュ通知が送信
 
-## Benefits
+## 利点
 
-- **Separation of Concerns**: Each condition type has its own dedicated class
-- **Extensibility**: Easy to add new condition types without modifying core service
-- **Testability**: Individual conditions can be tested in isolation
-- **Maintainability**: Condition logic is organized and easier to maintain
-- **Consistency**: Standardized interfaces ensure consistent behavior across conditions
-- **Performance**: Parallel execution reduces overall condition checking time
-- **Flexibility**: Supports both price-based and pattern-based conditions with configurable parameters
+- **関心事の分離**: 各条件タイプが専用のクラスを持つ
+- **拡張性**: コアサービスを変更せずに新しい条件タイプを簡単に追加
+- **テスト性**: 個別の条件を分離してテスト可能
+- **保守性**: 条件ロジックが整理され、保守しやすい
+- **一貫性**: 標準化されたインターフェースにより条件間の一貫した動作を保証
+- **パフォーマンス**: 並列実行により全体的な条件チェック時間を短縮
+- **柔軟性**: 設定可能なパラメータを持つ価格ベースとパターンベース両方の条件をサポート
