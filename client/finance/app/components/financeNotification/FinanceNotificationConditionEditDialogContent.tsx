@@ -9,6 +9,7 @@ import { ExchangeSessionType } from '@finance/types/ExchangeTypes';
 import { FinanceNotificationCondition } from '@finance/interfaces/FinanceNotificationType';
 import { FinanceNotificationConditionModeType, FinanceNotificationFrequencyType } from '@finance/types/FinanceNotificationType';
 import { FINANCE_NOTIFICATION_CONDITION_MODE, FINANCE_NOTIFICATION_FREQUENCY } from '@finance/consts/FinanceNotificationConst';
+import { TimeFrame } from '@finance/utils/FinanceUtil';
 
 import BasicRadioGroup from '@client-common/components/inputs/RadioGroups/BasicRadioGroup';
 import BasicSelect from '@client-common/components/inputs/Selects/BasicSelect';
@@ -20,6 +21,8 @@ import FrequencyUtil from '@/utils/finance-notification/FrequencyUtil';
 import ModeUtil from '@/utils/finance-notification/ModeUtil';
 import SessionSelect from '@/app/components/common/SessionSelect';
 import SessionUtil from '@/utils/SessionUtil';
+import TimeFrameSelect from '@/app/components/common/TimeFrameSelect';
+import TimeFrameUtil from '@/utils/TimeFrameUtil';
 
 interface FinanceNotificationEditDialogContentProps {
     item: FinanceNotificationCondition;
@@ -41,6 +44,7 @@ export default function FinanceNotificationConditionEditDialogContent({
         isBuyCondition: false,
         isSellCondition: false,
         enableTargetPrice: false,
+        enableTimeFrame: false,
     });
 
     const conditionFetchService = new FinanceNotificationConditionFetchService();
@@ -51,6 +55,7 @@ export default function FinanceNotificationConditionEditDialogContent({
             conditionName: conditions[0].value,
             frequency: FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
             session: SessionUtil.getDefaultSession(),
+            timeframe: TimeFrameUtil.getDefaultTimeFrame(),
             targetPrice: null,
             firstNotificationSent: false,
         });
@@ -98,6 +103,22 @@ export default function FinanceNotificationConditionEditDialogContent({
                 onItemChange({
                     ...item,
                     targetPrice: 1,
+                });
+            }
+        }
+
+        if (!conditionInfo.enableTimeFrame) {
+            onItemChange({
+                ...item,
+                timeframe: null,
+            });
+        } else {
+            // Only set timeframe to default if it's a new item and timeframe is null
+            // For existing items, preserve the current timeframe value
+            if (isNew && !item.timeframe) {
+                onItemChange({
+                    ...item,
+                    timeframe: TimeFrameUtil.getDefaultTimeFrame(),
                 });
             }
         }
@@ -154,6 +175,18 @@ export default function FinanceNotificationConditionEditDialogContent({
                     });
                 }}
             />
+            {conditionInfo.enableTimeFrame && (
+                <TimeFrameSelect
+                    value={item.timeframe !== null ? item.timeframe : TimeFrameUtil.getDefaultTimeFrame()}
+                    disabled={loading}
+                    onChange={(value) => {
+                        onItemChange({
+                            ...item,
+                            timeframe: value,
+                        });
+                    }}
+                />
+            )}
             {conditionInfo.enableTargetPrice && (
                 <CurrencyNumberField
                     label='目標価格'

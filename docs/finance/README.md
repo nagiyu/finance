@@ -41,10 +41,13 @@ Finance モジュールは以下の主要機能を提供します：
 - 株価条件の監視
 - 条件達成時の通知送信
 - **スマート通知ナビゲーション**: 通知クリック時に該当のExchangeとTickerが選択されたトップ画面に遷移
-- **条件ごとの通知頻度管理** (新機能)
+- **条件ごとの通知頻度管理** (機能)
   - 価格条件 (指定価格を上回る/下回る)
   - パターン条件 (赤三兵、陰の三つ星など)
   - 各条件で独立して頻度設定可能
+- **条件ごとの時間枠設定** (新機能)
+  - 各条件で独立してローソク足の時間枠を設定可能
+  - 通知タイミングと条件チェックの時間枠を分離
 - 複数の通知条件タイプ対応
 
 **通知頻度オプション:**
@@ -52,6 +55,11 @@ Finance モジュールは以下の主要機能を提供します：
 - 10分ごと: 10分間隔でチェック  
 - 1時間ごと: 1時間間隔でチェック
 - 取引開始時のみ: 取引開始時のみチェック
+
+**時間枠オプション:**
+- 分足: 1分、3分、5分、15分、30分、45分
+- 時間足: 1時間、2時間、3時間、4時間
+- 日足、週足、月足
 
 #### ExchangeService
 取引所データの管理を行うサービスです。
@@ -117,6 +125,35 @@ const notificationService = new FinanceNotificationService();
 await notificationService.notification('https://example.com/api/notifications');
 ```
 
+### 条件チェック（時間枠指定）
+```typescript
+import ConditionService from '@finance/services/ConditionService';
+
+const conditionService = new ConditionService();
+
+// 5分足でのパターン条件チェック
+const result = await conditionService.checkCondition(
+  'SansenAkenomyojo',
+  'NYSE',
+  'AAPL', 
+  'extended',
+  null,
+  'MinuteLevel',
+  '5'  // 5分足を指定
+);
+
+// 1時間足での価格条件チェック
+const result = await conditionService.checkCondition(
+  'GreaterThan',
+  'NYSE', 
+  'AAPL',
+  'regular',
+  150.0,
+  'HourlyLevel',
+  '60'  // 1時間足を指定
+);
+```
+
 ### スマート通知ナビゲーション
 通知をクリックした時、該当のExchangeとTickerが自動的に選択されたトップ画面に遷移する機能を提供します。
 
@@ -153,4 +190,4 @@ Finance Module
 - [Server Documentation](./server/README.md) - Lambda functions and API endpoints
 - [Client Documentation](./client/README.md) - Next.js application and UI components
 - [Common Module](../common/README.md) - Shared utilities and services
-- **[条件ごとの通知頻度設定機能](./per-condition-frequency.md)** - 新機能: 条件別通知頻度設定
+- **[条件ごとの通知頻度設定機能](./per-condition-frequency.md)** - 条件別通知頻度設定・時間枠設定機能

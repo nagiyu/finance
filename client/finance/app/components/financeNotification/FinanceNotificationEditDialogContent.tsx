@@ -24,6 +24,7 @@ import FrequencyUtil from '@/utils/finance-notification/FrequencyUtil';
 import ModeUtil from '@/utils/finance-notification/ModeUtil';
 import SessionUtil from '@/utils/SessionUtil';
 import TickerUtil from '@/utils/TickerUtil';
+import TimeFrameUtil from '@/utils/TimeFrameUtil';
 import { ExchangeDataType } from '@/interfaces/data/ExchangeDataType';
 import { TickerDataType } from '@/interfaces/data/TickerDataType';
 import { StateType } from '@/app/finance-notification/page';
@@ -59,6 +60,7 @@ export default function FinanceNotificationEditDialogContent({
         conditionName: '',
         frequency: FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
         session: EXCHANGE_SESSION.EXTENDED,
+        timeframe: TimeFrameUtil.getDefaultTimeFrame(),
         targetPrice: null,
         firstNotificationSent: false,
     };
@@ -88,6 +90,11 @@ export default function FinanceNotificationEditDialogContent({
             id: 'session',
             label: 'Session',
             format: (cell) => SessionUtil.formatSession(cell),
+        },
+        {
+            id: 'timeframe',
+            label: 'TimeFrame',
+            format: (cell) => TimeFrameUtil.formatTimeFrame(cell),
         },
         {
             id: 'targetPrice',

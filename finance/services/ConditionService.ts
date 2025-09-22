@@ -9,6 +9,7 @@ import TickerService from '@finance/services/TickerService';
 import FrequencyUtil from '@finance/utils/FrequencyUtil';
 import { ExchangeSessionType } from '@finance/types/ExchangeTypes';
 import { FinanceNotificationFrequencyType } from '@finance/types/FinanceNotificationType';
+import { TimeFrame } from '@finance/utils/FinanceUtil';
 
 type ConditionConstructor = new (exchangeService: ExchangeService, tickerService: TickerService) => ConditionBase;
 
@@ -119,6 +120,7 @@ export default class ConditionService {
    * @param session Exchange session type
    * @param targetPrice Target price (optional)
    * @param frequency Notification frequency (optional)
+   * @param timeframe Timeframe for candlestick data (optional, defaults to '1')
    * @returns Promise that resolves to true if the condition is met, false otherwise
    */
   public async checkCondition(
@@ -127,11 +129,12 @@ export default class ConditionService {
     tickerId: string,
     session?: ExchangeSessionType,
     targetPrice?: number | null,
-    frequency?: FinanceNotificationFrequencyType
+    frequency?: FinanceNotificationFrequencyType,
+    timeframe?: TimeFrame | null
   ): Promise<ConditionResult> {
     const ConditionClass = this.getCondition(conditionName);
     const condition = new ConditionClass(this.exchangeService, this.tickerService);
-    const met = await condition.checkCondition(exchangeId, tickerId, session, targetPrice);
+    const met = await condition.checkCondition(exchangeId, tickerId, session, targetPrice, timeframe);
 
     if (!met) {
       return { met };

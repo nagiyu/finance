@@ -3,6 +3,7 @@ import {
   FinanceNotificationConditionModeType,
   FinanceNotificationFrequencyType,
 } from '@finance/types/FinanceNotificationType';
+import { TimeFrame } from '@finance/utils/FinanceUtil';
 
 /**
  * Condition with frequency configuration
@@ -32,6 +33,11 @@ export interface FinanceNotificationCondition {
    * Session type for price data
    */
   session: ExchangeSessionType;
+
+  /**
+   * Timeframe for candlestick data used in condition checking
+   */
+  timeframe?: TimeFrame | null;
 
   /**
    * Target price for conditions that require it (e.g., GreaterThan, LessThan)

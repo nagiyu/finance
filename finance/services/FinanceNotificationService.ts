@@ -134,7 +134,8 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
               ticker.id,
               condition.session,
               condition.targetPrice,
-              condition.frequency
+              condition.frequency,
+              condition.timeframe
             );
           } catch (error) {
             console.error(`Error checking condition ${condition.conditionName}:`, error);
