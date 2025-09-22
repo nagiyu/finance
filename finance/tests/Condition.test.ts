@@ -233,15 +233,15 @@ describe('ConditionTest', () => {
       FinanceUtilMock.StockPriceDataMock = [
         {
           date: '2025-01-01 00:00',
-          data: [950, 1010, 940, 1020] // large bullish candle [open, close, low, high]
+          data: [950, 1010, 940, 1020] // large bullish candle [open, close, low, high] - close > open, large body
         },
         {
           date: '2025-01-02 00:00',
-          data: [1030, 1015, 1000, 1050] // small bearish candle with gap up [open, close, low, high]
+          data: [1030, 1025, 1025, 1040] // small bearish candle with gap up [open, close, low, high] - gap up (low 1025 > first high 1020), small body
         },
         {
           date: '2025-01-03 00:00',
-          data: [1040, 970, 960, 1045] // large bearish candle [open, close, low, high]
+          data: [1020, 960, 950, 1025] // large bearish candle [open, close, low, high] - close < open, large body
         }
       ];
 

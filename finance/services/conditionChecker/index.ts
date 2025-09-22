@@ -17,4 +17,3 @@ export { HawkReversalConditionChecker } from './HawkReversalConditionChecker';
 export { ThreeDarkStarsConditionChecker } from './ThreeDarkStarsConditionChecker';
 export { ShootingStarConditionChecker } from './ShootingStarConditionChecker';
 export { SansenAkenomyojoConditionChecker } from './SansenAkenomyojoConditionChecker';
-export { SansenYoinomyojoConditionChecker } from './SansenYoinomyojoConditionChecker';

@@ -22,7 +22,6 @@ export const FINANCE_NOTIFICATION_CONDITION_TYPE = {
   THREE_DARK_STARS: 'ThreeDarkStars',
   SHOOTING_STAR: 'ShootingStar',
   SANSEN_AKENOMYOJO: 'SansenAkenomyojo',
-  SANSEN_YOINOMYOJO: 'SansenYoinomyojo',
 } as const;
 
 /**
