@@ -24,6 +24,7 @@ import FrequencyUtil from '@/utils/finance-notification/FrequencyUtil';
 import ModeUtil from '@/utils/finance-notification/ModeUtil';
 import SessionUtil from '@/utils/SessionUtil';
 import TickerUtil from '@/utils/TickerUtil';
+import TimeFrameUtil from '@/utils/TimeFrameUtil';
 import { ExchangeDataType } from '@/interfaces/data/ExchangeDataType';
 import { TickerDataType } from '@/interfaces/data/TickerDataType';
 import { StateType } from '@/app/finance-notification/page';
@@ -59,6 +60,7 @@ export default function FinanceNotificationEditDialogContent({
         conditionName: '',
         frequency: FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
         session: EXCHANGE_SESSION.EXTENDED,
+        timeframe: TimeFrameUtil.getDefaultTimeFrame(),
         targetPrice: null,
         firstNotificationSent: false,
     };
@@ -90,6 +92,11 @@ export default function FinanceNotificationEditDialogContent({
             format: (cell) => SessionUtil.formatSession(cell),
         },
         {
+            id: 'timeframe',
+            label: 'TimeFrame',
+            format: (cell) => TimeFrameUtil.formatTimeFrame(cell),
+        },
+        {
             id: 'targetPrice',
             label: 'Target Price',
         },
@@ -106,7 +113,12 @@ export default function FinanceNotificationEditDialogContent({
     };
 
     const onConditionEditClick = (condition: FinanceNotificationCondition) => {
-        setCondition(condition);
+        // Ensure backward compatibility: set default timeframe if missing
+        const conditionWithTimeframe = {
+            ...condition,
+            timeframe: condition.timeframe || TimeFrameUtil.getDefaultTimeFrame()
+        };
+        setCondition(conditionWithTimeframe);
         setIsNewCondition(false);
         setEditConditionDialogOpen(true);
     };
@@ -155,6 +167,8 @@ export default function FinanceNotificationEditDialogContent({
     const conditionListToTable = (conditions: FinanceNotificationCondition[]): FinanceNotificationConditionTableType[] => {
         return conditions.map((condition) => ({
             ...condition,
+            // Ensure backward compatibility: set default timeframe if missing
+            timeframe: condition.timeframe || TimeFrameUtil.getDefaultTimeFrame(),
             action: (
                 <DirectionStack>
                     <ContainedButton label='Edit' onClick={() => onConditionEditClick(condition)} />

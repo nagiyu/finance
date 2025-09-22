@@ -9,6 +9,7 @@ import { ExchangeSessionType } from '@finance/types/ExchangeTypes';
 import { FinanceNotificationCondition } from '@finance/interfaces/FinanceNotificationType';
 import { FinanceNotificationConditionModeType, FinanceNotificationFrequencyType } from '@finance/types/FinanceNotificationType';
 import { FINANCE_NOTIFICATION_CONDITION_MODE, FINANCE_NOTIFICATION_FREQUENCY } from '@finance/consts/FinanceNotificationConst';
+import { TimeFrame } from '@finance/utils/FinanceUtil';
 
 import BasicRadioGroup from '@client-common/components/inputs/RadioGroups/BasicRadioGroup';
 import BasicSelect from '@client-common/components/inputs/Selects/BasicSelect';
@@ -20,6 +21,8 @@ import FrequencyUtil from '@/utils/finance-notification/FrequencyUtil';
 import ModeUtil from '@/utils/finance-notification/ModeUtil';
 import SessionSelect from '@/app/components/common/SessionSelect';
 import SessionUtil from '@/utils/SessionUtil';
+import TimeFrameSelect from '@/app/components/common/TimeFrameSelect';
+import TimeFrameUtil from '@/utils/TimeFrameUtil';
 
 interface FinanceNotificationEditDialogContentProps {
     item: FinanceNotificationCondition;
@@ -51,6 +54,7 @@ export default function FinanceNotificationConditionEditDialogContent({
             conditionName: conditions[0].value,
             frequency: FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
             session: SessionUtil.getDefaultSession(),
+            timeframe: TimeFrameUtil.getDefaultTimeFrame(),
             targetPrice: null,
             firstNotificationSent: false,
         });
@@ -151,6 +155,16 @@ export default function FinanceNotificationConditionEditDialogContent({
                     onItemChange({
                         ...item,
                         session: value as ExchangeSessionType,
+                    });
+                }}
+            />
+            <TimeFrameSelect
+                value={item.timeframe}
+                disabled={loading}
+                onChange={(value) => {
+                    onItemChange({
+                        ...item,
+                        timeframe: value,
                     });
                 }}
             />
