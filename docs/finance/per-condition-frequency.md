@@ -15,6 +15,7 @@ Finance Notification システムで、各条件ごとに通知頻度と時間�
 #### パターン条件
 - **赤三兵 (THREE_RED_SOLDIERS)**
 - **三川明けの明星 (THREE_RIVER_EVENING_STAR)**
+- **三川宵の明星 (SANSEN_YOINOMYOJO)**
 - **二本たくり線 (TWO_TAKURI_LINES)**
 - **つばめ返し (SWALLOW_RETURN)**
 - **仕掛け花火 (FIREWORKS)**
