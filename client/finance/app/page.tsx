@@ -106,11 +106,19 @@ export default function Home() {
     if (exchangeOptions.length > 0 && !urlParamsProcessed) {
       // Check for URL parameters first
       const exchangeIdFromUrl = searchParams.get('exchangeId');
+      const timeframeFromUrl = searchParams.get('timeframe');
+      
       if (exchangeIdFromUrl && exchangeOptions.some(opt => opt.value === exchangeIdFromUrl)) {
         setExchange(exchangeIdFromUrl);
       } else {
         setExchange(exchangeOptions[0].value);
       }
+      
+      // Set timeframe from URL if valid
+      if (timeframeFromUrl && TimeFrameUtil.isValidTimeFrame(timeframeFromUrl)) {
+        setTimeframe(timeframeFromUrl);
+      }
+      
       setUrlParamsProcessed(true);
     }
   }, [exchangeOptions, searchParams, urlParamsProcessed]);

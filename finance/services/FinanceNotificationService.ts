@@ -166,11 +166,12 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
               }
             };
 
-            // Include exchange and ticker data in the message
+            // Include exchange, ticker, and timeframe data in the message
             const messageWithData = JSON.stringify({
               message: conditionResult.message || '',
               exchangeId: notification.exchangeId,
-              tickerId: notification.tickerId
+              tickerId: notification.tickerId,
+              timeframe: condition.timeframe
             });
 
             await this.notificationService.sendPushNotification(endpoint, messageWithData, subscription);

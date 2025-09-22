@@ -7,6 +7,7 @@ export interface NotificationPayloadType extends PayloadType {
   data?: {
     exchangeId?: string;
     tickerId?: string;
+    timeframe?: string;
   };
 }
 
@@ -17,12 +18,14 @@ export async function POST(request: NextRequest) {
   let messageData;
   let exchangeId;
   let tickerId;
+  let timeframe;
   try {
     const parsed = JSON.parse(message);
     if (typeof parsed === 'object' && parsed.message) {
       messageData = parsed.message;
       exchangeId = parsed.exchangeId;
       tickerId = parsed.tickerId;
+      timeframe = parsed.timeframe;
     } else {
       messageData = message;
     }
@@ -38,7 +41,8 @@ export async function POST(request: NextRequest) {
     // Include custom data for the service worker
     data: {
       exchangeId,
-      tickerId
+      tickerId,
+      timeframe
     }
   };
 

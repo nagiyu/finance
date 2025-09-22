@@ -166,16 +166,16 @@ const result = await conditionService.checkCondition(
 ```
 
 ### スマート通知ナビゲーション
-通知をクリックした時、該当のExchangeとTickerが自動的に選択されたトップ画面に遷移する機能を提供します。
+通知をクリックした時、該当のExchange、Ticker、および TimeFrame が自動的に選択されたトップ画面に遷移する機能を提供します。
 
 **仕組み:**
-1. 通知送信時にexchangeIdとtickerIdをメッセージデータに含める
+1. 通知送信時にexchangeId、tickerId、timeframeをメッセージデータに含める
 2. Service Workerが通知クリックを検知し、URLパラメータとして追加
-3. ホーム画面がURLパラメータを読み取り、該当のExchangeとTickerを自動選択
+3. ホーム画面がURLパラメータを読み取り、該当のExchange、Ticker、TimeFrameを自動選択
 
 **URL例:**
 ```
-https://your-app.com/?exchangeId=NYSE&tickerId=AAPL-NYSE
+https://your-app.com/?exchangeId=NYSE&tickerId=AAPL-NYSE&timeframe=5
 ```
 
 ## アーキテクチャ
