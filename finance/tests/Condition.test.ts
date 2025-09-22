@@ -11,6 +11,7 @@ import FinanceUtilMock from '@finance/tests/mocks/utils/FinanceUtilMock';
 import GreaterThanCondition from '@finance/conditions/GreaterThanCondition';
 import LessThanCondition from '@finance/conditions/LessThanCondition';
 import SansenAkenomyojoCondition from '@finance/conditions/SansenAkenomyojoCondition';
+import SansenYoinomyojoCondition from '@finance/conditions/SansenYoinomyojoCondition';
 import TickerServiceMock from '@finance/tests/mocks/services/TickerServiceMock';
 import { EXCHANGE_SESSION } from '@finance/consts/ExchangeConsts';
 
@@ -191,6 +192,56 @@ describe('ConditionTest', () => {
         {
           date: '2025-01-03 00:00',
           data: [970, 1010, 970, 1020]
+        }
+      ];
+
+      const result = await service.checkCondition(conditionKey, 'MOCK_EXCHANGE', 'MOCK_TICKER', EXCHANGE_SESSION.EXTENDED);
+
+      expect(result.met).toBe(true);
+      expect(result.message).not.toBe('');
+    });
+  });
+
+  describe('三川宵の明星', () => {
+    const conditionKey = 'SansenYoinomyojo';
+
+    it('Not Contains in Buy Condition List', () => {
+      const conditionList = service.getBuyConditionList();
+      expect(conditionList).not.toContain(conditionKey);
+    });
+
+    it('Contains in Sell Condition List', () => {
+      const conditionList = service.getSellConditionList();
+      expect(conditionList).toContain(conditionKey);
+    });
+
+    it('Get Condition Info', () => {
+      const info = service.getConditionInfo(conditionKey);
+      expect(info.name).toBe('三川宵の明星');
+      expect(info.description).not.toBe('');
+      expect(info.isBuyCondition).toBe(false);
+      expect(info.isSellCondition).toBe(true);
+    });
+
+    it('Get Condition', () => {
+      const ConditionClass = service.getCondition(conditionKey);
+      expect(ConditionClass).toBe(SansenYoinomyojoCondition);
+    });
+
+    it('Check Condition', async () => {
+      // Evening star pattern: large bullish, small bearish with gap up, large bearish
+      FinanceUtilMock.StockPriceDataMock = [
+        {
+          date: '2025-01-01 00:00',
+          data: [950, 1010, 940, 1020] // large bullish candle [open, close, low, high]
+        },
+        {
+          date: '2025-01-02 00:00',
+          data: [1030, 1015, 1000, 1050] // small bearish candle with gap up [open, close, low, high]
+        },
+        {
+          date: '2025-01-03 00:00',
+          data: [1040, 970, 960, 1045] // large bearish candle [open, close, low, high]
         }
       ];
 

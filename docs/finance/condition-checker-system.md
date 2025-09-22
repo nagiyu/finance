@@ -110,6 +110,12 @@ Detects the "Three Dark Stars" pattern - three consecutive bearish candles with 
 #### ShootingStarConditionChecker
 Detects the "Shooting Star" pattern - a bearish reversal pattern with long upper shadow, short bearish body, and small lower shadow.
 
+#### SansenAkenomyojoConditionChecker
+Detects the "Sansen Akenomyojo (Morning Star)" pattern - a bullish reversal pattern with a long bearish candle, small bullish candle with gap up, and large bullish candle.
+
+#### SansenYoinomyojoConditionChecker
+Detects the "Sansen Yoinomyojo (Evening Star)" pattern - a bearish reversal pattern with a long bullish candle, small bearish candle with gap up, and large bearish candle.
+
 ## Creating New Condition Checkers
 
 To add a new condition checker:

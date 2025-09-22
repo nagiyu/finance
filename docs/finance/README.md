@@ -43,7 +43,7 @@ Finance モジュールは以下の主要機能を提供します：
 - **スマート通知ナビゲーション**: 通知クリック時に該当のExchangeとTickerが選択されたトップ画面に遷移
 - **条件ごとの通知頻度管理** (機能)
   - 価格条件 (指定価格を上回る/下回る)
-  - パターン条件 (赤三兵、陰の三つ星など)
+  - パターン条件 (赤三兵、三川明けの明星、三川宵の明星、陰の三つ星など)
   - 各条件で独立して頻度設定可能
 - **条件ごとの時間枠設定** (新機能)
   - 各条件で独立してローソク足の時間枠を設定可能
@@ -131,9 +131,20 @@ import ConditionService from '@finance/services/ConditionService';
 
 const conditionService = new ConditionService();
 
-// 5分足でのパターン条件チェック
+// 5分足でのパターン条件チェック（買いシグナル）
 const result = await conditionService.checkCondition(
   'SansenAkenomyojo',
+  'NYSE',
+  'AAPL', 
+  'extended',
+  null,
+  'MinuteLevel',
+  '5'  // 5分足を指定
+);
+
+// 5分足でのパターン条件チェック（売りシグナル）
+const result = await conditionService.checkCondition(
+  'SansenYoinomyojo',
   'NYSE',
   'AAPL', 
   'extended',

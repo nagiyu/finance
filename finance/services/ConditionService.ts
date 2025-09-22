@@ -5,6 +5,7 @@ import ExchangeService from '@finance/services/ExchangeService';
 import GreaterThanCondition, { GreaterThanConditionInfo } from '@finance/conditions/GreaterThanCondition';
 import LessThanCondition, { LessThanConditionInfo } from '@finance/conditions/LessThanCondition';
 import SansenAkenomyojoCondition, { SansenAkenomyojoConditionInfo } from '@finance/conditions/SansenAkenomyojoCondition';
+import SansenYoinomyojoCondition, { SansenYoinomyojoConditionInfo } from '@finance/conditions/SansenYoinomyojoCondition';
 import TickerService from '@finance/services/TickerService';
 import FrequencyUtil from '@finance/utils/FrequencyUtil';
 import { ExchangeSessionType } from '@finance/types/ExchangeTypes';
@@ -59,6 +60,10 @@ export default class ConditionService {
     SansenAkenomyojo: {
       info: SansenAkenomyojoConditionInfo,
       condition: SansenAkenomyojoCondition
+    },
+    SansenYoinomyojo: {
+      info: SansenYoinomyojoConditionInfo,
+      condition: SansenYoinomyojoCondition
     },
   };
 
