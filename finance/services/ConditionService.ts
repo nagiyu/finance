@@ -1,6 +1,7 @@
 import ErrorUtil from '@common/utils/ErrorUtil';
 
 import ConditionBase, { ConditionInfo } from '@finance/conditions/ConditionBase';
+import DoubleTopCondition, { DoubleTopConditionInfo } from '@finance/conditions/DoubleTopCondition';
 import ExchangeService from '@finance/services/ExchangeService';
 import GreaterThanCondition, { GreaterThanConditionInfo } from '@finance/conditions/GreaterThanCondition';
 import LessThanCondition, { LessThanConditionInfo } from '@finance/conditions/LessThanCondition';
@@ -69,6 +70,10 @@ export default class ConditionService {
     Sanzon: {
       info: SanzonConditionInfo,
       condition: SanzonCondition
+    },
+    DoubleTop: {
+      info: DoubleTopConditionInfo,
+      condition: DoubleTopCondition
     },
   };
 
