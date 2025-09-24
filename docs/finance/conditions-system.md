@@ -177,6 +177,43 @@ export default class MyPatternCondition extends ConditionBase {
 
 ホームページでは、目標価格が不要な条件（`enableTargetPrice: false`）の評価結果をリアルタイムで表示します。
 
+#### 新機能: 全条件表示
+
+**`/api/finance-notification/conditions/all`**
+
+指定されたExchange、Ticker、時間軸、セッションに対して評価可能な全ての条件をチェックし、適用状況を表示します。
+
+```typescript
+// リクエストパラメータ
+{
+  exchangeId: string;
+  tickerId: string;
+  timeframe?: string;
+  session?: string;
+}
+
+// レスポンス
+{
+  conditions: [
+    {
+      key: string;
+      name: string;
+      description: string;
+      isBuyCondition: boolean;
+      isSellCondition: boolean;
+      isMet: boolean;
+    }
+  ]
+}
+```
+
+#### 条件表示の特徴
+
+- **全条件表示**: 適用中・適用外問わず全ての条件を表示
+- **視覚的区別**: 適用中の条件は●、適用外の条件は○で表示し、適用外の条件は薄い色で表示
+- **インタラクティブ**: 各条件をクリックするとダイアログで詳細情報を表示
+- **グループ化**: 買いシグナルと売りシグナルに分けて表示
+
 #### API エンドポイント
 
 **`/api/finance-notification/conditions/check`**
