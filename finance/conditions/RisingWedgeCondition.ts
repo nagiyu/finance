@@ -43,148 +43,84 @@ export default class RisingWedgeCondition extends ConditionBase {
 
   /**
    * Detect rising wedge pattern
-   * Look for converging trend lines where:
-   * 1. Both highs and lows are rising
-   * 2. The low trend line has a steeper angle than the high trend line
-   * 3. Volume typically decreases during formation
-   * 4. Price breaks below the lower trend line for confirmation
+   * Simplified approach focusing on key characteristics:
+   * 1. Both highs and lows are generally rising in early/mid stages
+   * 2. Price range is converging (narrowing wedge)
+   * 3. Recent breakdown below support trend line
    */
   private detectRisingWedgePattern(candles: any[]): boolean {
-    // Find significant highs and lows
-    const highs = this.findSignificantHighs(candles);
-    const lows = this.findSignificantLows(candles);
-
-    if (highs.length < 3 || lows.length < 3) {
+    if (candles.length < 15) {
       return false;
     }
 
-    // Get the most recent highs and lows for trend line analysis
-    const recentHighs = highs.slice(-4); // Last 4 highs
-    const recentLows = lows.slice(-4); // Last 4 lows
+    // Analyze different sections of the data
+    const firstThird = candles.slice(0, Math.floor(candles.length / 3));
+    const middleThird = candles.slice(Math.floor(candles.length / 3), Math.floor(candles.length * 2 / 3));
+    const lastThird = candles.slice(Math.floor(candles.length * 2 / 3));
 
-    if (recentHighs.length < 3 || recentLows.length < 3) {
-      return false;
-    }
-
-    // Calculate trend lines
-    const highTrendLine = this.calculateTrendLine(recentHighs);
-    const lowTrendLine = this.calculateTrendLine(recentLows);
-
-    if (!highTrendLine || !lowTrendLine) {
-      return false;
-    }
-
-    // Check if both trend lines are rising (positive slope)
-    if (highTrendLine.slope <= 0 || lowTrendLine.slope <= 0) {
-      return false;
-    }
-
-    // Check if the low trend line has a steeper angle than the high trend line
-    // This creates the converging wedge shape
-    if (lowTrendLine.slope <= highTrendLine.slope) {
-      return false;
-    }
-
-    // Check for convergence - lines should be getting closer
-    const earlyHighs = recentHighs.slice(0, 2);
-    const earlyLows = recentLows.slice(0, 2);
-    const laterHighs = recentHighs.slice(-2);
-    const laterLows = recentLows.slice(-2);
-
-    const earlySpread = this.averagePrice(earlyHighs) - this.averagePrice(earlyLows);
-    const laterSpread = this.averagePrice(laterHighs) - this.averagePrice(laterLows);
-
-    // The spread should be narrowing (convergence)
-    if (laterSpread >= earlySpread) {
-      return false;
-    }
-
-    // Check for breakdown confirmation
-    const currentCandle = candles[candles.length - 1];
-    const currentLow = currentCandle.data[2]; // low price
-    const currentClose = currentCandle.data[1]; // close price
-
-    // Calculate the current level of the lower trend line
-    const currentLowTrendLevel = this.getTrendLineValueAtIndex(lowTrendLine, candles.length - 1, recentLows[0].index);
-
-    // Check if price has broken below the lower trend line
-    const breakdownConfirmed = currentLow < currentLowTrendLevel || currentClose < currentLowTrendLevel;
-
-    if (!breakdownConfirmed) {
-      return false;
-    }
-
-    // Additional confirmation: check that breakdown is sustained
-    // Look at the last 2-3 candles to ensure it's not just a brief spike
-    let confirmationCount = 0;
-    const lookBackCandles = Math.min(3, candles.length);
+    // Get high and low values for each section
+    const firstHigh = Math.max(...firstThird.map(c => c.data[3]));
+    const firstLow = Math.min(...firstThird.map(c => c.data[2]));
     
-    for (let i = candles.length - lookBackCandles; i < candles.length; i++) {
-      const candleLow = candles[i].data[2];
-      const candleClose = candles[i].data[1];
-      const trendLevel = this.getTrendLineValueAtIndex(lowTrendLine, i, recentLows[0].index);
-      
-      if (candleLow < trendLevel || candleClose < trendLevel) {
-        confirmationCount++;
+    const middleHigh = Math.max(...middleThird.map(c => c.data[3]));
+    const middleLow = Math.min(...middleThird.map(c => c.data[2]));
+
+    const lastHigh = Math.max(...lastThird.slice(0, -5).map(c => c.data[3])); // Exclude breakdown candles
+    const lastLow = Math.min(...lastThird.slice(0, -5).map(c => c.data[2])); // Exclude breakdown candles
+
+    // Check for rising pattern: both highs and lows should generally increase
+    const highsRising = middleHigh > firstHigh && lastHigh >= middleHigh;
+    const lowsRising = middleLow > firstLow && lastLow >= middleLow;
+
+    if (!highsRising || !lowsRising) {
+      return false;
+    }
+
+    // Check for convergence: the spread should be narrowing
+    const firstSpread = firstHigh - firstLow;
+    const middleSpread = middleHigh - middleLow;
+    const lastSpread = lastHigh - lastLow;
+
+    // Pattern should show convergence (narrowing wedge)
+    if (lastSpread >= firstSpread || lastSpread >= middleSpread) {
+      return false;
+    }
+
+    // Check for breakdown in recent candles
+    const recentCandles = lastThird.slice(-6); // Last 6 candles
+    const supportLevel = this.calculateSimpleSupport(candles.slice(-12, -2)); // Support from recent but not breakdown candles
+
+    if (supportLevel === null) {
+      return false;
+    }
+
+    // Count breakdown candles
+    let breakdownCount = 0;
+    for (const candle of recentCandles) {
+      if (candle.data[2] < supportLevel || candle.data[1] < supportLevel) { // low or close below support
+        breakdownCount++;
       }
     }
 
-    // At least 2 out of the last 3 candles should confirm the breakdown
-    return confirmationCount >= 2;
+    // At least half of recent candles should show breakdown
+    return breakdownCount >= Math.ceil(recentCandles.length / 2);
   }
 
   /**
-   * Find significant highs in the price data
+   * Calculate simple support level from recent lows
    */
-  private findSignificantHighs(candles: any[]): Array<{index: number, price: number}> {
-    const highs = [];
-    const lookback = 2; // Look at 2 candles on each side
-
-    for (let i = lookback; i < candles.length - lookback; i++) {
-      const currentHigh = candles[i].data[3]; // high price
-      let isSignificantHigh = true;
-
-      // Check if this is a local maximum
-      for (let j = i - lookback; j <= i + lookback; j++) {
-        if (j !== i && candles[j].data[3] >= currentHigh) {
-          isSignificantHigh = false;
-          break;
-        }
-      }
-
-      if (isSignificantHigh) {
-        highs.push({ index: i, price: currentHigh });
-      }
+  private calculateSimpleSupport(candles: any[]): number | null {
+    if (candles.length < 5) {
+      return null;
     }
 
-    return highs;
-  }
-
-  /**
-   * Find significant lows in the price data
-   */
-  private findSignificantLows(candles: any[]): Array<{index: number, price: number}> {
-    const lows = [];
-    const lookback = 2; // Look at 2 candles on each side
-
-    for (let i = lookback; i < candles.length - lookback; i++) {
-      const currentLow = candles[i].data[2]; // low price
-      let isSignificantLow = true;
-
-      // Check if this is a local minimum
-      for (let j = i - lookback; j <= i + lookback; j++) {
-        if (j !== i && candles[j].data[2] <= currentLow) {
-          isSignificantLow = false;
-          break;
-        }
-      }
-
-      if (isSignificantLow) {
-        lows.push({ index: i, price: currentLow });
-      }
-    }
-
-    return lows;
+    // Find the lowest lows in the period and use them as support
+    const lows = candles.map(c => c.data[2]); // low prices
+    lows.sort((a, b) => a - b);
+    
+    // Use average of lowest 30% of lows as support level
+    const supportLows = lows.slice(0, Math.max(1, Math.floor(lows.length * 0.3)));
+    return supportLows.reduce((sum, low) => sum + low, 0) / supportLows.length;
   }
 
   /**
@@ -209,20 +145,5 @@ export default class RisingWedgeCondition extends ConditionBase {
     const intercept = (sumY - slope * sumX) / n;
 
     return { slope, intercept };
-  }
-
-  /**
-   * Get the trend line value at a specific index
-   */
-  private getTrendLineValueAtIndex(trendLine: {slope: number, intercept: number}, index: number, baseIndex: number): number {
-    return trendLine.intercept + trendLine.slope * index;
-  }
-
-  /**
-   * Calculate average price of a set of points
-   */
-  private averagePrice(points: Array<{index: number, price: number}>): number {
-    if (points.length === 0) return 0;
-    return points.reduce((sum, point) => sum + point.price, 0) / points.length;
   }
 }
