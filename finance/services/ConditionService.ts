@@ -98,6 +98,16 @@ export default class ConditionService {
   }
 
   /**
+   * Gets the list of conditions that don't require target price.
+   * @returns List of condition keys that can be evaluated without target price
+   */
+  public getEvaluableConditionList(): string[] {
+    return Object.entries(this.conditionMap)
+      .filter(([, value]) => !value.info.enableTargetPrice)
+      .map(([key]) => key);
+  }
+
+  /**
    * Gets the information about a specific condition.
    * @param conditionName Condition Name
    * @returns Condition Information
