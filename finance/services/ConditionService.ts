@@ -1,5 +1,6 @@
 import ErrorUtil from '@common/utils/ErrorUtil';
 
+import BearCollarCondition, { BearCollarConditionInfo } from '@finance/conditions/BearCollarCondition';
 import ConditionBase, { ConditionInfo } from '@finance/conditions/ConditionBase';
 import DoubleTopCondition, { DoubleTopConditionInfo } from '@finance/conditions/DoubleTopCondition';
 import ExchangeService from '@finance/services/ExchangeService';
@@ -74,6 +75,10 @@ export default class ConditionService {
     DoubleTop: {
       info: DoubleTopConditionInfo,
       condition: DoubleTopCondition
+    },
+    BearCollar: {
+      info: BearCollarConditionInfo,
+      condition: BearCollarCondition
     },
   };
 
