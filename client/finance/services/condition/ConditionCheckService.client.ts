@@ -1,10 +1,14 @@
-import APIUtil from '@client-common/utils/APIUtil';
+import ResponseValidator from '@client-common/utils/ResponseValidator';
 
 interface ConditionCheckResult {
   name: string;
   key: string;
   isBuyCondition: boolean;
   isSellCondition: boolean;
+}
+
+interface ConditionCheckResponse {
+  conditions: ConditionCheckResult[];
 }
 
 export default class ConditionCheckService {
@@ -30,12 +34,18 @@ export default class ConditionCheckService {
       params.append('session', session);
     }
 
-    const response = await APIUtil.get(`/api/finance-notification/conditions/check?${params.toString()}`);
-    
-    if (response.success && response.data) {
-      return response.data.conditions || [];
-    }
+    try {
+      const response = await fetch(`/api/finance-notification/conditions/check?${params.toString()}`, {
+        method: 'GET'
+      });
 
-    return [];
+      ResponseValidator.ValidateResponse(response);
+
+      const result: ConditionCheckResponse = await response.json();
+      return result.conditions || [];
+    } catch (error) {
+      console.error('Failed to check conditions:', error);
+      return [];
+    }
   }
 }
