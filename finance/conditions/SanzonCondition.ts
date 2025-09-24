@@ -5,7 +5,7 @@ import ErrorUtil from '@common/utils/ErrorUtil';
 
 export const SanzonConditionInfo: ConditionInfo = {
   name: '三尊',
-  description: '三尊（Head and Shoulders）は、上昇トレンドの終盤に現れやすい弱気の反転パターンです。3つの山（ピーク）を形成し、中央の山（頭）が最も高く、両側の山（肩）は類似の高さで頭より低くなります。山と山の間の安値（谷）を結んだネックラインを明確に下抜けることで下落トレンド入りのシグナルとされます。厳格な検証により、谷の深さ、肩の対称性、ネックライン突破の確認を行います。',
+  description: '三尊（Head and Shoulders）は、上昇トレンドの終盤に現れやすい弱気の反転パターンです。3つの山（ピーク）を形成し、中央の山（頭）が最も高く、両側の山（肩）は類似の高さで頭より低くなります。山と山の間の安値（谷）を結んだネックラインを明確に下抜けることで下落トレンド入りのシグナルとされます。厳格な検証により、谷の深さ（2%以上）、肩の対称性、ネックライン突破の確認を行います。',
   isBuyCondition: false,
   isSellCondition: true,
   enableTargetPrice: false,
@@ -78,7 +78,7 @@ export default class SanzonCondition extends ConditionBase {
           const valley2 = this.findLowestBetween(candles, head.index, right.index);
           
           if (valley1 !== null && valley2 !== null) {
-            // Valleys should be significantly lower than peaks (at least 3% lower)
+            // Valleys should be significantly lower than peaks (at least 2% lower for realistic market conditions)
             const valley1Depth = Math.min(
               (left.price - valley1) / left.price,
               (head.price - valley1) / head.price
@@ -88,7 +88,7 @@ export default class SanzonCondition extends ConditionBase {
               (right.price - valley2) / right.price
             );
             
-            if (valley1Depth < 0.03 || valley2Depth < 0.03) {
+            if (valley1Depth < 0.02 || valley2Depth < 0.02) {
               continue;
             }
 

@@ -349,27 +349,29 @@ describe('ConditionTest', () => {
 
     it('Check Condition: 浅い谷のパターン（無効）', async () => {
       // Invalid pattern: valleys are too shallow (not deep enough from peaks)
+      // This test creates a scenario where the valleys between peaks are deliberately shallow (<2% depth)
       FinanceUtilMock.StockPriceDataMock = [
         { date: '2025-01-01 00:00', data: [1000, 1010, 990, 1020] },
         // Left shoulder
         { date: '2025-01-02 00:00', data: [1010, 1030, 1005, 1070] }, // Left shoulder: 1070
-        { date: '2025-01-03 00:00', data: [1030, 1020, 1065, 1035] }, // Shallow valley: 1065 (too high)
-        { date: '2025-01-04 00:00', data: [1020, 1025, 1015, 1030] },
+        { date: '2025-01-03 00:00', data: [1030, 1020, 1060, 1035] }, // Very shallow valley: 1060 (only 0.9% below 1070)
+        { date: '2025-01-04 00:00', data: [1020, 1025, 1058, 1030] }, // Still shallow
         
         // Head peak
         { date: '2025-01-05 00:00', data: [1025, 1040, 1020, 1100] }, // Head: 1100
-        { date: '2025-01-06 00:00', data: [1040, 1030, 1070, 1045] }, // Shallow valley: 1070 (too high)
-        { date: '2025-01-07 00:00', data: [1030, 1035, 1025, 1040] },
+        { date: '2025-01-06 00:00', data: [1040, 1030, 1085, 1045] }, // Very shallow valley: 1085 (only 1.4% below 1100)
+        { date: '2025-01-07 00:00', data: [1030, 1035, 1083, 1040] }, // Still shallow
         
         // Right shoulder
         { date: '2025-01-08 00:00', data: [1035, 1045, 1030, 1075] }, // Right shoulder: 1075
-        { date: '2025-01-09 00:00', data: [1045, 1035, 1025, 1050] },
-        { date: '2025-01-10 00:00', data: [1035, 1020, 1015, 1040] },
-        { date: '2025-01-11 00:00', data: [1020, 1010, 1000, 1025] },
-        { date: '2025-01-12 00:00', data: [1010, 1000, 990, 1015] },
-        { date: '2025-01-13 00:00', data: [1000, 995, 985, 1005] },
-        { date: '2025-01-14 00:00', data: [995, 980, 975, 1000] },
-        { date: '2025-01-15 00:00', data: [980, 970, 965, 985] }
+        // Keep all subsequent valleys high to ensure shallow valleys between peaks are used
+        { date: '2025-01-09 00:00', data: [1045, 1035, 1080, 1050] },
+        { date: '2025-01-10 00:00', data: [1035, 1020, 1075, 1040] },
+        { date: '2025-01-11 00:00', data: [1020, 1010, 1070, 1025] },
+        { date: '2025-01-12 00:00', data: [1010, 1000, 1065, 1015] },
+        { date: '2025-01-13 00:00', data: [1000, 995, 1060, 1005] },
+        { date: '2025-01-14 00:00', data: [995, 980, 1055, 1000] },
+        { date: '2025-01-15 00:00', data: [980, 970, 1050, 985] }
       ];
 
       const result = await service.checkCondition(conditionKey, 'MOCK_EXCHANGE', 'MOCK_TICKER', EXCHANGE_SESSION.EXTENDED);
