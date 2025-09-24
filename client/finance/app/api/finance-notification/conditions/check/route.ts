@@ -3,10 +3,12 @@ import { NextRequest } from 'next/server';
 import ConditionService from '@finance/services/ConditionService';
 import { ExchangeSessionType } from '@finance/types/ExchangeTypes';
 import { EXCHANGE_SESSION } from '@finance/consts/ExchangeConsts';
+import { TimeFrame } from '@finance/utils/FinanceUtil';
 
 import APIUtil from '@client-common/utils/APIUtil';
 
 import FinanceAuthorizer from '@/services/finance/FinanceAuthorizer';
+import TimeFrameUtil from '@/utils/TimeFrameUtil';
 
 export async function GET(request: NextRequest) {
   if (!await FinanceAuthorizer.isUser()) {
@@ -34,6 +36,10 @@ export async function GET(request: NextRequest) {
     const sessionType: ExchangeSessionType = 
       session === EXCHANGE_SESSION.EXTENDED ? EXCHANGE_SESSION.EXTENDED : EXCHANGE_SESSION.REGULAR;
 
+    // Validate and cast timeframe to proper type
+    const timeframeType: TimeFrame = 
+      timeframe && TimeFrameUtil.isValidTimeFrame(timeframe) ? timeframe : TimeFrameUtil.getDefaultTimeFrame();
+
     for (const conditionName of evaluableConditions) {
       try {
         const result = await service.checkCondition(
@@ -43,7 +49,7 @@ export async function GET(request: NextRequest) {
           sessionType,
           null, // no target price
           undefined, // no frequency
-          timeframe || '1'
+          timeframeType
         );
 
         if (result.met) {
