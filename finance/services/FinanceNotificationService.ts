@@ -146,7 +146,10 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
         // Wait for all conditions to complete and find the first met condition
         const results = await Promise.allSettled(conditionPromises);
 
-        for (const result of results) {
+        for (let i = 0; i < results.length; i++) {
+          const result = results[i];
+          const condition = conditionsToCheck[i];
+          
           if (result.status === 'fulfilled') {
             const conditionResult: ConditionResult = result.value;
 
