@@ -6,6 +6,7 @@ import DoubleTopCondition, { DoubleTopConditionInfo } from '@finance/conditions/
 import ExchangeService from '@finance/services/ExchangeService';
 import GreaterThanCondition, { GreaterThanConditionInfo } from '@finance/conditions/GreaterThanCondition';
 import LessThanCondition, { LessThanConditionInfo } from '@finance/conditions/LessThanCondition';
+import RisingWedgeCondition, { RisingWedgeConditionInfo } from '@finance/conditions/RisingWedgeCondition';
 import SansenAkenomyojoCondition, { SansenAkenomyojoConditionInfo } from '@finance/conditions/SansenAkenomyojoCondition';
 import SansenYoinomyojoCondition, { SansenYoinomyojoConditionInfo } from '@finance/conditions/SansenYoinomyojoCondition';
 import SanzonCondition, { SanzonConditionInfo } from '@finance/conditions/SanzonCondition';
@@ -79,6 +80,10 @@ export default class ConditionService {
     BearCollar: {
       info: BearCollarConditionInfo,
       condition: BearCollarCondition
+    },
+    RisingWedge: {
+      info: RisingWedgeConditionInfo,
+      condition: RisingWedgeCondition
     },
   };
 
