@@ -1,6 +1,8 @@
 import { NextRequest } from 'next/server';
 
 import ConditionService from '@finance/services/ConditionService';
+import { ExchangeSessionType } from '@finance/types/ExchangeTypes';
+import { EXCHANGE_SESSION } from '@finance/consts/ExchangeConsts';
 
 import APIUtil from '@client-common/utils/APIUtil';
 
@@ -28,13 +30,17 @@ export async function GET(request: NextRequest) {
     const evaluableConditions = service.getEvaluableConditionList();
     const applicableConditions = [];
 
+    // Validate and cast session to proper type
+    const sessionType: ExchangeSessionType = 
+      session === EXCHANGE_SESSION.EXTENDED ? EXCHANGE_SESSION.EXTENDED : EXCHANGE_SESSION.REGULAR;
+
     for (const conditionName of evaluableConditions) {
       try {
         const result = await service.checkCondition(
           conditionName,
           exchangeId,
           tickerId,
-          session || 'regular',
+          sessionType,
           null, // no target price
           undefined, // no frequency
           timeframe || '1'
