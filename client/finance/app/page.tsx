@@ -20,7 +20,7 @@ import { TickerDataType } from '@/interfaces/data/TickerDataType';
 
 import Auth from '@/app/components/Auth';
 import AuthAPIUtil from '@/app/utils/AuthAPIUtil';
-import ConditionStatus from '@/app/components/ConditionStatus';
+import AllConditionDisplay from '@/app/components/AllConditionDisplay';
 import ExchangeFetchService from '@/services/exchange/ExchangeFetchService.client';
 import Graph from '@/app/components/graph';
 import TickerFetchService from '@/services/ticker/TickerFetchService.client';
@@ -158,7 +158,7 @@ export default function Home() {
             }} />
             <BasicSelect label='取引時間' options={SessionUtil.toSelectOptions()} value={session} onChange={(value) => setSession(value)} />
           </DirectionStack>
-          <ConditionStatus 
+          <AllConditionDisplay 
             exchangeId={exchange}
             tickerId={ticker}
             timeframe={timeframe}
