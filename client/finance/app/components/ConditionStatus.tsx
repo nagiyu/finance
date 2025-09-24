@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import BasicStack from '@client-common/components/Layout/Stacks/BasicStack';
 import DirectionStack from '@client-common/components/Layout/Stacks/DirectionStack';
+import LoadingPage from '@client-common/pages/LoadingPage';
 import ConditionCheckService from '@/services/condition/ConditionCheckService.client';
 
 interface ConditionCheckResult {
@@ -57,13 +58,7 @@ export default function ConditionStatus({
   }, [exchangeId, tickerId, timeframe, session]);
 
   if (loading) {
-    return (
-      <BasicStack>
-        <div style={{ textAlign: 'center', padding: '10px' }}>
-          条件をチェック中...
-        </div>
-      </BasicStack>
-    );
+    return <LoadingPage />;
   }
 
   if (conditions.length === 0) {
