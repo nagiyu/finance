@@ -104,9 +104,8 @@ export default function Home() {
 
   useEffect(() => {
     if (exchangeOptions.length > 0 && !urlParamsProcessed) {
-      // Check for URL parameters first
+      // Check for Exchange URL parameter
       const exchangeIdFromUrl = searchParams.get('exchangeId');
-      const timeframeFromUrl = searchParams.get('timeframe');
       
       if (exchangeIdFromUrl && exchangeOptions.some(opt => opt.value === exchangeIdFromUrl)) {
         setExchange(exchangeIdFromUrl);
@@ -114,14 +113,20 @@ export default function Home() {
         setExchange(exchangeOptions[0].value);
       }
       
-      // Set timeframe from URL if valid
-      if (timeframeFromUrl && TimeFrameUtil.isValidTimeFrame(timeframeFromUrl)) {
-        setTimeframe(timeframeFromUrl);
-      }
-      
       setUrlParamsProcessed(true);
     }
   }, [exchangeOptions, searchParams, urlParamsProcessed]);
+
+  useEffect(() => {
+    if (urlParamsProcessed) {
+      // Check for TimeFrame URL parameter
+      const timeframeFromUrl = searchParams.get('timeframe');
+      
+      if (timeframeFromUrl && TimeFrameUtil.isValidTimeFrame(timeframeFromUrl)) {
+        setTimeframe(timeframeFromUrl);
+      }
+    }
+  }, [searchParams, urlParamsProcessed]);
 
   useEffect(() => {
     if (tickerOptions.length > 0 && urlParamsProcessed) {
