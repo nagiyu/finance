@@ -8,6 +8,8 @@ import { useSearchParams } from 'next/navigation';
 import { TimeFrame } from '@finance/utils/FinanceUtil';
 
 import BasicSelect from '@client-common/components/inputs/Selects/BasicSelect';
+import BasicStack from '@client-common/components/Layout/Stacks/BasicStack';
+import DirectionStack from '@client-common/components/Layout/Stacks/DirectionStack';
 
 import { SelectOptionType } from '@client-common/interfaces/SelectOptionType';
 
@@ -143,27 +145,27 @@ export default function Home() {
   return (
     <Auth
       userContent={
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-              <BasicSelect label='Exchange' options={exchangeOptions} value={exchange} onChange={(value) => setExchange(value)} />
-              <BasicSelect label='Ticker' options={tickerOptions} value={ticker} onChange={(value) => setTicker(value)} />
-            </div>
-            <Graph exchange={getExchangeKey(exchange)} ticker={getTickerKey(ticker)} timeframe={timeframe} session={session} />
-            <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-              <BasicSelect label='時間軸' options={TimeFrameUtil.toSelectOptions()} value={timeframe} onChange={(value) => {
-                if (TimeFrameUtil.isValidTimeFrame(value)) {
-                  setTimeframe(value);
-                }
-              }} />
-              <BasicSelect label='取引時間' options={SessionUtil.toSelectOptions()} value={session} onChange={(value) => setSession(value)} />
-            </div>
-            <AllConditionDisplay 
-              exchangeId={exchange}
-              tickerId={ticker}
-              timeframe={timeframe}
-              session={session}
-            />
-          </div>
+        <BasicStack>
+          <DirectionStack>
+            <BasicSelect label='Exchange' options={exchangeOptions} value={exchange} onChange={(value) => setExchange(value)} />
+            <BasicSelect label='Ticker' options={tickerOptions} value={ticker} onChange={(value) => setTicker(value)} />
+          </DirectionStack>
+          <Graph exchange={getExchangeKey(exchange)} ticker={getTickerKey(ticker)} timeframe={timeframe} session={session} />
+          <DirectionStack>
+            <BasicSelect label='時間軸' options={TimeFrameUtil.toSelectOptions()} value={timeframe} onChange={(value) => {
+              if (TimeFrameUtil.isValidTimeFrame(value)) {
+                setTimeframe(value);
+              }
+            }} />
+            <BasicSelect label='取引時間' options={SessionUtil.toSelectOptions()} value={session} onChange={(value) => setSession(value)} />
+          </DirectionStack>
+          <AllConditionDisplay 
+            exchangeId={exchange}
+            tickerId={ticker}
+            timeframe={timeframe}
+            session={session}
+          />
+        </BasicStack>
       }
     />
   );

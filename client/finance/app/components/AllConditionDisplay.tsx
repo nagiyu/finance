@@ -1,7 +1,9 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import LoadingPage from '@client-common/pages/LoadingPage';
 import AllConditionsService, { AllConditionResult } from '@/services/condition/AllConditionsService.client';
+import ConditionDetailDialog from '@/app/components/ConditionDetailDialog';
 
 interface AllConditionDisplayProps {
   exchangeId: string;
@@ -60,16 +62,7 @@ export default function AllConditionDisplay({
   };
 
   if (loading) {
-    return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        padding: '20px' 
-      }}>
-        <div>読み込み中...</div>
-      </div>
-    );
+    return <LoadingPage />;
   }
 
   if (conditions.length === 0) {
@@ -195,137 +188,11 @@ export default function AllConditionDisplay({
       </div>
 
       {/* Condition Detail Dialog */}
-      {dialogOpen && selectedCondition && (
-        <div 
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            zIndex: 1000
-          }}
-          onClick={handleDialogClose}
-        >
-          <div 
-            style={{
-              backgroundColor: 'white',
-              padding: '24px',
-              borderRadius: '8px',
-              maxWidth: '500px',
-              width: '90%',
-              maxHeight: '80%',
-              overflow: 'auto',
-              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div style={{ marginBottom: '16px' }}>
-              <h2 style={{ 
-                fontSize: '18px', 
-                fontWeight: 'bold', 
-                color: '#333',
-                margin: '0 0 16px 0'
-              }}>
-                {selectedCondition.name}
-              </h2>
-
-              <div style={{ marginBottom: '16px' }}>
-                <div style={{ 
-                  fontSize: '14px', 
-                  fontWeight: 'bold', 
-                  marginBottom: '8px',
-                  color: '#333'
-                }}>
-                  条件名
-                </div>
-                <div style={{ fontSize: '14px', color: '#666' }}>
-                  {selectedCondition.name}
-                </div>
-              </div>
-
-              <div style={{ marginBottom: '16px' }}>
-                <div style={{ 
-                  fontSize: '14px', 
-                  fontWeight: 'bold', 
-                  marginBottom: '8px',
-                  color: '#333'
-                }}>
-                  説明
-                </div>
-                <div style={{ 
-                  fontSize: '14px', 
-                  color: '#666',
-                  lineHeight: '1.5'
-                }}>
-                  {selectedCondition.description}
-                </div>
-              </div>
-
-              <div style={{ marginBottom: '16px' }}>
-                <div style={{ 
-                  fontSize: '14px', 
-                  fontWeight: 'bold', 
-                  marginBottom: '8px',
-                  color: '#333'
-                }}>
-                  現在の状態
-                </div>
-                <div style={{ 
-                  fontSize: '14px',
-                  color: selectedCondition.isMet ? '#2e7d32' : '#666',
-                  fontWeight: selectedCondition.isMet ? 'bold' : 'normal'
-                }}>
-                  {selectedCondition.isMet ? '条件適用中' : '条件適用外'}
-                </div>
-              </div>
-
-              <div style={{ marginBottom: '24px' }}>
-                <div style={{ 
-                  fontSize: '14px', 
-                  fontWeight: 'bold', 
-                  marginBottom: '8px',
-                  color: '#333'
-                }}>
-                  シグナルタイプ
-                </div>
-                <div style={{ fontSize: '14px', color: '#666' }}>
-                  {selectedCondition.isBuyCondition && selectedCondition.isSellCondition 
-                    ? '買い・売り両方' 
-                    : selectedCondition.isBuyCondition 
-                      ? '買いシグナル' 
-                      : '売りシグナル'}
-                </div>
-              </div>
-
-              <button
-                onClick={handleDialogClose}
-                style={{
-                  backgroundColor: '#1976d2',
-                  color: 'white',
-                  border: 'none',
-                  padding: '8px 16px',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: '14px'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#1565c0';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#1976d2';
-                }}
-              >
-                閉じる
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConditionDetailDialog
+        open={dialogOpen}
+        condition={selectedCondition}
+        onClose={handleDialogClose}
+      />
     </div>
   );
 }
