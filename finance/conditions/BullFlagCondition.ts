@@ -27,7 +27,7 @@ export default class BullFlagCondition extends ConditionBase {
         timeframe: timeframe || '1'
       });
 
-      if (!stockData || !Array.isArray(stockData) || stockData.length < 20) {
+      if (!stockData || !Array.isArray(stockData) || stockData.length < 15) {
         return false;
       }
 
@@ -49,7 +49,7 @@ export default class BullFlagCondition extends ConditionBase {
    * 3. Breakout: Price breaks above flag resistance with volume confirmation
    */
   private detectBullFlagPattern(candles: any[]): boolean {
-    if (candles.length < 20) {
+    if (candles.length < 15) {
       return false;
     }
 
@@ -79,8 +79,8 @@ export default class BullFlagCondition extends ConditionBase {
     const candidates: Array<{startIndex: number, endIndex: number, startPrice: number, endPrice: number}> = [];
     
     // Look for strong upward moves in the last 15 candles (leaving room for flag + breakout)
-    for (let i = 0; i < candles.length - 10; i++) {
-      for (let j = i + 3; j <= Math.min(i + 8, candles.length - 7); j++) {
+    for (let i = 0; i < candles.length - 8; i++) {
+      for (let j = i + 3; j <= Math.min(i + 8, candles.length - 5); j++) {
         const startPrice = Math.min(candles[i].data[0], candles[i].data[1]); // min of open/close
         const endPrice = Math.max(candles[j].data[0], candles[j].data[1]); // max of open/close
         const gain = (endPrice - startPrice) / startPrice;
@@ -118,9 +118,9 @@ export default class BullFlagCondition extends ConditionBase {
     const candidates: Array<{startIndex: number, endIndex: number, highPrice: number, lowPrice: number}> = [];
     
     // Flag should start within 1-2 candles after flagpole
-    for (let start = flagStart; start <= Math.min(flagStart + 2, candles.length - 5); start++) {
-      // Flag duration: 3-8 candles
-      for (let end = start + 3; end <= Math.min(start + 8, candles.length - 2); end++) {
+    for (let start = flagStart; start <= Math.min(flagStart + 2, candles.length - 3); start++) {
+      // Flag duration: 2-6 candles (adjusted for smaller datasets)
+      for (let end = start + 2; end <= Math.min(start + 6, candles.length - 2); end++) {
         const flagCandles = candles.slice(start, end + 1);
         
         // Calculate flag high and low
@@ -132,16 +132,16 @@ export default class BullFlagCondition extends ConditionBase {
           lowPrice = Math.min(lowPrice, candle.data[2]); // low
         }
         
-        // Flag should be relatively tight consolidation (typically 2-5% range)
+        // Flag should be relatively tight consolidation (typically 0.5-5% range)
         const flagRange = (highPrice - lowPrice) / lowPrice;
-        if (flagRange <= 0.05 && flagRange >= 0.01) {
+        if (flagRange <= 0.05 && flagRange >= 0.005) {
           // Check if flag shows sideways/slight downward bias
           const firstClose = flagCandles[0].data[1];
           const lastClose = flagCandles[flagCandles.length - 1].data[1];
           const flagBias = (lastClose - firstClose) / firstClose;
           
-          // Flag can be slightly down (-3%) to slightly up (+1%)
-          if (flagBias >= -0.03 && flagBias <= 0.01) {
+          // Flag can be slightly down (-5%) to slightly up (+2%)
+          if (flagBias >= -0.05 && flagBias <= 0.02) {
             candidates.push({
               startIndex: start,
               endIndex: end,
@@ -184,7 +184,7 @@ export default class BullFlagCondition extends ConditionBase {
         // Price should be at least approaching the flagpole high
         const progressTowardTarget = (candleClose - flag.lowPrice) / (flagpole.endPrice - flag.lowPrice);
         
-        if (progressTowardTarget >= 0.3) { // At least 30% progress toward flagpole high
+        if (progressTowardTarget >= 0.2) { // At least 20% progress toward flagpole high (more lenient)
           return true;
         }
       }
