@@ -111,27 +111,88 @@ export default class AscendingTriangleCondition extends ConditionBase {
   }
 
   /**
-   * Find significant lows (local troughs)
+   * Find support points for ascending triangle
+   * Instead of strict local minima, find points where price bounced off support
    */
   private findSignificantLows(candles: any[]): Array<{index: number, price: number}> {
     const lows = [];
-    const minDistance = 2; // Minimum distance between troughs
+    const lookback = 3; // Look for pullbacks/bounces
     
-    for (let i = minDistance; i < candles.length - minDistance; i++) {
+    for (let i = lookback; i < candles.length - lookback; i++) {
       const currentLow = candles[i].data[2]; // low price
-      let isSignificantLow = true;
+      const currentClose = candles[i].data[1]; // close price
       
-      // Check if this is lower than surrounding candles
-      for (let j = i - minDistance; j <= i + minDistance; j++) {
-        if (j !== i && candles[j].data[2] <= currentLow) {
-          isSignificantLow = false;
+      // Look for bounce pattern: price drops then recovers
+      let isPullbackLow = false;
+      
+      // Check if this is a pullback low (lower than recent candles and followed by recovery)
+      let isLowerThanRecent = true;
+      let hasRecovery = false;
+      
+      // Check previous candles
+      for (let j = i - lookback; j < i; j++) {
+        if (candles[j].data[2] <= currentLow) {
+          isLowerThanRecent = false;
           break;
         }
       }
       
-      if (isSignificantLow) {
+      // Check following candles for recovery
+      for (let j = i + 1; j <= i + lookback && j < candles.length; j++) {
+        if (candles[j].data[1] > currentClose || candles[j].data[2] > currentLow) {
+          hasRecovery = true;
+          break;
+        }
+      }
+      
+      if (isLowerThanRecent && hasRecovery) {
+        isPullbackLow = true;
+      }
+      
+      // Also include strict local lows as backup
+      let isLocalLow = true;
+      for (let j = Math.max(0, i - 1); j <= Math.min(candles.length - 1, i + 1); j++) {
+        if (j !== i && candles[j].data[2] <= currentLow) {
+          isLocalLow = false;
+          break;
+        }
+      }
+      
+      if (isPullbackLow || isLocalLow) {
         lows.push({ index: i, price: currentLow });
       }
+    }
+    
+    // If we still don't have enough lows, be more lenient and take swing lows
+    if (lows.length < 2) {
+      const swingLows = this.findSwingLows(candles);
+      return swingLows;
+    }
+    
+    return lows;
+  }
+
+  /**
+   * Find swing lows - more lenient approach for ascending triangles
+   */
+  private findSwingLows(candles: any[]): Array<{index: number, price: number}> {
+    const lows = [];
+    const period = 5; // Look at 5-candle periods
+    
+    for (let i = 0; i < candles.length - period; i += period) {
+      const segment = candles.slice(i, i + period);
+      let lowestIndex = 0;
+      let lowestPrice = segment[0].data[2];
+      
+      // Find the lowest low in this segment
+      for (let j = 1; j < segment.length; j++) {
+        if (segment[j].data[2] < lowestPrice) {
+          lowestPrice = segment[j].data[2];
+          lowestIndex = j;
+        }
+      }
+      
+      lows.push({ index: i + lowestIndex, price: lowestPrice });
     }
     
     return lows;
@@ -208,21 +269,32 @@ export default class AscendingTriangleCondition extends ConditionBase {
   private verifyPatternConvergence(candles: any[], resistanceLevel: number, supportTrend: {slope: number, intercept: number}): boolean {
     // Check if support line is approaching resistance level
     const startIndex = 0;
+    const midIndex = Math.floor(candles.length / 2);
     const endIndex = candles.length - 1;
     
     const startSupportPrice = supportTrend.slope * startIndex + supportTrend.intercept;
+    const midSupportPrice = supportTrend.slope * midIndex + supportTrend.intercept;
     const endSupportPrice = supportTrend.slope * endIndex + supportTrend.intercept;
     
-    // Support should be rising and approaching resistance
+    // Support should be rising
     if (endSupportPrice <= startSupportPrice) {
       return false;
     }
     
-    // Check that the gap between support and resistance is narrowing
+    // Check that the gap is narrowing over time (convergence)
     const startGap = resistanceLevel - startSupportPrice;
+    const midGap = resistanceLevel - midSupportPrice;
     const endGap = resistanceLevel - endSupportPrice;
     
-    return endGap < startGap && endGap > 0;
+    // The pattern should show convergence - gaps should be getting smaller
+    // But we allow for the final gap to be negative (breakout scenario)
+    const isConverging = midGap < startGap && (endGap < midGap);
+    
+    // Also ensure the support hasn't been too far below resistance at start
+    const maxGapRatio = 0.15; // Support should start within 15% of resistance
+    const startGapRatio = startGap / resistanceLevel;
+    
+    return isConverging && startGapRatio <= maxGapRatio;
   }
 
   /**
