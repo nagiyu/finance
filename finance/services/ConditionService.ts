@@ -1,5 +1,6 @@
 import ErrorUtil from '@common/utils/ErrorUtil';
 
+import AscendingTriangleCondition, { AscendingTriangleConditionInfo } from '@finance/conditions/AscendingTriangleCondition';
 import BearCollarCondition, { BearCollarConditionInfo } from '@finance/conditions/BearCollarCondition';
 import ConditionBase, { ConditionInfo } from '@finance/conditions/ConditionBase';
 import DoubleTopCondition, { DoubleTopConditionInfo } from '@finance/conditions/DoubleTopCondition';
@@ -84,6 +85,10 @@ export default class ConditionService {
     RisingWedge: {
       info: RisingWedgeConditionInfo,
       condition: RisingWedgeCondition
+    },
+    AscendingTriangle: {
+      info: AscendingTriangleConditionInfo,
+      condition: AscendingTriangleCondition
     },
   };
 
