@@ -317,6 +317,40 @@ public getEvaluableConditionList(): string[] {
 3. **結果処理**: 最初に満たされた条件を見つけるために結果を処理
 4. **通知**: 条件が満たされた場合、プッシュ通知が送信
 
+## テスト構造
+
+### 条件別テストファイル
+
+各条件タイプは専用のテストファイルに分離されており、保守性とテスト性を向上させています：
+
+```
+finance/tests/conditions/
+├── GreaterThanCondition.test.ts      # 指定価格を上回る
+├── LessThanCondition.test.ts         # 指定価格を下回る  
+├── SansenAkenomyojoCondition.test.ts # 三川明けの明星
+├── SansenYoinomyojoCondition.test.ts # 三川宵の明星
+├── SanzonCondition.test.ts           # 三尊
+├── DoubleTopCondition.test.ts        # ダブルトップ
+├── BearCollarCondition.test.ts       # ベアコラッグ
+└── RisingWedgeCondition.test.ts      # 上昇ウェッジ
+```
+
+### テストの特徴
+
+- **分離されたテスト**: 各条件に特化したテストケース
+- **包括的カバレッジ**: 正常系・異常系・境界値のテストを含む
+- **モック使用**: `FinanceUtilMock` を使用した予測可能なテスト環境
+- **一貫した構造**: 全テストファイルで統一されたテストパターン
+
+### テスト内容
+
+各条件テストには以下が含まれます：
+
+1. **サービス登録テスト**: 買い・売り条件リストへの登録確認
+2. **条件情報テスト**: メタデータの正確性確認
+3. **条件クラステスト**: 正しいクラスインスタンスの取得確認
+4. **条件ロジックテスト**: 実際の条件チェック動作の検証
+
 ## 利点
 
 - **関心事の分離**: 各条件タイプが専用のクラスを持つ
