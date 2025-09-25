@@ -117,6 +117,27 @@ const result = await conditionService.checkCondition(
 - **谷の一貫性**: 2つの谷の価格差は5%以内
 - **ネックライン突破の確認**: 直近3本のローソク足のうち少なくとも2本がネックラインを下回って終値を付ける
 
+#### GyakusanzonCondition (逆三尊)
+「逆三尊（Inverse Head and Shoulders）」パターンを検出 - 下落トレンドの終盤に現れやすい強気反転パターン：
+1. 左肩：最初の下落谷（底）
+2. 頭：中央で最も深い谷（底）
+3. 右肩：再び下落するが頭を超えず、左肩と類似の深さで止まる谷（底）
+4. ネックライン：谷と谷の間の高値を結んだライン
+
+このパターンは価格がネックラインを上抜けることで上昇トレンド入りのシグナルとされます。
+
+**厳格な検証基準：**
+- **肩の対称性**: 左肩と右肩の価格差は15%以内
+- **山の高さ**: 各山は隣接するボトムより少なくとも2%高い（現実的な市場条件に対応）
+- **山の一貫性**: 2つの山の価格差は5%以内
+- **ネックライン突破の確認**: 直近3本のローソク足のうち少なくとも2本がネックラインを上回って終値を付ける
+
+**価格例：**
+- 左肩：1000円 → 900円 → 950円
+- 頭：950円 → 800円 → 950円
+- 右肩：950円 → 880円 → 950円
+- ネックライン：950円付近を上抜けて強気転換シグナル
+
 #### DoubleTopCondition (ダブルトップ)
 「ダブルトップ」パターンを検出 - 上昇トレンドの終盤に現れやすい弱気反転パターン：
 1. 1つ目の山（トップ）：上昇トレンドの勢いで高値をつける
@@ -373,6 +394,7 @@ finance/tests/conditions/
 ├── SansenAkenomyojoCondition.test.ts # 三川明けの明星
 ├── SansenYoinomyojoCondition.test.ts # 三川宵の明星
 ├── SanzonCondition.test.ts           # 三尊
+├── GyakusanzonCondition.test.ts      # 逆三尊
 ├── DoubleTopCondition.test.ts        # ダブルトップ
 ├── RisingDoubleBottomCondition.test.ts # 切り上げダブルボトム
 ├── BearCollarCondition.test.ts       # ベアコラッグ

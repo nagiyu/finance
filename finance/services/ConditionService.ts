@@ -6,6 +6,7 @@ import ConditionBase, { ConditionInfo } from '@finance/conditions/ConditionBase'
 import DoubleTopCondition, { DoubleTopConditionInfo } from '@finance/conditions/DoubleTopCondition';
 import ExchangeService from '@finance/services/ExchangeService';
 import GreaterThanCondition, { GreaterThanConditionInfo } from '@finance/conditions/GreaterThanCondition';
+import GyakusanzonCondition, { GyakusanzonConditionInfo } from '@finance/conditions/GyakusanzonCondition';
 import LessThanCondition, { LessThanConditionInfo } from '@finance/conditions/LessThanCondition';
 import RisingDoubleBottomCondition, { RisingDoubleBottomConditionInfo } from '@finance/conditions/RisingDoubleBottomCondition';
 import RisingWedgeCondition, { RisingWedgeConditionInfo } from '@finance/conditions/RisingWedgeCondition';
@@ -74,6 +75,10 @@ export default class ConditionService {
     Sanzon: {
       info: SanzonConditionInfo,
       condition: SanzonCondition
+    },
+    Gyakusanzon: {
+      info: GyakusanzonConditionInfo,
+      condition: GyakusanzonCondition
     },
     DoubleTop: {
       info: DoubleTopConditionInfo,
