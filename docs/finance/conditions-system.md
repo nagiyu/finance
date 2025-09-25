@@ -124,6 +124,24 @@ const result = await conditionService.checkCondition(
 3. 2つ目の山（トップ）：再び反発するが、1つ目とほぼ同水準で高値止まり
 4. ネックライン割れ：谷の安値（ネックライン）を明確に下抜けた時点で「ダブルトップ完成」
 
+#### RisingDoubleBottomCondition (切り上げダブルボトム)
+「切り上げダブルボトム」パターンを検出 - 下降トレンドの底値圏で出現する強気反転パターン：
+1. **1回目の底（ボトムA）**：下落トレンドの中で安値を付ける
+2. **一度の反発**：そこから一定の戻り（ネックライン候補）をつける
+3. **2回目の底（ボトムB）**：再び下げるが、1回目の安値よりも高い位置で反発（「切り上げ」ポイント）
+4. **ネックライン突破**：戻り高値（ネックライン）を出来高を伴って上抜けると買いシグナル
+
+**検出条件：**
+- **切り上げ特徴**: 2回目の底が1回目より0.5%〜10%高い位置にある
+- **ネックライン形成**: 2つの底の間のピークが両底より少なくとも3%高い
+- **突破確認**: 直近2-3本のローソク足がネックラインを上抜けて終値を付ける
+
+**価格例：**
+- 1回目の底：1,000円で底を付ける
+- 反発：1,200円まで戻す（ネックライン候補）
+- 2回目の底：1,050円で下げ止まる（1回目より高い）
+- 突破：1,200円を上抜けて切り上げダブルボトム完成
+
 #### RisingWedgeCondition (上昇ウェッジ)
 「上昇ウェッジ（Rising Wedge）」パターンを検出 - 上昇相場の天井近くに現れやすい弱気反転パターン：
 
@@ -356,6 +374,7 @@ finance/tests/conditions/
 ├── SansenYoinomyojoCondition.test.ts # 三川宵の明星
 ├── SanzonCondition.test.ts           # 三尊
 ├── DoubleTopCondition.test.ts        # ダブルトップ
+├── RisingDoubleBottomCondition.test.ts # 切り上げダブルボトム
 ├── BearCollarCondition.test.ts       # ベアコラッグ
 ├── RisingWedgeCondition.test.ts      # 上昇ウェッジ
 └── AscendingTriangleCondition.test.ts # アセンディング・トライアングル
