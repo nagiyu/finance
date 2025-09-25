@@ -2,6 +2,7 @@ import ErrorUtil from '@common/utils/ErrorUtil';
 
 import AscendingTriangleCondition, { AscendingTriangleConditionInfo } from '@finance/conditions/AscendingTriangleCondition';
 import BearCollarCondition, { BearCollarConditionInfo } from '@finance/conditions/BearCollarCondition';
+import BullFlagCondition, { BullFlagConditionInfo } from '@finance/conditions/BullFlagCondition';
 import ConditionBase, { ConditionInfo } from '@finance/conditions/ConditionBase';
 import DoubleTopCondition, { DoubleTopConditionInfo } from '@finance/conditions/DoubleTopCondition';
 import ExchangeService from '@finance/services/ExchangeService';
@@ -94,6 +95,10 @@ export default class ConditionService {
     AscendingTriangle: {
       info: AscendingTriangleConditionInfo,
       condition: AscendingTriangleCondition
+    },
+    BullFlag: {
+      info: BullFlagConditionInfo,
+      condition: BullFlagCondition
     },
   };
 
