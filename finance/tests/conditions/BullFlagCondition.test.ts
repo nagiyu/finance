@@ -73,6 +73,7 @@ describe('BullFlagCondition', () => {
         // Breakout: Price breaks above flag resistance
         { date: '2025-01-13 00:00', data: [1275, 1320, 1275, 1325] }, // Breakout candle
         { date: '2025-01-14 00:00', data: [1320, 1350, 1315, 1355] }, // Continuation
+        { date: '2025-01-15 00:00', data: [1350, 1380, 1345, 1385] }, // Additional data point
       ];
 
       const result = await service.checkCondition(conditionKey, 'MOCK_EXCHANGE', 'MOCK_TICKER', EXCHANGE_SESSION.EXTENDED);
@@ -180,21 +181,28 @@ describe('BullFlagCondition', () => {
     it('Check Condition - Bull Flag with Different Timeframe', async () => {
       // Test pattern recognition with smaller price movements (simulating different timeframe)
       FinanceUtilMock.StockPriceDataMock = [
+        // Earlier context data
+        { date: '2025-01-01 00:00', data: [98.0, 99.0, 97.5, 99.5] },
+        { date: '2025-01-02 00:00', data: [99.0, 99.5, 98.5, 100.0] },
+        { date: '2025-01-03 00:00', data: [99.5, 100.2, 99.0, 100.5] },
+        
         // Flagpole: 100.0 -> 105.0 (5% gain)
-        { date: '2025-01-01 00:00', data: [100.0, 101.5, 99.8, 102.0] },
-        { date: '2025-01-02 00:00', data: [101.5, 103.2, 101.0, 103.8] },
-        { date: '2025-01-03 00:00', data: [103.2, 104.8, 102.9, 105.2] },
-        { date: '2025-01-04 00:00', data: [104.8, 105.0, 104.5, 105.5] },
+        { date: '2025-01-04 00:00', data: [100.0, 101.5, 99.8, 102.0] },
+        { date: '2025-01-05 00:00', data: [101.5, 103.2, 101.0, 103.8] },
+        { date: '2025-01-06 00:00', data: [103.2, 104.8, 102.9, 105.2] },
+        { date: '2025-01-07 00:00', data: [104.8, 105.0, 104.5, 105.5] },
         
         // Flag: slight pullback and consolidation
-        { date: '2025-01-05 00:00', data: [105.0, 104.5, 104.0, 105.2] },
-        { date: '2025-01-06 00:00', data: [104.5, 104.2, 103.8, 104.8] },
-        { date: '2025-01-07 00:00', data: [104.2, 104.0, 103.6, 104.5] },
-        { date: '2025-01-08 00:00', data: [104.0, 104.3, 103.8, 104.6] },
+        { date: '2025-01-08 00:00', data: [105.0, 104.5, 104.0, 105.2] },
+        { date: '2025-01-09 00:00', data: [104.5, 104.2, 103.8, 104.8] },
+        { date: '2025-01-10 00:00', data: [104.2, 104.0, 103.6, 104.5] },
+        { date: '2025-01-11 00:00', data: [104.0, 104.3, 103.8, 104.6] },
         
         // Breakout
-        { date: '2025-01-09 00:00', data: [104.3, 106.0, 104.3, 106.2] },
-        { date: '2025-01-10 00:00', data: [106.0, 107.5, 105.8, 107.8] },
+        { date: '2025-01-12 00:00', data: [104.3, 106.0, 104.3, 106.2] },
+        { date: '2025-01-13 00:00', data: [106.0, 107.5, 105.8, 107.8] },
+        { date: '2025-01-14 00:00', data: [107.5, 108.2, 107.0, 108.5] },
+        { date: '2025-01-15 00:00', data: [108.2, 109.0, 107.8, 109.2] },
       ];
 
       const result = await service.checkCondition(conditionKey, 'MOCK_EXCHANGE', 'MOCK_TICKER', EXCHANGE_SESSION.EXTENDED);
