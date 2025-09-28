@@ -1,14 +1,24 @@
 import ErrorUtil from '@common/utils/ErrorUtil';
 
+import AscendingTriangleCondition, { AscendingTriangleConditionInfo } from '@finance/conditions/AscendingTriangleCondition';
+import BearCollarCondition, { BearCollarConditionInfo } from '@finance/conditions/BearCollarCondition';
+import BullFlagCondition, { BullFlagConditionInfo } from '@finance/conditions/BullFlagCondition';
 import ConditionBase, { ConditionInfo } from '@finance/conditions/ConditionBase';
+import DoubleTopCondition, { DoubleTopConditionInfo } from '@finance/conditions/DoubleTopCondition';
 import ExchangeService from '@finance/services/ExchangeService';
 import GreaterThanCondition, { GreaterThanConditionInfo } from '@finance/conditions/GreaterThanCondition';
+import GyakusanzonCondition, { GyakusanzonConditionInfo } from '@finance/conditions/GyakusanzonCondition';
 import LessThanCondition, { LessThanConditionInfo } from '@finance/conditions/LessThanCondition';
+import RisingDoubleBottomCondition, { RisingDoubleBottomConditionInfo } from '@finance/conditions/RisingDoubleBottomCondition';
+import RisingWedgeCondition, { RisingWedgeConditionInfo } from '@finance/conditions/RisingWedgeCondition';
 import SansenAkenomyojoCondition, { SansenAkenomyojoConditionInfo } from '@finance/conditions/SansenAkenomyojoCondition';
+import SansenYoinomyojoCondition, { SansenYoinomyojoConditionInfo } from '@finance/conditions/SansenYoinomyojoCondition';
+import SanzonCondition, { SanzonConditionInfo } from '@finance/conditions/SanzonCondition';
 import TickerService from '@finance/services/TickerService';
 import FrequencyUtil from '@finance/utils/FrequencyUtil';
 import { ExchangeSessionType } from '@finance/types/ExchangeTypes';
 import { FinanceNotificationFrequencyType } from '@finance/types/FinanceNotificationType';
+import { TimeFrame } from '@finance/utils/FinanceUtil';
 
 type ConditionConstructor = new (exchangeService: ExchangeService, tickerService: TickerService) => ConditionBase;
 
@@ -59,6 +69,42 @@ export default class ConditionService {
       info: SansenAkenomyojoConditionInfo,
       condition: SansenAkenomyojoCondition
     },
+    SansenYoinomyojo: {
+      info: SansenYoinomyojoConditionInfo,
+      condition: SansenYoinomyojoCondition
+    },
+    Sanzon: {
+      info: SanzonConditionInfo,
+      condition: SanzonCondition
+    },
+    Gyakusanzon: {
+      info: GyakusanzonConditionInfo,
+      condition: GyakusanzonCondition
+    },
+    DoubleTop: {
+      info: DoubleTopConditionInfo,
+      condition: DoubleTopCondition
+    },
+    RisingDoubleBottom: {
+      info: RisingDoubleBottomConditionInfo,
+      condition: RisingDoubleBottomCondition
+    },
+    BearCollar: {
+      info: BearCollarConditionInfo,
+      condition: BearCollarCondition
+    },
+    RisingWedge: {
+      info: RisingWedgeConditionInfo,
+      condition: RisingWedgeCondition
+    },
+    AscendingTriangle: {
+      info: AscendingTriangleConditionInfo,
+      condition: AscendingTriangleCondition
+    },
+    BullFlag: {
+      info: BullFlagConditionInfo,
+      condition: BullFlagCondition
+    },
   };
 
   /**
@@ -78,6 +124,16 @@ export default class ConditionService {
   public getSellConditionList(): string[] {
     return Object.entries(this.conditionMap)
       .filter(([, value]) => value.info.isSellCondition)
+      .map(([key]) => key);
+  }
+
+  /**
+   * Gets the list of conditions that don't require target price.
+   * @returns List of condition keys that can be evaluated without target price
+   */
+  public getEvaluableConditionList(): string[] {
+    return Object.entries(this.conditionMap)
+      .filter(([, value]) => !value.info.enableTargetPrice)
       .map(([key]) => key);
   }
 
@@ -119,6 +175,7 @@ export default class ConditionService {
    * @param session Exchange session type
    * @param targetPrice Target price (optional)
    * @param frequency Notification frequency (optional)
+   * @param timeframe Timeframe for candlestick data (optional, defaults to '1')
    * @returns Promise that resolves to true if the condition is met, false otherwise
    */
   public async checkCondition(
@@ -127,11 +184,12 @@ export default class ConditionService {
     tickerId: string,
     session?: ExchangeSessionType,
     targetPrice?: number | null,
-    frequency?: FinanceNotificationFrequencyType
+    frequency?: FinanceNotificationFrequencyType,
+    timeframe?: TimeFrame | null
   ): Promise<ConditionResult> {
     const ConditionClass = this.getCondition(conditionName);
     const condition = new ConditionClass(this.exchangeService, this.tickerService);
-    const met = await condition.checkCondition(exchangeId, tickerId, session, targetPrice);
+    const met = await condition.checkCondition(exchangeId, tickerId, session, targetPrice, timeframe);
 
     if (!met) {
       return { met };

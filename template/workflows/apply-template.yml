@@ -102,6 +102,12 @@ jobs:
             # Handle modification conflicts
             git diff --name-only --diff-filter=U | while read file; do
               echo "Resolving conflict in: $file"
+              # Skip workflow files to avoid permission issues
+              if [[ "$file" == .github/workflows/* ]]; then
+                echo "Skipping workflow file (permission restriction): $file"
+                git rm -f "$file" 2>/dev/null || git reset -- "$file"
+                continue
+              fi
               # Check if the template version exists
               if git show ":3:$file" > /dev/null 2>&1; then
                 # Template version exists, use it
@@ -116,7 +122,8 @@ jobs:
             done
             
             # Add any remaining untracked files that might be new from template
-            git add .
+            # but exclude workflow files
+            git add . ':!.github/workflows/*'
           else
             echo "No merge conflicts to resolve"
           fi
@@ -124,6 +131,9 @@ jobs:
       - name: Check for changes
         id: changes
         run: |
+          # Ensure workflow files are not staged to avoid permission issues
+          git reset -- .github/workflows/ 2>/dev/null || true
+          
           # More comprehensive change detection
           if [ "${{ env.template_has_updates }}" = "false" ]; then
             echo "changes_detected=false" >> $GITHUB_ENV

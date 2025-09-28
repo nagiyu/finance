@@ -1,0 +1,3 @@
+[submodule "typescript-common"]
+	path = typescript-common
+	url = https://github.com/nagiyu/nagiyu-typescript-common.git

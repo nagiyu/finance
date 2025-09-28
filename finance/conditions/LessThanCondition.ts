@@ -1,4 +1,6 @@
 import ConditionBase, { ConditionInfo } from '@finance/conditions/ConditionBase';
+import { ExchangeSessionType } from '@finance/types/ExchangeTypes';
+import { TimeFrame } from '@finance/utils/FinanceUtil';
 
 export const LessThanConditionInfo: ConditionInfo = {
   name: '指定価格を下回る',
@@ -6,14 +8,16 @@ export const LessThanConditionInfo: ConditionInfo = {
   isBuyCondition: true,
   isSellCondition: true,
   enableTargetPrice: true,
+  enableTimeFrame: false,
 };
 
 export default class LessThanCondition extends ConditionBase {
   public async checkCondition(
     exchangeId: string,
     tickerId: string,
-    session?: string,
-    targetPrice?: number | null
+    session?: ExchangeSessionType,
+    targetPrice?: number | null,
+    timeframe?: TimeFrame | null
   ): Promise<boolean> {
     if (targetPrice === null || targetPrice === undefined) {
       throw new Error('Target price is required for LessThanCondition');

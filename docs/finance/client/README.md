@@ -45,6 +45,7 @@ client/finance/
 - 時間軸・セッション設定
 - リアルタイムチャート表示
 - 認証状態管理
+- 条件ステータス表示（画面下部）
 
 **State管理:**
 ```typescript
@@ -56,7 +57,48 @@ const [timeframe, setTimeframe] = useState<TimeFrame>('1');
 const [session, setSession] = useState<string>('regular');
 ```
 
+#### Condition Status (`app/components/ConditionStatus.tsx`)
+
+選択されたExchange、Ticker、時間軸に基づいて、指定価格が不要な条件の評価結果を表示するコンポーネントです。
+
+**主要機能:**
+- 目標価格が不要な条件（enableTargetPrice: false）の自動評価
+- 買いシグナル・売りシグナルの視覚的表示
+- 条件名のみの簡潔な表示（説明文は非表示）
+- 条件が満たされた場合のみ表示
+
+**表示される条件:**
+- 三川明けの明星（買いシグナル）
+- 三川宵の明星（売りシグナル）
+
+**API連携:**
+- `/api/finance-notification/conditions/check` - 条件評価API
+- `ConditionCheckService` - クライアントサービス
+
 ### UI Components
+
+#### Finance Notification Condition Edit Dialog
+金融通知条件の作成・編集を行うダイアログコンポーネント
+
+**機能:**
+- 条件の選択時に詳細な説明を表示
+- 条件の種類（買い・売り）に応じた適切な条件一覧の表示
+- 通知頻度、セッション、時間枠などの詳細設定
+
+**条件説明表示:**
+条件を選択すると、選択した条件の詳細説明が条件選択欄の下に表示されます。これにより、ユーザーは各条件の動作を理解してから設定を行うことができます。
+
+```typescript
+// 条件情報の例
+{
+  name: "指定価格を上回る",
+  description: "株価が指定した価格を上回った時に通知します。",
+  isBuyCondition: true,
+  isSellCondition: true,
+  enableTargetPrice: true,
+  enableTimeFrame: false
+}
+```
 
 #### TimeFrameUtil
 時間軸選択のためのユーティリティクラス
@@ -220,7 +262,7 @@ npm run dev
     "baseUrl": ".",
     "paths": {
       "@/*": ["./app/*"],
-      "@client-common/*": ["../common/*"],
+      "@client-common/*": ["../typescript-common/*"],
       "@finance/*": ["../../finance/*"],
       "@common/*": ["../../common/*"]
     }

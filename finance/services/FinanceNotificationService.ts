@@ -134,7 +134,8 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
               ticker.id,
               condition.session,
               condition.targetPrice,
-              condition.frequency
+              condition.frequency,
+              condition.timeframe
             );
           } catch (error) {
             console.error(`Error checking condition ${condition.conditionName}:`, error);
@@ -145,7 +146,10 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
         // Wait for all conditions to complete and find the first met condition
         const results = await Promise.allSettled(conditionPromises);
 
-        for (const result of results) {
+        for (let i = 0; i < results.length; i++) {
+          const result = results[i];
+          const condition = conditionsToCheck[i];
+          
           if (result.status === 'fulfilled') {
             const conditionResult: ConditionResult = result.value;
 
@@ -165,11 +169,12 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
               }
             };
 
-            // Include exchange and ticker data in the message
+            // Include exchange, ticker, and timeframe data in the message
             const messageWithData = JSON.stringify({
               message: conditionResult.message || '',
               exchangeId: notification.exchangeId,
-              tickerId: notification.tickerId
+              tickerId: notification.tickerId,
+              timeframe: condition.timeframe
             });
 
             await this.notificationService.sendPushNotification(endpoint, messageWithData, subscription);

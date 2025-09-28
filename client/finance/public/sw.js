@@ -29,6 +29,7 @@ self.addEventListener('notificationclick', function (event) {
     const params = new URLSearchParams();
     params.set('exchangeId', notificationData.exchangeId);
     params.set('tickerId', notificationData.tickerId);
+    params.set('timeframe', notificationData.timeframe);
     url += '/?' + params.toString();
   }
   
