@@ -1,3 +1,4 @@
+import { CURRENCY } from '@finance/consts/CurrencyConst';
 import TargetPriceService from '@finance/services/TargetPriceService';
 import { TargetPriceCalculationInput } from '@finance/interfaces/data/TargetPriceDataType';
 
@@ -9,7 +10,7 @@ describe('TargetPriceService', () => {
         totalCost: 150000, // 1500 JPY per share
         buyTolerance: 0.9,
         sellTolerance: 1.1,
-        currency: 'JPY'
+        currency: CURRENCY.JPY
       };
 
       const result = TargetPriceService.calculateTargetPrice(input);
@@ -17,7 +18,7 @@ describe('TargetPriceService', () => {
       expect(result.averagePrice).toBe(1500);
       expect(result.buyTargetPrice).toBe(1350); // 1500 * 0.9
       expect(result.sellTargetPrice).toBeCloseTo(1650, 5); // 1500 * 1.1
-      expect(result.currency).toBe('JPY');
+      expect(result.currency).toBe(CURRENCY.JPY);
       expect(result.originalCurrency).toBeUndefined();
       expect(result.exchangeRate).toBeUndefined();
     });
@@ -28,7 +29,7 @@ describe('TargetPriceService', () => {
         totalCost: 2500, // $50 per share
         buyTolerance: 0.95,
         sellTolerance: 1.05,
-        currency: 'USD'
+        currency: CURRENCY.USD
       };
 
       const result = TargetPriceService.calculateTargetPrice(input);
@@ -36,7 +37,7 @@ describe('TargetPriceService', () => {
       expect(result.averagePrice).toBe(50);
       expect(result.buyTargetPrice).toBe(47.5); // 50 * 0.95
       expect(result.sellTargetPrice).toBe(52.5); // 50 * 1.05
-      expect(result.currency).toBe('USD');
+      expect(result.currency).toBe(CURRENCY.USD);
     });
 
     it('should convert from USD to JPY when target currency is specified', () => {
@@ -45,8 +46,8 @@ describe('TargetPriceService', () => {
         totalCost: 1000, // $100 per share
         buyTolerance: 0.9,
         sellTolerance: 1.1,
-        currency: 'USD',
-        targetCurrency: 'JPY'
+        currency: CURRENCY.USD,
+        targetCurrency: CURRENCY.JPY
       };
 
       const result = TargetPriceService.calculateTargetPrice(input);
@@ -55,8 +56,8 @@ describe('TargetPriceService', () => {
       expect(result.averagePrice).toBe(14300);
       expect(result.buyTargetPrice).toBe(12870); // ¥14,300 * 0.9
       expect(result.sellTargetPrice).toBe(15730); // ¥14,300 * 1.1
-      expect(result.currency).toBe('JPY');
-      expect(result.originalCurrency).toBe('USD');
+      expect(result.currency).toBe(CURRENCY.JPY);
+      expect(result.originalCurrency).toBe(CURRENCY.USD);
       expect(result.exchangeRate).toBe(143.0);
     });
 
@@ -66,8 +67,8 @@ describe('TargetPriceService', () => {
         totalCost: 143000, // ¥1430 per share
         buyTolerance: 0.8,
         sellTolerance: 1.2,
-        currency: 'JPY',
-        targetCurrency: 'USD'
+        currency: CURRENCY.JPY,
+        targetCurrency: CURRENCY.USD
       };
 
       const result = TargetPriceService.calculateTargetPrice(input);
@@ -76,8 +77,8 @@ describe('TargetPriceService', () => {
       expect(result.averagePrice).toBe(10.01);
       expect(result.buyTargetPrice).toBe(8.01); // $10.01 * 0.8
       expect(result.sellTargetPrice).toBe(12.01); // $10.01 * 1.2
-      expect(result.currency).toBe('USD');
-      expect(result.originalCurrency).toBe('JPY');
+      expect(result.currency).toBe(CURRENCY.USD);
+      expect(result.originalCurrency).toBe(CURRENCY.JPY);
       expect(result.exchangeRate).toBe(0.007);
     });
 
@@ -87,7 +88,7 @@ describe('TargetPriceService', () => {
         totalCost: 5025, // 150 per share
         buyTolerance: 0.9,
         sellTolerance: 1.1,
-        currency: 'USD'
+        currency: CURRENCY.USD
       };
 
       const result = TargetPriceService.calculateTargetPrice(input);
@@ -105,13 +106,13 @@ describe('TargetPriceService', () => {
         30000,
         0.85,
         1.15,
-        'JPY'
+        CURRENCY.JPY
       );
 
       expect(result.averagePrice).toBe(150);
       expect(result.buyTargetPrice).toBe(127.5); // 150 * 0.85
       expect(result.sellTargetPrice).toBe(172.5); // 150 * 1.15
-      expect(result.currency).toBe('JPY');
+      expect(result.currency).toBe(CURRENCY.JPY);
     });
 
     it('should work with currency conversion', () => {
@@ -120,13 +121,13 @@ describe('TargetPriceService', () => {
         10000,
         0.9,
         1.1,
-        'USD',
-        'JPY'
+        CURRENCY.USD,
+        CURRENCY.JPY
       );
 
       expect(result.averagePrice).toBe(14300); // $100 -> ¥14,300
-      expect(result.currency).toBe('JPY');
-      expect(result.originalCurrency).toBe('USD');
+      expect(result.currency).toBe(CURRENCY.JPY);
+      expect(result.originalCurrency).toBe(CURRENCY.USD);
     });
   });
 
@@ -137,7 +138,7 @@ describe('TargetPriceService', () => {
         totalCost: 1000,
         buyTolerance: 0.9,
         sellTolerance: 1.1,
-        currency: 'JPY'
+        currency: CURRENCY.JPY
       };
 
       expect(() => TargetPriceService.calculateTargetPrice(input))
@@ -150,7 +151,7 @@ describe('TargetPriceService', () => {
         totalCost: -1000,
         buyTolerance: 0.9,
         sellTolerance: 1.1,
-        currency: 'JPY'
+        currency: CURRENCY.JPY
       };
 
       expect(() => TargetPriceService.calculateTargetPrice(input))
@@ -163,7 +164,7 @@ describe('TargetPriceService', () => {
         totalCost: 1000,
         buyTolerance: 0,
         sellTolerance: 1.1,
-        currency: 'JPY'
+        currency: CURRENCY.JPY
       };
 
       expect(() => TargetPriceService.calculateTargetPrice(input))
@@ -176,7 +177,7 @@ describe('TargetPriceService', () => {
         totalCost: 1000,
         buyTolerance: 0.9,
         sellTolerance: -1.1,
-        currency: 'JPY'
+        currency: CURRENCY.JPY
       };
 
       expect(() => TargetPriceService.calculateTargetPrice(input))
@@ -189,7 +190,7 @@ describe('TargetPriceService', () => {
         totalCost: 1000,
         buyTolerance: 1.1,
         sellTolerance: 0.9,
-        currency: 'JPY'
+        currency: CURRENCY.JPY
       };
 
       expect(() => TargetPriceService.calculateTargetPrice(input))
@@ -215,7 +216,7 @@ describe('TargetPriceService', () => {
         totalCost: 1000,
         buyTolerance: 0.9,
         sellTolerance: 1.1,
-        currency: 'JPY',
+        currency: CURRENCY.JPY,
         targetCurrency: 'EUR'
       };
 

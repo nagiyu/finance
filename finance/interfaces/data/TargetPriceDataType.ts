@@ -1,3 +1,5 @@
+import { CurrencyType } from '@finance/consts/CurrencyConst';
+
 /**
  * Interface for TargetPrice calculation input parameters
  */
@@ -25,13 +27,13 @@ export interface TargetPriceCalculationInput {
   /**
    * Currency type: 'JPY' or 'USD'
    */
-  currency: 'JPY' | 'USD';
+  currency: CurrencyType;
 
   /**
    * Target currency for conversion (optional)
    * If specified, result will be converted to this currency
    */
-  targetCurrency?: 'JPY' | 'USD';
+  targetCurrency?: CurrencyType;
 }
 
 /**
@@ -56,12 +58,12 @@ export interface TargetPriceCalculationResult {
   /**
    * Currency of the calculated prices
    */
-  currency: 'JPY' | 'USD';
+  currency: CurrencyType;
 
   /**
    * Original currency before conversion (if conversion was applied)
    */
-  originalCurrency?: 'JPY' | 'USD';
+  originalCurrency?: CurrencyType;
 
   /**
    * Exchange rate used for conversion (if conversion was applied)

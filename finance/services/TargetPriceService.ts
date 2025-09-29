@@ -1,3 +1,5 @@
+import ErrorUtil from '@common/utils/ErrorUtil';
+import { CURRENCY, CurrencyType } from '@finance/consts/CurrencyConst';
 import { TargetPriceCalculationInput, TargetPriceCalculationResult } from '@finance/interfaces/data/TargetPriceDataType';
 
 /**
@@ -58,8 +60,8 @@ export default class TargetPriceService {
     totalCost: number,
     buyTolerance: number,
     sellTolerance: number,
-    currency: 'JPY' | 'USD',
-    targetCurrency?: 'JPY' | 'USD'
+    currency: CurrencyType,
+    targetCurrency?: CurrencyType
   ): TargetPriceCalculationResult {
     return this.calculateTargetPrice({
       currentQuantity,
@@ -77,31 +79,31 @@ export default class TargetPriceService {
    */
   private static validateInput(input: TargetPriceCalculationInput): void {
     if (input.currentQuantity <= 0) {
-      throw new Error('Current quantity must be greater than 0');
+      ErrorUtil.throwError('Current quantity must be greater than 0');
     }
 
     if (input.totalCost <= 0) {
-      throw new Error('Total cost must be greater than 0');
+      ErrorUtil.throwError('Total cost must be greater than 0');
     }
 
     if (input.buyTolerance <= 0) {
-      throw new Error('Buy tolerance must be greater than 0');
+      ErrorUtil.throwError('Buy tolerance must be greater than 0');
     }
 
     if (input.sellTolerance <= 0) {
-      throw new Error('Sell tolerance must be greater than 0');
+      ErrorUtil.throwError('Sell tolerance must be greater than 0');
     }
 
     if (input.buyTolerance >= input.sellTolerance) {
-      throw new Error('Buy tolerance must be less than sell tolerance');
+      ErrorUtil.throwError('Buy tolerance must be less than sell tolerance');
     }
 
-    if (!['JPY', 'USD'].includes(input.currency)) {
-      throw new Error('Currency must be either JPY or USD');
+    if (!Object.values(CURRENCY).includes(input.currency)) {
+      ErrorUtil.throwError('Currency must be either JPY or USD');
     }
 
-    if (input.targetCurrency && !['JPY', 'USD'].includes(input.targetCurrency)) {
-      throw new Error('Target currency must be either JPY or USD');
+    if (input.targetCurrency && !Object.values(CURRENCY).includes(input.targetCurrency)) {
+      ErrorUtil.throwError('Target currency must be either JPY or USD');
     }
   }
 
@@ -113,7 +115,7 @@ export default class TargetPriceService {
    */
   private static convertCurrency(
     result: TargetPriceCalculationResult,
-    targetCurrency: 'JPY' | 'USD'
+    targetCurrency: CurrencyType
   ): TargetPriceCalculationResult {
     const sourceCurrency = result.currency;
     
@@ -126,18 +128,18 @@ export default class TargetPriceService {
     let convertedSellTargetPrice: number;
     let exchangeRate: number;
 
-    if (sourceCurrency === 'USD' && targetCurrency === 'JPY') {
+    if (sourceCurrency === CURRENCY.USD && targetCurrency === CURRENCY.JPY) {
       exchangeRate = this.USD_TO_JPY_RATE;
       convertedAveragePrice = this.convertUsdToJpy(result.averagePrice);
       convertedBuyTargetPrice = this.convertUsdToJpy(result.buyTargetPrice);
       convertedSellTargetPrice = this.convertUsdToJpy(result.sellTargetPrice);
-    } else if (sourceCurrency === 'JPY' && targetCurrency === 'USD') {
+    } else if (sourceCurrency === CURRENCY.JPY && targetCurrency === CURRENCY.USD) {
       exchangeRate = this.JPY_TO_USD_RATE;
       convertedAveragePrice = this.convertJpyToUsd(result.averagePrice);
       convertedBuyTargetPrice = this.convertJpyToUsd(result.buyTargetPrice);
       convertedSellTargetPrice = this.convertJpyToUsd(result.sellTargetPrice);
     } else {
-      throw new Error(`Unsupported currency conversion: ${sourceCurrency} to ${targetCurrency}`);
+      ErrorUtil.throwError(`Unsupported currency conversion: ${sourceCurrency} to ${targetCurrency}`);
     }
 
     return {
