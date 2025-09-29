@@ -6,74 +6,7 @@
 import { FINANCE_NOTIFICATION_CONDITION_MODE, FINANCE_NOTIFICATION_FREQUENCY } from '../consts/FinanceNotificationConst';
 import { EXCHANGE_SESSION } from '../consts/ExchangeConsts';
 import { FinanceNotificationSimplifiedConfig } from '../interfaces/FinanceNotificationType';
-
-// Mock ConditionService for testing
-class MockConditionService {
-  public getBuyConditionList(): string[] {
-    return ['GreaterThan', 'SansenAkenomyojo', 'GyakusanZon'];
-  }
-
-  public getSellConditionList(): string[] {
-    return ['LessThan', 'DoubleTop', 'SanZon'];
-  }
-
-  public getConditionInfo(conditionName: string) {
-    const conditionInfoMap: Record<string, any> = {
-      'GreaterThan': { enableTargetPrice: true, isBuyCondition: true, isSellCondition: false },
-      'LessThan': { enableTargetPrice: true, isBuyCondition: false, isSellCondition: true },
-      'SansenAkenomyojo': { enableTargetPrice: false, isBuyCondition: true, isSellCondition: false },
-      'GyakusanZon': { enableTargetPrice: false, isBuyCondition: true, isSellCondition: false },
-      'DoubleTop': { enableTargetPrice: false, isBuyCondition: false, isSellCondition: true },
-      'SanZon': { enableTargetPrice: false, isBuyCondition: false, isSellCondition: true },
-    };
-    return conditionInfoMap[conditionName];
-  }
-}
-
-// Simplified version of FinanceNotificationService for testing new methods only
-class SimplifiedFinanceNotificationService {
-  private conditionService: MockConditionService;
-
-  constructor() {
-    this.conditionService = new MockConditionService();
-  }
-
-  public generateConditionListFromMode(config: FinanceNotificationSimplifiedConfig) {
-    const { mode, frequency, session, timeframe, targetPrice } = config;
-    
-    // Get all conditions based on mode
-    const applicableConditions = mode === FINANCE_NOTIFICATION_CONDITION_MODE.BUY 
-      ? this.conditionService.getBuyConditionList()
-      : this.conditionService.getSellConditionList();
-
-    const conditionList: any[] = [];
-
-    for (const conditionName of applicableConditions) {
-      const conditionInfo = this.conditionService.getConditionInfo(conditionName);
-      
-      // If target price is not provided, skip conditions that require it
-      if (!targetPrice && conditionInfo.enableTargetPrice) {
-        continue;
-      }
-
-      // Create condition configuration
-      const condition = {
-        id: null,
-        mode,
-        conditionName,
-        frequency,
-        session,
-        timeframe,
-        targetPrice: conditionInfo.enableTargetPrice ? targetPrice : null,
-        firstNotificationSent: false,
-      };
-
-      conditionList.push(condition);
-    }
-
-    return conditionList;
-  }
-}
+import { SimplifiedFinanceNotificationService } from './mocks/services/SimplifiedFinanceNotificationService';
 
 describe('FinanceNotificationService - Simplified Configuration', () => {
   let service: SimplifiedFinanceNotificationService;
