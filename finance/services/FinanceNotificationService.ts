@@ -10,10 +10,10 @@ import ExchangeService from '@finance/services/ExchangeService';
 import FinanceNotificationDataAccessor from '@finance/services/FinanceNotificationDataAccessor';
 import TickerService from '@finance/services/TickerService';
 import { ExchangeDataType } from '@finance/interfaces/data/ExchangeDataType';
-import { FinanceNotificationCondition } from '@finance/interfaces/FinanceNotificationType';
+import { FinanceNotificationCondition, FinanceNotificationSimplifiedConfig } from '@finance/interfaces/FinanceNotificationType';
 import { FinanceNotificationDataType } from '@finance/interfaces/data/FinanceNotificationDataType';
 import { FinanceNotificationRecordType } from '@finance/interfaces/record/FinanceNotificationRecordType';
-import { FINANCE_NOTIFICATION_FREQUENCY } from '@finance/consts/FinanceNotificationConst';
+import { FINANCE_NOTIFICATION_FREQUENCY, FINANCE_NOTIFICATION_CONDITION_MODE } from '@finance/consts/FinanceNotificationConst';
 
 export default class FinanceNotificationService extends CRUDServiceBase<FinanceNotificationDataType, FinanceNotificationRecordType> {
   private readonly exchangeService: ExchangeService;
@@ -343,5 +343,158 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
   private isHourlyInterval(currentTime: Date): boolean {
     const minutes = currentTime.getMinutes();
     return minutes === 0;
+  }
+
+  /**
+   * Generate condition list from simplified configuration (buy/sell mode based)
+   * This method creates a condition list based on mode selection and automatically
+   * filters out conditions that don't require target price when none is provided.
+   * 
+   * @param config Simplified notification configuration
+   * @returns Generated condition list for notification
+   */
+  public generateConditionListFromMode(config: FinanceNotificationSimplifiedConfig): FinanceNotificationCondition[] {
+    const { mode, frequency, session, timeframe, targetPrice } = config;
+    
+    // Get all conditions based on mode
+    const applicableConditions = mode === FINANCE_NOTIFICATION_CONDITION_MODE.BUY 
+      ? this.conditionService.getBuyConditionList()
+      : this.conditionService.getSellConditionList();
+
+    const conditionList: FinanceNotificationCondition[] = [];
+
+    for (const conditionName of applicableConditions) {
+      const conditionInfo = this.conditionService.getConditionInfo(conditionName);
+      
+      // If target price is not provided, skip conditions that require it
+      if (!targetPrice && conditionInfo.enableTargetPrice) {
+        continue;
+      }
+
+      // Create condition configuration
+      const condition: FinanceNotificationCondition = {
+        id: null, // Will be set when saved to database
+        mode,
+        conditionName,
+        frequency,
+        session,
+        timeframe,
+        targetPrice: conditionInfo.enableTargetPrice ? targetPrice : null,
+        firstNotificationSent: false,
+      };
+
+      conditionList.push(condition);
+    }
+
+    return conditionList;
+  }
+
+  /**
+   * Create notification using simplified mode-based configuration
+   * This is the new improved method that works with buy/sell mode selection
+   * instead of manual condition configuration.
+   * 
+   * @param creates Base notification data
+   * @param config Simplified configuration
+   * @returns Created notification
+   */
+  public async createWithSimplifiedConfig(
+    creates: Omit<Partial<FinanceNotificationDataType>, 'conditionList'>,
+    config: FinanceNotificationSimplifiedConfig
+  ): Promise<FinanceNotificationDataType> {
+    // Generate condition list from simplified config
+    const conditionList = this.generateConditionListFromMode(config);
+
+    if (conditionList.length === 0) {
+      ErrorUtil.throwError(`No applicable conditions found for mode ${config.mode} with current configuration`);
+    }
+
+    // Create the full notification data
+    const notificationData: Partial<FinanceNotificationDataType> = {
+      ...creates,
+      conditionList,
+    };
+
+    return await this.create(notificationData);
+  }
+
+  /**
+   * Check conditions using simplified mode-based approach
+   * This method checks all conditions that match the specified mode for a given
+   * exchange and ticker, filtering by target price requirements.
+   * 
+   * @param exchangeId Exchange ID
+   * @param tickerId Ticker ID
+   * @param config Simplified configuration for condition checking
+   * @returns Promise that resolves to the first met condition result
+   */
+  public async checkConditionsWithMode(
+    exchangeId: string,
+    tickerId: string,
+    config: FinanceNotificationSimplifiedConfig
+  ): Promise<ConditionResult | null> {
+    const { mode, session, timeframe, targetPrice } = config;
+
+    // Get all conditions based on mode
+    const applicableConditions = mode === FINANCE_NOTIFICATION_CONDITION_MODE.BUY 
+      ? this.conditionService.getBuyConditionList()
+      : this.conditionService.getSellConditionList();
+
+    // Filter conditions based on target price availability
+    const conditionsToCheck = applicableConditions.filter(conditionName => {
+      const conditionInfo = this.conditionService.getConditionInfo(conditionName);
+      
+      // If target price is not provided, skip conditions that require it
+      if (!targetPrice && conditionInfo.enableTargetPrice) {
+        return false;
+      }
+      
+      return true;
+    });
+
+    if (conditionsToCheck.length === 0) {
+      console.log(`No applicable conditions found for mode ${mode} with current configuration`);
+      return null;
+    }
+
+    // Check all conditions in parallel
+    const conditionPromises = conditionsToCheck.map(async (conditionName) => {
+      try {
+        const conditionInfo = this.conditionService.getConditionInfo(conditionName);
+        return await this.conditionService.checkCondition(
+          conditionName,
+          exchangeId,
+          tickerId,
+          session,
+          conditionInfo.enableTargetPrice ? targetPrice : null,
+          config.frequency,
+          timeframe
+        );
+      } catch (error) {
+        console.error(`Error checking condition ${conditionName}:`, error);
+        return { met: false, message: '' };
+      }
+    });
+
+    // Wait for all conditions to complete and find the first met condition
+    const results = await Promise.allSettled(conditionPromises);
+
+    for (let i = 0; i < results.length; i++) {
+      const result = results[i];
+      const conditionName = conditionsToCheck[i];
+      
+      if (result.status === 'fulfilled') {
+        const conditionResult: ConditionResult = result.value;
+
+        if (conditionResult.met) {
+          console.log(`Condition ${conditionName} met for ${mode} mode`);
+          return conditionResult;
+        }
+      } else {
+        console.error(`Failed to check condition ${conditionName}:`, result.reason);
+      }
+    }
+
+    return null;
   }
 }

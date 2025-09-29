@@ -49,3 +49,33 @@ export interface FinanceNotificationCondition {
    */
   firstNotificationSent: boolean;
 }
+
+/**
+ * Simplified notification configuration with mode-based condition selection
+ */
+export interface FinanceNotificationSimplifiedConfig {
+  /**
+   * Notification mode (Buy/Sell) - determines which conditions to apply
+   */
+  mode: FinanceNotificationConditionModeType;
+
+  /**
+   * Frequency setting applied to all applicable conditions
+   */
+  frequency: FinanceNotificationFrequencyType;
+
+  /**
+   * Session type for price data
+   */
+  session: ExchangeSessionType;
+
+  /**
+   * Timeframe for candlestick data used in condition checking
+   */
+  timeframe?: TimeFrame | null;
+
+  /**
+   * Target price - conditions that don't require it will be internally excluded
+   */
+  targetPrice?: number | null;
+}
