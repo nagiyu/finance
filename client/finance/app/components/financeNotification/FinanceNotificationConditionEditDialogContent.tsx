@@ -3,13 +3,13 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { Button } from '@mui/material';
 
 import { ConditionInfo } from '@finance/conditions/ConditionBase';
 import { ExchangeSessionType } from '@finance/types/ExchangeTypes';
 import { FinanceNotificationCondition } from '@finance/interfaces/FinanceNotificationType';
 import { FinanceNotificationConditionModeType, FinanceNotificationFrequencyType } from '@finance/types/FinanceNotificationType';
 import { FINANCE_NOTIFICATION_CONDITION_MODE, FINANCE_NOTIFICATION_FREQUENCY } from '@finance/consts/FinanceNotificationConst';
-import { TimeFrame } from '@finance/utils/FinanceUtil';
 
 import BasicRadioGroup from '@client-common/components/inputs/RadioGroups/BasicRadioGroup';
 import BasicSelect from '@client-common/components/inputs/Selects/BasicSelect';
@@ -23,6 +23,7 @@ import SessionSelect from '@/app/components/common/SessionSelect';
 import SessionUtil from '@/utils/SessionUtil';
 import TimeFrameSelect from '@/app/components/common/TimeFrameSelect';
 import TimeFrameUtil from '@/utils/TimeFrameUtil';
+import TargetPriceCalculationDialog from '@/app/components/financeNotification/TargetPriceCalculationDialog';
 
 interface FinanceNotificationEditDialogContentProps {
     item: FinanceNotificationCondition;
@@ -46,6 +47,7 @@ export default function FinanceNotificationConditionEditDialogContent({
         enableTargetPrice: false,
         enableTimeFrame: false,
     });
+    const [calculationDialogOpen, setCalculationDialogOpen] = useState(false);
 
     const conditionFetchService = new FinanceNotificationConditionFetchService();
 
@@ -201,25 +203,46 @@ export default function FinanceNotificationConditionEditDialogContent({
                 />
             )}
             {conditionInfo.enableTargetPrice && (
-                <CurrencyNumberField
-                    label='目標価格'
-                    value={item.targetPrice !== null ? item.targetPrice : 0}
-                    disabled={loading}
-                    onChange={(value) => {
-                        onItemChange({
-                            ...item,
-                            targetPrice: Number(value.target.value)
-                        })
-                    }}
-                    onValueChange={(value) => {
-                        // Ensure the target price is not negative
-                        const validValue = Math.max(0, value);
-                        onItemChange({
-                            ...item,
-                            targetPrice: validValue
-                        })
-                    }}
-                />
+                <div>
+                    <CurrencyNumberField
+                        label='目標価格'
+                        value={item.targetPrice !== null ? item.targetPrice : 0}
+                        disabled={loading}
+                        onChange={(value) => {
+                            onItemChange({
+                                ...item,
+                                targetPrice: Number(value.target.value)
+                            })
+                        }}
+                        onValueChange={(value) => {
+                            // Ensure the target price is not negative
+                            const validValue = Math.max(0, value);
+                            onItemChange({
+                                ...item,
+                                targetPrice: validValue
+                            })
+                        }}
+                    />
+                    <Button
+                        variant="outlined"
+                        size="small"
+                        onClick={() => setCalculationDialogOpen(true)}
+                        disabled={loading}
+                        sx={{ mt: 1 }}
+                    >
+                        算出ツールを使用
+                    </Button>
+                    <TargetPriceCalculationDialog
+                        open={calculationDialogOpen}
+                        onClose={() => setCalculationDialogOpen(false)}
+                        onApply={(targetPrice) => {
+                            onItemChange({
+                                ...item,
+                                targetPrice: targetPrice
+                            });
+                        }}
+                    />
+                </div>
             )}
         </>
     );
