@@ -61,6 +61,20 @@ Finance モジュールは以下の主要機能を提供します：
 - 時間足: 1時間、2時間、3時間、4時間
 - 日足、週足、月足
 
+#### TargetPriceService
+目標価格算出機能を提供するサービスクラスです。
+
+**機能:**
+- 保有株式情報からの平均取得価格算出
+- 買い・売り目標価格の算出（許容範囲ベース）
+- JPY・USD通貨変換機能
+- 入力パラメータのバリデーション
+
+**算出項目:**
+- 平均取得価格: 総コスト ÷ 保有株数
+- 買い目標価格: 平均取得価格 × 買い許容範囲（例: 0.9）
+- 売り目標価格: 平均取得価格 × 売り許容範囲（例: 1.1）
+
 #### ExchangeService
 取引所データの管理を行うサービスです。
 
@@ -125,43 +139,31 @@ const notificationService = new FinanceNotificationService();
 await notificationService.notification('https://example.com/api/notifications');
 ```
 
-### 条件チェック（時間枠指定）
+### TargetPrice算出ツール
 ```typescript
-import ConditionService from '@finance/services/ConditionService';
+import TargetPriceService from '@finance/services/TargetPriceService';
 
-const conditionService = new ConditionService();
-
-// 5分足でのパターン条件チェック（買いシグナル）
-const result = await conditionService.checkCondition(
-  'SansenAkenomyojo',
-  'NYSE',
-  'AAPL', 
-  'extended',
-  null,
-  'MinuteLevel',
-  '5'  // 5分足を指定
+// 基本的な目標価格算出
+const result = TargetPriceService.calculateTargetPriceFromHoldings(
+  100,      // 保有株数
+  150000,   // 総コスト（円）
+  0.9,      // 買い許容範囲（90%）
+  1.1,      // 売り許容範囲（110%）
+  'JPY'     // 通貨
 );
 
-// 5分足でのパターン条件チェック（売りシグナル）
-const result = await conditionService.checkCondition(
-  'SansenYoinomyojo',
-  'NYSE',
-  'AAPL', 
-  'extended',
-  null,
-  'MinuteLevel',
-  '5'  // 5分足を指定
-);
+console.log(`平均取得価格: ${result.averagePrice}`);
+console.log(`買い目標価格: ${result.buyTargetPrice}`);
+console.log(`売り目標価格: ${result.sellTargetPrice}`);
 
-// 1時間足での価格条件チェック
-const result = await conditionService.checkCondition(
-  'GreaterThan',
-  'NYSE', 
-  'AAPL',
-  'regular',
-  150.0,
-  'HourlyLevel',
-  '60'  // 1時間足を指定
+// 通貨変換付きの算出
+const convertedResult = TargetPriceService.calculateTargetPriceFromHoldings(
+  50,       // 保有株数
+  2500,     // 総コスト（ドル）
+  0.95,     // 買い許容範囲（95%）
+  1.05,     // 売り許容範囲（105%）
+  'USD',    // 元通貨
+  'JPY'     // 目標通貨（円換算）
 );
 ```
 
@@ -186,6 +188,7 @@ Finance Module
 │   └── FinanceUtil (TradingView API Integration)
 ├── services/
 │   ├── FinanceNotificationService (Alert Management)
+│   ├── TargetPriceService (Target Price Calculation)
 │   ├── ExchangeService (Exchange Management)
 │   ├── TickerService (Ticker Management)
 │   └── MyTickerService (Personal Ticker Lists)
@@ -202,3 +205,4 @@ Finance Module
 - [Client Documentation](./client/README.md) - Next.js application and UI components
 - [Common Module](../common/README.md) - Shared utilities and services
 - **[条件ごとの通知頻度設定機能](./per-condition-frequency.md)** - 条件別通知頻度設定・時間枠設定機能
+- **[TargetPrice算出ツール](./target-price-calculation.md)** - 保有株式からの目標価格算出機能
