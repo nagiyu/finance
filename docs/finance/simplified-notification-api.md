@@ -58,12 +58,11 @@ public async checkConditionsByMode(
 
 ### 条件の自動選択
 
+**重要**: GreaterThan（指定価格を上回る）とLessThan（指定価格を下回る）条件は、買い・売り両方のシナリオで利用可能なため、このシンプル設定APIからは除外されています。これらの条件は別途、個別に設定する必要があります。
+
 #### 買いモード (`FINANCE_NOTIFICATION_CONDITION_MODE.BUY`)
 
-以下の全ての買い条件が自動的にチェックされます:
-
-**価格条件 (targetPrice が必要):**
-- GreaterThan (指定価格を上回る)
+以下のパターン条件が自動的にチェックされます（価格条件は除外）:
 
 **パターン条件 (targetPrice 不要):**
 - SansenAkenomyojo (三川明けの明星)
@@ -75,11 +74,7 @@ public async checkConditionsByMode(
 
 #### 売りモード (`FINANCE_NOTIFICATION_CONDITION_MODE.SELL`)
 
-以下の全ての売り条件が自動的にチェックされます:
-
-**価格条件 (targetPrice が必要):**
-- LessThan (指定価格を下回る)
-- BearCollar (ベアコラッグ) ※targetPriceが設定されている場合のみ
+以下のパターン条件が自動的にチェックされます（価格条件は除外）:
 
 **パターン条件 (targetPrice 不要):**
 - SansenYoinomyojo (三川宵の明星)
@@ -89,23 +84,25 @@ public async checkConditionsByMode(
 
 ### ターゲット価格のフィルタリング
 
-メソッドは内部的に以下のロジックで条件をフィルタリングします:
+**価格条件の取り扱い:**
+- GreaterThan（指定価格を上回る）とLessThan（指定価格を下回る）は、買い・売り両方で使用可能なため、このAPIからは除外されています
+- これらの条件を使用する場合は、従来の個別設定方式を利用してください
 
+**パターン条件のフィルタリング:**
 1. 指定されたモード（買い/売り）に対応する全ての条件を取得
-2. 各条件の `enableTargetPrice` プロパティをチェック
-3. `targetPrice` が `null` または `undefined` の場合:
+2. GreaterThanとLessThanを除外
+3. 各条件の `enableTargetPrice` プロパティをチェック
+4. `targetPrice` が `null` または `undefined` の場合:
    - `enableTargetPrice: true` の条件は除外
    - `enableTargetPrice: false` の条件のみ実行
-4. `targetPrice` が設定されている場合:
-   - 全ての条件を実行
-
-これにより、価格設定が不要なパターン条件は常に動作し、価格条件は `targetPrice` が指定された場合のみ動作します。
+5. `targetPrice` が設定されている場合:
+   - 全てのパターン条件を実行（GreaterThan/LessThanは除外）
 
 ---
 
 ## 使用例
 
-### 例1: 買い条件の全チェック（ターゲット価格あり）
+### 例1: 買い条件の全チェック（パターン条件のみ）
 
 ```typescript
 const results = await financeNotificationService.checkConditionsByMode(
@@ -113,18 +110,38 @@ const results = await financeNotificationService.checkConditionsByMode(
   'NYSE',
   'AAPL',
   EXCHANGE_SESSION.EXTENDED,
-  150.00,  // ターゲット価格 $150
+  null,    // ターゲット価格は不要（パターン条件のみ）
   FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
   '1'      // 1分足
 );
 
-// 結果: 価格条件とパターン条件の両方がチェックされる
-// - GreaterThan: 現在価格が$150を上回るかチェック
+// 結果: パターン条件のみがチェックされる
 // - SansenAkenomyojo: 三川明けの明星パターンをチェック
-// - その他全ての買い条件もチェック
+// - Gyakusanzon: 逆三尊パターンをチェック
+// - その他全ての買いパターン条件もチェック
+// - GreaterThan/LessThanは除外
 ```
 
-### 例2: 買い条件の全チェック（ターゲット価格なし）
+### 例2: 買い条件の全チェック（ターゲット価格あり）
+
+```typescript
+const results = await financeNotificationService.checkConditionsByMode(
+  FINANCE_NOTIFICATION_CONDITION_MODE.BUY,
+  'NYSE',
+  'AAPL',
+  EXCHANGE_SESSION.EXTENDED,
+  150.00,  // ターゲット価格を設定しても、GreaterThan/LessThanは除外
+  FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
+  '1'      // 1分足
+);
+
+// 結果: パターン条件のみがチェックされる（価格条件は除外）
+// - SansenAkenomyojo: チェックされる
+// - その他の買いパターン条件もチェックされる
+// - GreaterThan: 除外される（別途個別設定が必要）
+```
+
+### 例3: パターンのみチェック（ターゲット価格なし）
 
 ```typescript
 const results = await financeNotificationService.checkConditionsByMode(
@@ -138,12 +155,11 @@ const results = await financeNotificationService.checkConditionsByMode(
 );
 
 // 結果: パターン条件のみがチェックされる
-// - GreaterThan: スキップされる（targetPrice が必要）
 // - SansenAkenomyojo: チェックされる
 // - その他の買いパターン条件もチェックされる
 ```
 
-### 例3: 売り条件の全チェック
+### 例4: 売り条件の全チェック
 
 ```typescript
 const results = await financeNotificationService.checkConditionsByMode(
@@ -151,18 +167,18 @@ const results = await financeNotificationService.checkConditionsByMode(
   'NYSE',
   'AAPL',
   EXCHANGE_SESSION.EXTENDED,
-  140.00,  // ターゲット価格 $140
+  140.00,  // ターゲット価格を設定しても、LessThanは除外
   FINANCE_NOTIFICATION_FREQUENCY.TEN_MINUTE_LEVEL,
   '5'      // 5分足
 );
 
-// 結果: 価格条件とパターン条件の両方がチェックされる
-// - LessThan: 現在価格が$140を下回るかチェック
+// 結果: パターン条件のみがチェックされる
 // - SansenYoinomyojo: 三川宵の明星パターンをチェック
-// - その他全ての売り条件もチェック
+// - その他全ての売りパターン条件もチェック
+// - LessThan: 除外される（別途個別設定が必要）
 ```
 
-### 例4: 結果の処理
+### 例5: 結果の処理
 
 ```typescript
 const results = await financeNotificationService.checkConditionsByMode(
@@ -170,7 +186,7 @@ const results = await financeNotificationService.checkConditionsByMode(
   'NYSE',
   'AAPL',
   EXCHANGE_SESSION.EXTENDED,
-  150.00,
+  null,
   FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
   '1'
 );
@@ -182,7 +198,7 @@ if (results.length > 0) {
   results.forEach((result, index) => {
     if (result.message) {
       console.log(`条件 ${index + 1}: ${result.message}`);
-      // 例: "AAPL shows 指定価格を上回る pattern - signal detected (通知頻度: 1分ごと)"
+      // 例: "AAPL shows 三川明けの明星 pattern - signal detected (通知頻度: 1分ごと)"
     }
   });
 } else {
@@ -195,15 +211,16 @@ if (results.length > 0) {
 ## 利点
 
 ### 1. シンプルな設定
-- 買い/売りを選択するだけで、関連する全ての条件が適用される
+- 買い/売りを選択するだけで、関連するパターン条件が適用される
 - 個別に条件を選択する必要がない
+- GreaterThan/LessThanは除外され、必要に応じて個別設定可能
 
 ### 2. 柔軟性
-- ターゲット価格を設定すれば価格条件も含めてチェック
-- ターゲット価格を設定しなければパターン条件のみチェック
+- パターン条件のみに焦点を当てた設定
+- 価格条件（GreaterThan/LessThan）は別途個別に管理
 
 ### 3. 自動フィルタリング
-- 条件の適用可否を内部的に判断
+- パターン条件の適用可否を内部的に判断
 - 不要な条件チェックを自動的にスキップ
 
 ### 4. 並列処理
@@ -266,18 +283,21 @@ public async notification(endpoint: string): Promise<void>
    ├─ BUY → getBuyConditionList()
    └─ SELL → getSellConditionList()
 
-2. targetPrice の有無をチェック
-   ├─ あり → 全ての条件を適用
-   └─ なし → enableTargetPrice=false の条件のみ適用
+2. GreaterThanとLessThanを除外
+   └─ これらは買い・売り両方で使用可能なため個別管理
 
-3. 適用可能な条件を並列でチェック
+3. targetPrice の有無をチェック
+   ├─ あり → パターン条件を適用（価格条件は除外済み）
+   └─ なし → enableTargetPrice=false のパターン条件のみ適用
+
+4. 適用可能な条件を並列でチェック
    └─ Promise.allSettled() で全条件を並行実行
 
-4. 結果を収集
+5. 結果を収集
    ├─ met=true の条件のみを抽出
    └─ エラーは { met: false } として処理
 
-5. 結果配列を返す
+6. 結果配列を返す
 ```
 
 ### パフォーマンス

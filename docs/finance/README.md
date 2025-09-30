@@ -49,9 +49,9 @@ Finance モジュールは以下の主要機能を提供します：
   - 各条件で独立してローソク足の時間枠を設定可能
   - 通知タイミングと条件チェックの時間枠を分離
 - **簡易通知設定 API** (新機能)
-  - 買い/売りモードとターゲット価格のみでの通知設定
-  - 該当する全ての条件を自動的に適用
-  - ターゲット価格を必要としない条件は内部的に除外
+  - 買い/売りモードの選択でパターン条件を自動適用
+  - GreaterThan/LessThanは除外（別途個別設定が必要）
+  - 該当するパターン条件を自動的に適用
 - 複数の通知条件タイプ対応
 
 **通知頻度オプション:**
@@ -143,28 +143,28 @@ import FinanceNotificationService from '@finance/services/FinanceNotificationSer
 const notificationService = new FinanceNotificationService();
 await notificationService.notification('https://example.com/api/notifications');
 
-// 新しい方法: 買い/売りモードとターゲット価格での通知チェック
+// 新しい方法: 買い/売りモードでのパターン条件チェック
 import { FINANCE_NOTIFICATION_CONDITION_MODE, FINANCE_NOTIFICATION_FREQUENCY } from '@finance/consts/FinanceNotificationConst';
 import { EXCHANGE_SESSION } from '@finance/consts/ExchangeConsts';
 
-// 買い条件の全チェック（ターゲット価格あり）
+// 買いパターン条件の全チェック（GreaterThan/LessThanは除外）
 const buyResults = await notificationService.checkConditionsByMode(
   FINANCE_NOTIFICATION_CONDITION_MODE.BUY,
   'NYSE',
   'AAPL',
   EXCHANGE_SESSION.EXTENDED,
-  150.00,  // ターゲット価格 $150
+  null,    // パターン条件のみをチェック
   FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
   '1'      // 1分足
 );
 
-// 売り条件の全チェック（ターゲット価格なし、パターンのみ）
+// 売りパターン条件の全チェック（GreaterThan/LessThanは除外）
 const sellResults = await notificationService.checkConditionsByMode(
   FINANCE_NOTIFICATION_CONDITION_MODE.SELL,
   'NYSE',
   'AAPL',
   EXCHANGE_SESSION.EXTENDED,
-  null,    // ターゲット価格なし
+  null,    // パターン条件のみをチェック
   FINANCE_NOTIFICATION_FREQUENCY.HOURLY_LEVEL,
   'D'      // 日足
 );

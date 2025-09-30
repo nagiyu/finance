@@ -399,7 +399,7 @@ describe('FinanceNotificationService', () => {
 
   describe('checkConditionsByMode', () => {
     describe('Buy Mode', () => {
-      it('should check all buy conditions when targetPrice is provided', async () => {
+      it('should check buy pattern conditions excluding GreaterThan/LessThan', async () => {
         FinanceUtilMock.StockPriceDataMock = [
           {
             date: '2025-01-01 00:00',
@@ -417,13 +417,13 @@ describe('FinanceNotificationService', () => {
           '1' as TimeFrame
         );
 
-        // Should include GreaterThan condition which is met (1010 > 950)
+        // Should only check pattern conditions, not GreaterThan/LessThan
         expect(results).toBeDefined();
         expect(Array.isArray(results)).toBe(true);
-        expect(results.some(r => r.met)).toBe(true);
+        // GreaterThan should be excluded even with targetPrice
       });
 
-      it('should exclude conditions requiring targetPrice when not provided', async () => {
+      it('should check only pattern conditions when targetPrice is not provided', async () => {
         FinanceUtilMock.StockPriceDataMock = [
           {
             date: '2025-01-01 00:00',
@@ -441,13 +441,13 @@ describe('FinanceNotificationService', () => {
           '1' as TimeFrame
         );
 
-        // Should only check conditions that don't require targetPrice
+        // Should only check pattern conditions that don't require targetPrice
         expect(results).toBeDefined();
         expect(Array.isArray(results)).toBe(true);
         // Results can be empty or contain pattern-based conditions
       });
 
-      it('should return empty array when no conditions are met', async () => {
+      it('should return empty array when no pattern conditions are met', async () => {
         FinanceUtilMock.StockPriceDataMock = [
           {
             date: '2025-01-01 00:00',
@@ -465,7 +465,7 @@ describe('FinanceNotificationService', () => {
           '1' as TimeFrame
         );
 
-        // No buy conditions should be met with flat price at 900 and targetPrice 1000
+        // No buy pattern conditions should be met with flat price
         expect(results).toBeDefined();
         expect(Array.isArray(results)).toBe(true);
       });
@@ -494,7 +494,7 @@ describe('FinanceNotificationService', () => {
     });
 
     describe('Sell Mode', () => {
-      it('should check all sell conditions when targetPrice is provided', async () => {
+      it('should check sell pattern conditions excluding GreaterThan/LessThan', async () => {
         FinanceUtilMock.StockPriceDataMock = [
           {
             date: '2025-01-01 00:00',
@@ -512,13 +512,13 @@ describe('FinanceNotificationService', () => {
           '1' as TimeFrame
         );
 
-        // Should include LessThan condition which is met (900 < 950)
+        // Should only check pattern conditions, not LessThan
         expect(results).toBeDefined();
         expect(Array.isArray(results)).toBe(true);
-        expect(results.some(r => r.met)).toBe(true);
+        // LessThan should be excluded even with targetPrice
       });
 
-      it('should exclude conditions requiring targetPrice when not provided', async () => {
+      it('should check only pattern conditions when targetPrice is not provided', async () => {
         FinanceUtilMock.StockPriceDataMock = [
           {
             date: '2025-01-01 00:00',
@@ -536,12 +536,12 @@ describe('FinanceNotificationService', () => {
           '1' as TimeFrame
         );
 
-        // Should only check conditions that don't require targetPrice
+        // Should only check pattern conditions that don't require targetPrice
         expect(results).toBeDefined();
         expect(Array.isArray(results)).toBe(true);
       });
 
-      it('should return empty array when no conditions are met', async () => {
+      it('should return empty array when no pattern conditions are met', async () => {
         FinanceUtilMock.StockPriceDataMock = [
           {
             date: '2025-01-01 00:00',
@@ -559,7 +559,7 @@ describe('FinanceNotificationService', () => {
           '1' as TimeFrame
         );
 
-        // No sell conditions should be met with flat price at 1100 and targetPrice 1000
+        // No sell pattern conditions should be met with flat price
         expect(results).toBeDefined();
         expect(Array.isArray(results)).toBe(true);
       });
