@@ -16,6 +16,7 @@ import { SelectOptionType } from '@client-common/interfaces/SelectOptionType';
 import ExchangeUtil from '@/utils/ExchangeUtil';
 import TickerUtil from '@/utils/TickerUtil';
 import TimeFrameUtil from '@/utils/TimeFrameUtil';
+import SessionUtil from '@/utils/SessionUtil';
 import { ExchangeDataType } from '@/interfaces/data/ExchangeDataType';
 import { TickerDataType } from '@/interfaces/data/TickerDataType';
 
@@ -25,43 +26,6 @@ import AllConditionDisplay from '@/app/components/AllConditionDisplay';
 import ExchangeFetchService from '@/services/exchange/ExchangeFetchService.client';
 import Graph from '@/app/components/graph';
 import TickerFetchService from '@/services/ticker/TickerFetchService.client';
-
-interface SessionOption {
-  value: string;
-  label: string;
-}
-
-class SessionUtil {
-  // Available session options with user-friendly labels
-  private static readonly SESSION_OPTIONS: SessionOption[] = [
-    { value: "regular", label: "通常時間" },
-    { value: "extended", label: "時間外取引含む" },
-  ];
-
-  /**
-   * Convert session options to SelectOption format for use with BasicSelect component
-   */
-  public static toSelectOptions(): SelectOptionType[] {
-    return this.SESSION_OPTIONS.map(option => ({
-      label: option.label,
-      value: option.value
-    }));
-  }
-
-  /**
-   * Get the default session
-   */
-  public static getDefaultSession(): string {
-    return "regular";
-  }
-
-  /**
-   * Validate if a string is a valid session
-   */
-  public static isValidSession(value: string): boolean {
-    return this.SESSION_OPTIONS.some(option => option.value === value);
-  }
-}
 
 export default function Home() {
   const searchParams = useSearchParams();

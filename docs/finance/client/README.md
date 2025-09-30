@@ -54,7 +54,7 @@ const [tickers, setTickers] = useState<TickerDataType[]>([]);
 const [exchange, setExchange] = useState('');
 const [ticker, setTicker] = useState('');
 const [timeframe, setTimeframe] = useState<TimeFrame>('1');
-const [session, setSession] = useState<string>('regular');
+const [session, setSession] = useState<string>('extended');
 ```
 
 #### Condition Status (`app/components/ConditionStatus.tsx`)
