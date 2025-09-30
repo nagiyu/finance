@@ -135,9 +135,35 @@ interface TargetPriceCalculationResult {
 2. **精度**: 浮動小数点計算による微小な誤差が発生する可能性
 3. **通貨サポート**: 現在はJPYとUSDのみサポート
 
+## UI統合
+
+### TargetPrice算出ダイアログ
+
+Finance Notification Conditionの編集画面にて、目標価格の入力欄に「算出ツールを使用」ボタンが表示されます。
+
+#### 使用方法
+
+1. **ボタンをクリック**: 目標価格入力欄の下にある「算出ツールを使用」ボタンをクリックします。
+2. **保有情報を入力**: ダイアログにて以下の情報を入力します：
+   - **保有株数**: 現在の保有株数
+   - **総コスト**: 保有株式の総コスト
+   - **買い許容範囲**: 買い増し判断の許容範囲（例: 0.9 = 90%）
+   - **売り許容範囲**: 売却判断の許容範囲（例: 1.1 = 110%）
+   - **入力通貨**: 入力値の通貨（円またはドル）
+   - **目標通貨**: 目標価格の通貨（円またはドル）
+3. **適用をクリック**: 算出された売り目標価格が自動的に目標価格フィールドに設定されます。
+
+#### ダイアログの機能
+
+- **通貨変換**: 入力通貨と目標通貨を異なる通貨に設定することで、自動的に為替変換されます。
+- **バリデーション**: 入力値のバリデーションが行われ、エラーがある場合はアラートが表示されます。
+- **キャンセル**: ダイアログをキャンセルした場合、目標価格は変更されません。
+
 ## 関連ファイル
 
 - `finance/services/TargetPriceService.ts` - メインサービス
 - `finance/interfaces/data/TargetPriceDataType.ts` - 型定義
 - `finance/tests/services/TargetPriceService.test.ts` - テストコード
 - `common/utils/CurrencyUtil.ts` - 通貨変換ユーティリティ
+- `client/finance/app/components/financeNotification/TargetPriceCalculationDialog.tsx` - UI ダイアログコンポーネント
+- `client/finance/app/components/financeNotification/FinanceNotificationConditionEditDialogContent.tsx` - 統合先コンポーネント
