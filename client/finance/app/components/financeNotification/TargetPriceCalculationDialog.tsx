@@ -23,8 +23,7 @@ export default function TargetPriceCalculationDialog({
 }: TargetPriceCalculationDialogProps) {
     const [currentQuantity, setCurrentQuantity] = useState<number>(0);
     const [totalCost, setTotalCost] = useState<number>(0);
-    const [buyTolerance, setBuyTolerance] = useState<number>(0.9);
-    const [sellTolerance, setSellTolerance] = useState<number>(1.1);
+    const [tolerance, setTolerance] = useState<number>(0.1);
     const [currency, setCurrency] = useState<CurrencyType>(CURRENCY.JPY);
     const [targetCurrency, setTargetCurrency] = useState<CurrencyType>(CURRENCY.JPY);
 
@@ -38,8 +37,7 @@ export default function TargetPriceCalculationDialog({
             const result = TargetPriceService.calculateTargetPriceFromHoldings(
                 currentQuantity,
                 totalCost,
-                buyTolerance,
-                sellTolerance,
+                tolerance,
                 currency,
                 targetCurrency !== currency ? targetCurrency : undefined
             );
@@ -75,14 +73,9 @@ export default function TargetPriceCalculationDialog({
                         onChange={(e) => setTotalCost(Number(e.target.value))}
                     />
                     <BasicNumberField
-                        label="買い許容範囲"
-                        value={buyTolerance}
-                        onChange={(e) => setBuyTolerance(Number(e.target.value))}
-                    />
-                    <BasicNumberField
-                        label="売り許容範囲"
-                        value={sellTolerance}
-                        onChange={(e) => setSellTolerance(Number(e.target.value))}
+                        label="許容範囲 (例: 0.1 = ±10%)"
+                        value={tolerance}
+                        onChange={(e) => setTolerance(Number(e.target.value))}
                     />
                     <BasicRadioGroup
                         label="入力通貨"
