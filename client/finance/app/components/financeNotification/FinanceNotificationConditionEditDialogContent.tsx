@@ -3,7 +3,6 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Button } from '@mui/material';
 
 import { ConditionInfo } from '@finance/conditions/ConditionBase';
 import { ExchangeSessionType } from '@finance/types/ExchangeTypes';
@@ -14,6 +13,7 @@ import { FINANCE_NOTIFICATION_CONDITION_MODE, FINANCE_NOTIFICATION_FREQUENCY } f
 import BasicRadioGroup from '@client-common/components/inputs/RadioGroups/BasicRadioGroup';
 import BasicSelect from '@client-common/components/inputs/Selects/BasicSelect';
 import CurrencyNumberField from '@client-common/components/inputs/TextFields/CurrencyNumberField';
+import OutlinedButton from '@client-common/components/inputs/Buttons/OutlinedButton';
 import { SelectOptionType } from '@client-common/interfaces/SelectOptionType';
 
 import FinanceNotificationConditionFetchService from '@/services/financeNotification/FinanceNotificationConditionFetchService.client';
@@ -223,15 +223,13 @@ export default function FinanceNotificationConditionEditDialogContent({
                             })
                         }}
                     />
-                    <Button
-                        variant="outlined"
-                        size="small"
+                    <OutlinedButton
+                        label="算出ツールを使用"
                         onClick={() => setCalculationDialogOpen(true)}
                         disabled={loading}
+                        size="small"
                         sx={{ mt: 1 }}
-                    >
-                        算出ツールを使用
-                    </Button>
+                    />
                     <TargetPriceCalculationDialog
                         open={calculationDialogOpen}
                         onClose={() => setCalculationDialogOpen(false)}
