@@ -10,6 +10,7 @@ export const BullFlagConditionInfo: ConditionInfo = {
   isSellCondition: false,
   enableTargetPrice: false,
   enableTimeFrame: true,
+  enableSimplifiedMode: true,
 };
 
 export default class BullFlagCondition extends ConditionBase {

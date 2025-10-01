@@ -352,8 +352,9 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
    * Simplified notification logic that checks conditions based on buy/sell mode and target price.
    * This method automatically applies all relevant conditions for the specified mode.
    * 
-   * Note: GreaterThan and LessThan conditions are excluded from this simplified API
-   * as they can apply to both buy and sell scenarios and should be handled separately.
+   * Note: Conditions with enableSimplifiedMode=false (like GreaterThan and LessThan)
+   * are excluded from this simplified API as they can apply to both buy and sell scenarios
+   * and should be handled separately.
    * 
    * @param mode - Buy or Sell mode
    * @param exchangeId - Exchange ID
@@ -378,15 +379,15 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
       ? this.conditionService.getBuyConditionList()
       : this.conditionService.getSellConditionList();
 
-    // Filter conditions based on targetPrice availability and exclude GreaterThan/LessThan
+    // Filter conditions based on enableSimplifiedMode and targetPrice availability
     const applicableConditions = conditionList.filter(conditionName => {
-      // Exclude GreaterThan and LessThan as they apply to both buy and sell
-      if (conditionName === 'GreaterThan' || conditionName === 'LessThan') {
+      const conditionInfo = this.conditionService.getConditionInfo(conditionName);
+      
+      // Exclude conditions that are not enabled for simplified mode
+      if (!conditionInfo.enableSimplifiedMode) {
         return false;
       }
 
-      const conditionInfo = this.conditionService.getConditionInfo(conditionName);
-      
       // If condition requires target price but none is provided, skip it
       if (conditionInfo.enableTargetPrice && (targetPrice === null || targetPrice === undefined)) {
         return false;

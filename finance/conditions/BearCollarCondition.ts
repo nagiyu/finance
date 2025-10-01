@@ -10,6 +10,7 @@ export const BearCollarConditionInfo: ConditionInfo = {
   isSellCondition: true,
   enableTargetPrice: true,
   enableTimeFrame: true,
+  enableSimplifiedMode: true,
 };
 
 export default class BearCollarCondition extends ConditionBase {

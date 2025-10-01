@@ -38,6 +38,13 @@ export interface ConditionInfo {
    * Indicates if the condition supports timeframe configuration.
    */
   enableTimeFrame: boolean;
+
+  /**
+   * Indicates if the condition should be included in simplified mode API.
+   * Conditions that apply to both buy and sell (like GreaterThan/LessThan)
+   * should set this to false as they require separate configuration.
+   */
+  enableSimplifiedMode: boolean;
 }
 
 /**

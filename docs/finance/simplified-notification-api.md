@@ -58,11 +58,11 @@ public async checkConditionsByMode(
 
 ### 条件の自動選択
 
-**重要**: GreaterThan（指定価格を上回る）とLessThan（指定価格を下回る）条件は、買い・売り両方のシナリオで利用可能なため、このシンプル設定APIからは除外されています。これらの条件は別途、個別に設定する必要があります。
+**重要**: 条件の `enableSimplifiedMode` プロパティが `false` に設定されている条件（GreaterThan（指定価格を上回る）とLessThan（指定価格を下回る）など）は、買い・売り両方のシナリオで利用可能なため、このシンプル設定APIからは除外されています。これらの条件は別途、個別に設定する必要があります。
 
 #### 買いモード (`FINANCE_NOTIFICATION_CONDITION_MODE.BUY`)
 
-以下のパターン条件が自動的にチェックされます（価格条件は除外）:
+以下のパターン条件が自動的にチェックされます（`enableSimplifiedMode: true` の条件のみ）:
 
 **パターン条件 (targetPrice 不要):**
 - SansenAkenomyojo (三川明けの明星)
@@ -74,7 +74,7 @@ public async checkConditionsByMode(
 
 #### 売りモード (`FINANCE_NOTIFICATION_CONDITION_MODE.SELL`)
 
-以下のパターン条件が自動的にチェックされます（価格条件は除外）:
+以下のパターン条件が自動的にチェックされます（`enableSimplifiedMode: true` の条件のみ）:
 
 **パターン条件 (targetPrice 不要):**
 - SansenYoinomyojo (三川宵の明星)
@@ -85,18 +85,19 @@ public async checkConditionsByMode(
 ### ターゲット価格のフィルタリング
 
 **価格条件の取り扱い:**
-- GreaterThan（指定価格を上回る）とLessThan（指定価格を下回る）は、買い・売り両方で使用可能なため、このAPIからは除外されています
+- 条件の `enableSimplifiedMode` プロパティにより、簡易APIへの適用可否を管理
+- GreaterThan（指定価格を上回る）とLessThan（指定価格を下回る）は `enableSimplifiedMode: false` のため除外
 - これらの条件を使用する場合は、従来の個別設定方式を利用してください
 
 **パターン条件のフィルタリング:**
 1. 指定されたモード（買い/売り）に対応する全ての条件を取得
-2. GreaterThanとLessThanを除外
+2. `enableSimplifiedMode: false` の条件を除外
 3. 各条件の `enableTargetPrice` プロパティをチェック
 4. `targetPrice` が `null` または `undefined` の場合:
    - `enableTargetPrice: true` の条件は除外
    - `enableTargetPrice: false` の条件のみ実行
 5. `targetPrice` が設定されている場合:
-   - 全てのパターン条件を実行（GreaterThan/LessThanは除外）
+   - 全てのパターン条件を実行（`enableSimplifiedMode: false` の条件は除外）
 
 ---
 
@@ -283,11 +284,11 @@ public async notification(endpoint: string): Promise<void>
    ├─ BUY → getBuyConditionList()
    └─ SELL → getSellConditionList()
 
-2. GreaterThanとLessThanを除外
-   └─ これらは買い・売り両方で使用可能なため個別管理
+2. enableSimplifiedMode プロパティでフィルタリング
+   └─ enableSimplifiedMode: false の条件を除外（買い・売り両方で使用可能な条件）
 
 3. targetPrice の有無をチェック
-   ├─ あり → パターン条件を適用（価格条件は除外済み）
+   ├─ あり → パターン条件を適用（enableSimplifiedMode: false は除外済み）
    └─ なし → enableTargetPrice=false のパターン条件のみ適用
 
 4. 適用可能な条件を並列でチェック

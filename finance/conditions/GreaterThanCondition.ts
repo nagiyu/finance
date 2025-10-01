@@ -10,6 +10,7 @@ export const GreaterThanConditionInfo = {
   isSellCondition: true,
   enableTargetPrice: true,
   enableTimeFrame: false,
+  enableSimplifiedMode: false,
 };
 
 export default class GreaterThanCondition extends ConditionBase {

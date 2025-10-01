@@ -43,8 +43,14 @@ interface ConditionInfo {
   isSellCondition: boolean;        // 売りシグナルかどうか
   enableTargetPrice: boolean;      // 目標価格が必要かどうか
   enableTimeFrame: boolean;        // 時間枠が設定可能かどうか
+  enableSimplifiedMode: boolean;   // 簡易モードAPIで使用可能かどうか
 }
 ```
+
+**enableSimplifiedModeについて:**
+- `true`: 簡易モードAPI（`checkConditionsByMode`）で自動的に適用される条件
+- `false`: 買い・売り両方に適用可能な条件（GreaterThan、LessThanなど）。個別設定が必要
+
 
 #### ConditionResult
 条件チェックの結果を表すインターフェース：
