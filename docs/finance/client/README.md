@@ -84,6 +84,7 @@ const [session, setSession] = useState<string>('extended');
 - 条件の選択時に詳細な説明を表示
 - 条件の種類（買い・売り）に応じた適切な条件一覧の表示
 - 通知頻度、セッション、時間枠などの詳細設定
+- 目標価格の設定とTargetPrice算出ツールの統合
 
 **条件説明表示:**
 条件を選択すると、選択した条件の詳細説明が条件選択欄の下に表示されます。これにより、ユーザーは各条件の動作を理解してから設定を行うことができます。
@@ -98,6 +99,40 @@ const [session, setSession] = useState<string>('extended');
   enableTargetPrice: true,
   enableTimeFrame: false
 }
+```
+
+**TargetPrice算出ツール:**
+目標価格が必要な条件（`enableTargetPrice: true`）では、「算出ツールを使用」ボタンが表示されます。このボタンをクリックすると、TargetPrice算出ダイアログが開き、保有株式情報から目標価格を自動算出できます。
+
+詳細は [TargetPrice算出ツール](../target-price-calculation.md#ui統合) を参照してください。
+
+#### TargetPrice Calculation Dialog
+目標価格を自動算出するためのダイアログコンポーネント
+
+**機能:**
+- 保有株数、総コスト、許容範囲の入力
+- 通貨選択（JPY/USD）と自動為替変換
+- 算出された売り目標価格の自動適用
+
+**入力フィールド:**
+- **保有株数**: 現在の保有株数
+- **総コスト**: 保有株式の総コスト
+- **買い許容範囲**: 買い増し判断の許容範囲（例: 0.9 = 90%）
+- **売り許容範囲**: 売却判断の許容範囲（例: 1.1 = 110%）
+- **入力通貨**: 入力値の通貨（円またはドル）
+- **目標通貨**: 目標価格の通貨（円またはドル）
+
+**実装:**
+```typescript
+import TargetPriceCalculationDialog from '@/app/components/financeNotification/TargetPriceCalculationDialog';
+
+<TargetPriceCalculationDialog
+  open={calculationDialogOpen}
+  onClose={() => setCalculationDialogOpen(false)}
+  onApply={(targetPrice) => {
+    // 目標価格を適用
+  }}
+/>
 ```
 
 #### TimeFrameUtil
