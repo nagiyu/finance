@@ -15,14 +15,10 @@ export interface TargetPriceCalculationInput {
   totalCost: number;
 
   /**
-   * Tolerance range for buy condition (e.g., 0.9 for 90%)
+   * Tolerance multiplier to apply to average price (e.g., 0.1 for ±10%)
+   * This creates a range: average * (1 - tolerance) to average * (1 + tolerance)
    */
-  buyTolerance: number;
-
-  /**
-   * Tolerance range for sell condition (e.g., 1.1 for 110%)
-   */
-  sellTolerance: number;
+  tolerance: number;
 
   /**
    * Currency type: 'JPY' or 'USD'

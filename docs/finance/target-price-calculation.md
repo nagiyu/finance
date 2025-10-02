@@ -11,13 +11,15 @@ TargetPriceService は、保有している株式の情報から売買の目標�
 現在の保有情報から以下を算出します：
 
 - **平均取得価格**: 保有株数とトータルコストから算出
-- **買い目標価格**: 平均取得価格 × 買い許容範囲
-- **売り目標価格**: 平均取得価格 × 売り許容範囲
+- **買い目標価格**: 平均取得価格 × (1 - 許容範囲)
+- **売り目標価格**: 平均取得価格 × (1 + 許容範囲)
 
 ### 2. 許容範囲設定
 
-- **買い許容範囲**: 平均取得価格より低い価格での買い増し判断（例: 0.9 = 90%）
-- **売り許容範囲**: 平均取得価格より高い価格での売却判断（例: 1.1 = 110%）
+- **許容範囲**: 平均取得価格からの変動幅を示す倍率（例: 0.1 = ±10%）
+  - 買い目標価格: 平均価格 × (1 - 許容範囲)
+  - 売り目標価格: 平均価格 × (1 + 許容範囲)
+  - 許容範囲は買い、売りに共通して適用される単一の倍率です
 
 ### 3. 通貨変換
 
@@ -35,16 +37,15 @@ import TargetPriceService from '@finance/services/TargetPriceService';
 const result = TargetPriceService.calculateTargetPriceFromHoldings(
   100,      // 保有株数
   150000,   // 総コスト（円）
-  0.9,      // 買い許容範囲（90%）
-  1.1,      // 売り許容範囲（110%）
+  0.1,      // 許容範囲（±10%）
   'JPY'     // 通貨
 );
 
 console.log(result);
 // {
 //   averagePrice: 1500,     // 平均取得価格: ¥1,500
-//   buyTargetPrice: 1350,   // 買い目標価格: ¥1,350
-//   sellTargetPrice: 1650,  // 売り目標価格: ¥1,650
+//   buyTargetPrice: 1350,   // 買い目標価格: ¥1,350 (1500 × 0.9)
+//   sellTargetPrice: 1650,  // 売り目標価格: ¥1,650 (1500 × 1.1)
 //   currency: 'JPY'
 // }
 ```
@@ -56,8 +57,7 @@ console.log(result);
 const result = TargetPriceService.calculateTargetPriceFromHoldings(
   50,       // 保有株数
   2500,     // 総コスト（ドル）
-  0.95,     // 買い許容範囲（95%）
-  1.05,     // 売り許容範囲（105%）
+  0.05,     // 許容範囲（±5%）
   'USD',    // 元通貨
   'JPY'     // 目標通貨
 );
@@ -65,8 +65,8 @@ const result = TargetPriceService.calculateTargetPriceFromHoldings(
 console.log(result);
 // {
 //   averagePrice: 7150,       // 平均取得価格: ¥7,150 ($50 × 143)
-//   buyTargetPrice: 6792.5,   // 買い目標価格: ¥6,792.5
-//   sellTargetPrice: 7507.5,  // sell目標価格: ¥7,507.5
+//   buyTargetPrice: 6792.5,   // 買い目標価格: ¥6,792.5 (7150 × 0.95)
+//   sellTargetPrice: 7507.5,  // 売り目標価格: ¥7,507.5 (7150 × 1.05)
 //   currency: 'JPY',
 //   originalCurrency: 'USD',
 //   exchangeRate: 143.0
@@ -81,8 +81,7 @@ import { TargetPriceCalculationInput } from '@finance/interfaces/data/TargetPric
 const input: TargetPriceCalculationInput = {
   currentQuantity: 75,
   totalCost: 112500,
-  buyTolerance: 0.85,    // 85%で買い増し
-  sellTolerance: 1.2,    // 120%で売却
+  tolerance: 0.2,          // ±20%
   currency: 'JPY',
   targetCurrency: 'USD'  // ドル換算で表示
 };
@@ -98,8 +97,7 @@ const result = TargetPriceService.calculateTargetPrice(input);
 interface TargetPriceCalculationInput {
   currentQuantity: number;      // 現在の保有株数
   totalCost: number;           // 保有株式の総コスト
-  buyTolerance: number;        // 買い許容範囲 (0 < buyTolerance < sellTolerance)
-  sellTolerance: number;       // 売り許容範囲 (sellTolerance > buyTolerance)
+  tolerance: number;           // 許容範囲 (0 <= tolerance < 1)
   currency: 'JPY' | 'USD';     // 入力値の通貨
   targetCurrency?: 'JPY' | 'USD';  // 変換先通貨（オプション）
 }
@@ -124,9 +122,7 @@ interface TargetPriceCalculationResult {
 
 - `currentQuantity` が 0 以下
 - `totalCost` が 0 以下
-- `buyTolerance` が 0 以下
-- `sellTolerance` が 0 以下
-- `buyTolerance` が `sellTolerance` 以上
+- `tolerance` が 0 未満、または 1 以上
 - 無効な通貨コード
 
 ## 注意事項
@@ -147,8 +143,7 @@ Finance Notification Conditionの編集画面にて、目標価格の入力欄�
 2. **保有情報を入力**: ダイアログにて以下の情報を入力します：
    - **保有株数**: 現在の保有株数
    - **総コスト**: 保有株式の総コスト
-   - **買い許容範囲**: 買い増し判断の許容範囲（例: 0.9 = 90%）
-   - **売り許容範囲**: 売却判断の許容範囲（例: 1.1 = 110%）
+   - **許容範囲**: 平均価格からの変動幅（例: 0.1 = ±10%）
    - **入力通貨**: 入力値の通貨（円またはドル）
    - **目標通貨**: 目標価格の通貨（円またはドル）
 3. **適用をクリック**: 算出された売り目標価格が自動的に目標価格フィールドに設定されます。

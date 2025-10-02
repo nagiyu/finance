@@ -23,8 +23,10 @@ export default class TargetPriceService {
     const averagePrice = input.totalCost / input.currentQuantity;
 
     // Calculate target prices based on tolerance
-    const buyTargetPrice = averagePrice * input.buyTolerance;
-    const sellTargetPrice = averagePrice * input.sellTolerance;
+    // Buy target: average * (1 - tolerance)
+    // Sell target: average * (1 + tolerance)
+    const buyTargetPrice = averagePrice * (1 - input.tolerance);
+    const sellTargetPrice = averagePrice * (1 + input.tolerance);
 
     // Apply currency conversion if needed
     if (input.targetCurrency && input.targetCurrency !== input.currency) {
@@ -49,8 +51,7 @@ export default class TargetPriceService {
    * Calculate target price from MyTickerSummary data
    * @param currentQuantity Current quantity of stocks held
    * @param totalCost Total cost of current holdings
-   * @param buyTolerance Tolerance for buy condition (e.g., 0.9)
-   * @param sellTolerance Tolerance for sell condition (e.g., 1.1)
+   * @param tolerance Tolerance multiplier (e.g., 0.1 for ±10%)
    * @param currency Currency of the input values
    * @param targetCurrency Target currency for conversion (optional)
    * @returns Target price calculation result
@@ -58,16 +59,14 @@ export default class TargetPriceService {
   public static calculateTargetPriceFromHoldings(
     currentQuantity: number,
     totalCost: number,
-    buyTolerance: number,
-    sellTolerance: number,
+    tolerance: number,
     currency: CurrencyType,
     targetCurrency?: CurrencyType
   ): TargetPriceCalculationResult {
     return this.calculateTargetPrice({
       currentQuantity,
       totalCost,
-      buyTolerance,
-      sellTolerance,
+      tolerance,
       currency,
       targetCurrency
     });
@@ -86,16 +85,8 @@ export default class TargetPriceService {
       ErrorUtil.throwError('Total cost must be greater than 0');
     }
 
-    if (input.buyTolerance <= 0) {
-      ErrorUtil.throwError('Buy tolerance must be greater than 0');
-    }
-
-    if (input.sellTolerance <= 0) {
-      ErrorUtil.throwError('Sell tolerance must be greater than 0');
-    }
-
-    if (input.buyTolerance >= input.sellTolerance) {
-      ErrorUtil.throwError('Buy tolerance must be less than sell tolerance');
+    if (input.tolerance < 0 || input.tolerance >= 1) {
+      ErrorUtil.throwError('Tolerance must be between 0 and 1 (exclusive of 1)');
     }
 
     if (!Object.values(CURRENCY).includes(input.currency)) {
