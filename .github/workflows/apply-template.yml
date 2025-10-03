@@ -86,3 +86,84 @@ jobs:
             --draft || {
               echo "Failed to create PR, but branch was pushed."
             }
+
+  update-nextjs-common:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Install AWS CLI
+        run: |
+          cd /tmp
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip awscliv2.zip
+          sudo ./aws/install --update
+
+      - name: Configure AWS CLI
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Get Secrets from AWS SecretsManager
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: |
+            GitHub
+          parse-json-secrets: true
+
+      - name: Configure git user
+        run: |
+          git config user.name "${{ env.GITHUB_USERNAME }}"
+          git config user.email "${{ env.GITHUB_EMAIL }}"
+
+      - name: Fetch latest tags for submodule
+        run: |
+          cd nextjs-common
+          git fetch --tags
+          LATEST_TAG=$(git tag --sort=-v:refname | head -n 1)
+          echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_ENV
+
+      - name: Update submodule to latest tag
+        run: |
+          cd nextjs-common
+          git checkout ${{ env.LATEST_TAG }}
+          cd ..
+          git add nextjs-common
+          echo "BRANCH_NAME=update-nextjs-common-$(date +%Y%m%d-%H%M%S)" >> $GITHUB_ENV
+
+      - name: Create branch
+        run: git checkout -b ${{ env.BRANCH_NAME }}
+
+      - name: Check for submodule changes
+        id: submodule_changes
+        run: |
+          if [ -n "$(git status --porcelain nextjs-common)" ]; then
+            echo "submodule_changes=true" >> $GITHUB_ENV
+          else
+            echo "submodule_changes=false" >> $GITHUB_ENV
+          fi
+
+      - name: Commit submodule update
+        if: env.submodule_changes == 'true'
+        run: |
+          git commit -m "Update nextjs-common submodule to ${{ env.LATEST_TAG }}"
+          git push origin ${{ env.BRANCH_NAME }}
+
+      - name: Create Pull Request
+        if: env.submodule_changes == 'true'
+        run: |
+          export GH_TOKEN="${{ env.GITHUB_PERSONAL_ACCESS_TOKEN }}"
+          gh pr create \
+            --title "[Draft] Update nextjs-common submodule to ${{ env.LATEST_TAG }}" \
+            --body "Automated PR: nextjs-common submodule updated to ${{ env.LATEST_TAG }}" \
+            --base develop \
+            --head ${{ env.BRANCH_NAME }} \
+            --draft || {
+              echo "Failed to create PR, but branch was pushed."
+            }

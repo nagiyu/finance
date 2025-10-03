@@ -30,7 +30,7 @@
         "../../typescript-common/*"
       ],
       "@client-common/*": [
-        "../common/*"
+        "../../nextjs-common/common/*"
       ],
       "@finance/*": [
         "../../finance/*"

@@ -245,4 +245,5 @@ Finance Module
 - **[条件システム](./conditions-system.md)** - 利用可能な条件の詳細説明
 - **[条件ごとの通知頻度設定機能](./per-condition-frequency.md)** - 条件別通知頻度設定・時間枠設定機能
 - **[簡易通知設定 API](./simplified-notification-api.md)** - 買い/売りモードとターゲット価格のみで設定できる新しいAPI
+- **[簡易通知設定 UI](./simplified-notification-ui.md)** - 簡易モードでパターン条件をまとめて設定するUI改善
 - **[TargetPrice算出ツール](./target-price-calculation.md)** - 保有株式からの目標価格算出機能

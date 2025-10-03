@@ -14,7 +14,7 @@ import { FinanceNotificationCondition } from '@finance/interfaces/FinanceNotific
 import { FinanceNotificationConditionModeType } from '@finance/types/FinanceNotificationType';
 import { FinanceNotificationDataType } from '@finance/interfaces/data/FinanceNotificationDataType';
 import { FinanceNotificationRecordType } from '@finance/interfaces/record/FinanceNotificationRecordType';
-import { FINANCE_NOTIFICATION_CONDITION_MODE, FINANCE_NOTIFICATION_FREQUENCY } from '@finance/consts/FinanceNotificationConst';
+import { FINANCE_NOTIFICATION_CONDITION_MODE, FINANCE_NOTIFICATION_FREQUENCY, SIMPLIFIED_CONDITION_NAME } from '@finance/consts/FinanceNotificationConst';
 import { ExchangeSessionType } from '@finance/types/ExchangeTypes';
 import { TimeFrame } from '@finance/utils/FinanceUtil';
 
@@ -131,6 +131,20 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
         // Start all condition checks in parallel
         const conditionPromises = conditionsToCheck.map(async (condition) => {
           try {
+            // Handle simplified condition - expand to all simplified conditions for the mode
+            if (condition.conditionName === SIMPLIFIED_CONDITION_NAME) {
+              return await this.checkConditionsByMode(
+                condition.mode,
+                exchange.id,
+                ticker.id,
+                condition.session,
+                condition.targetPrice,
+                condition.frequency,
+                condition.timeframe
+              );
+            }
+            
+            // Regular condition check
             return await this.conditionService.checkCondition(
               condition.conditionName,
               exchange.id,
@@ -154,33 +168,36 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
           const condition = conditionsToCheck[i];
           
           if (result.status === 'fulfilled') {
-            const conditionResult: ConditionResult = result.value;
+            // Handle both single ConditionResult and array of ConditionResults (from simplified mode)
+            const conditionResults = Array.isArray(result.value) ? result.value : [result.value];
 
-            if (!conditionResult.met) {
-              console.log(`Condition not met for notification ${notification.id}, skipping push notification`);
-              continue;
-            }
-
-            console.log(`Condition met for notification ${notification.id}, sending push notification`);
-
-            // Prepare subscription object
-            const subscription: SubscriptionType = {
-              endpoint: notification.subscriptionEndpoint,
-              keys: {
-                p256dh: notification.subscriptionKeysP256dh,
-                auth: notification.subscriptionKeysAuth
+            for (const conditionResult of conditionResults) {
+              if (!conditionResult.met) {
+                console.log(`Condition not met for notification ${notification.id}, skipping push notification`);
+                continue;
               }
-            };
 
-            // Include exchange, ticker, and timeframe data in the message
-            const messageWithData = JSON.stringify({
-              message: conditionResult.message || '',
-              exchangeId: notification.exchangeId,
-              tickerId: notification.tickerId,
-              timeframe: condition.timeframe
-            });
+              console.log(`Condition met for notification ${notification.id}, sending push notification`);
 
-            await this.notificationService.sendPushNotification(endpoint, messageWithData, subscription);
+              // Prepare subscription object
+              const subscription: SubscriptionType = {
+                endpoint: notification.subscriptionEndpoint,
+                keys: {
+                  p256dh: notification.subscriptionKeysP256dh,
+                  auth: notification.subscriptionKeysAuth
+                }
+              };
+
+              // Include exchange, ticker, and timeframe data in the message
+              const messageWithData = JSON.stringify({
+                message: conditionResult.message || '',
+                exchangeId: notification.exchangeId,
+                tickerId: notification.tickerId,
+                timeframe: condition.timeframe
+              });
+
+              await this.notificationService.sendPushNotification(endpoint, messageWithData, subscription);
+            }
           }
         }
 
@@ -396,10 +413,14 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
       return true;
     });
 
-    // Check all applicable conditions in parallel
-    const conditionPromises = applicableConditions.map(async (conditionName) => {
+    // Check conditions sequentially with delay to avoid rate limiting
+    const metConditions: ConditionResult[] = [];
+    
+    for (let i = 0; i < applicableConditions.length; i++) {
+      const conditionName = applicableConditions[i];
+      
       try {
-        return await this.conditionService.checkCondition(
+        const result = await this.conditionService.checkCondition(
           conditionName,
           exchangeId,
           tickerId,
@@ -408,22 +429,19 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
           frequency,
           timeframe
         );
+        
+        if (result.met) {
+          metConditions.push(result);
+        }
       } catch (error) {
         console.error(`Error checking condition ${conditionName}:`, error);
-        return { met: false, message: '' };
       }
-    });
-
-    // Wait for all conditions to complete
-    const results = await Promise.allSettled(conditionPromises);
-
-    // Return only the conditions that were met
-    const metConditions: ConditionResult[] = [];
-    results.forEach((result) => {
-      if (result.status === 'fulfilled' && result.value.met) {
-        metConditions.push(result.value);
+      
+      // Add delay between condition checks to avoid rate limiting (except after the last one)
+      if (i < applicableConditions.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, 500)); // 500ms delay
       }
-    });
+    }
 
     return metConditions;
   }
