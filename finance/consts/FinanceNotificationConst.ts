@@ -27,3 +27,8 @@ export const FINANCE_NOTIFICATION_CONDITION_MODE = {
   BUY: 'Buy',
   SELL: 'Sell',
 } as const;
+
+/**
+ * Special condition name for simplified mode (all patterns grouped)
+ */
+export const SIMPLIFIED_CONDITION_NAME = 'SimplifiedAll' as const;
