@@ -7,7 +7,7 @@ import APIUtil from '@client-common/utils/APIUtil';
 import { SelectOptionType } from '@client-common/interfaces/SelectOptionType';
 
 import FinanceAuthorizer from '@/services/finance/FinanceAuthorizer';
-import { FINANCE_NOTIFICATION_CONDITION_MODE } from '@finance/consts/FinanceNotificationConst';
+import { FINANCE_NOTIFICATION_CONDITION_MODE, SIMPLIFIED_CONDITION_NAME } from '@finance/consts/FinanceNotificationConst';
 import ErrorUtil from '@common/utils/ErrorUtil';
 
 const getConditionList = (mode: FinanceNotificationConditionModeType): string[] => {
@@ -34,13 +34,38 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ mode: 
 
   try {
     const conditionList = getConditionList(mode);
+    const service = new ConditionService();
 
-    const conditionOptionList: SelectOptionType[] = conditionList.map(condition => {
-      const service = new ConditionService();
-      return {
+    const simplifiedConditions: string[] = [];
+    const nonSimplifiedConditions: string[] = [];
+
+    // Separate conditions by enableSimplifiedMode
+    conditionList.forEach(condition => {
+      const info = service.getConditionInfo(condition);
+      if (info.enableSimplifiedMode) {
+        simplifiedConditions.push(condition);
+      } else {
+        nonSimplifiedConditions.push(condition);
+      }
+    });
+
+    const conditionOptionList: SelectOptionType[] = [];
+
+    // Add simplified group option if there are any simplified conditions
+    if (simplifiedConditions.length > 0) {
+      const modeLabel = mode === FINANCE_NOTIFICATION_CONDITION_MODE.BUY ? '買い' : '売り';
+      conditionOptionList.push({
+        label: `簡易設定 (全${modeLabel}パターン)`,
+        value: SIMPLIFIED_CONDITION_NAME
+      });
+    }
+
+    // Add non-simplified conditions individually
+    nonSimplifiedConditions.forEach(condition => {
+      conditionOptionList.push({
         label: service.getConditionInfo(condition).name,
         value: condition
-      }
+      });
     });
 
     return APIUtil.ReturnSuccess(conditionOptionList);
