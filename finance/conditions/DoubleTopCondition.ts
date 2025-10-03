@@ -10,6 +10,7 @@ export const DoubleTopConditionInfo: ConditionInfo = {
   isSellCondition: true,
   enableTargetPrice: false,
   enableTimeFrame: true,
+  enableSimplifiedMode: true,
 };
 
 export default class DoubleTopCondition extends ConditionBase {

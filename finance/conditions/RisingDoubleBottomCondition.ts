@@ -10,6 +10,7 @@ export const RisingDoubleBottomConditionInfo: ConditionInfo = {
   isSellCondition: false,
   enableTargetPrice: false,
   enableTimeFrame: true,
+  enableSimplifiedMode: true,
 };
 
 export default class RisingDoubleBottomCondition extends ConditionBase {

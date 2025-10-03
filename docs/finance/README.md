@@ -48,6 +48,10 @@ Finance モジュールは以下の主要機能を提供します：
 - **条件ごとの時間枠設定** (新機能)
   - 各条件で独立してローソク足の時間枠を設定可能
   - 通知タイミングと条件チェックの時間枠を分離
+- **簡易通知設定 API** (新機能)
+  - 買い/売りモードの選択でパターン条件を自動適用
+  - GreaterThan/LessThanは除外（別途個別設定が必要）
+  - 該当するパターン条件を自動的に適用
 - 複数の通知条件タイプ対応
 
 **通知頻度オプション:**
@@ -135,8 +139,42 @@ const currentPrice = await FinanceUtil.getCurrentStockPrice('NYSE', 'AAPL');
 ```typescript
 import FinanceNotificationService from '@finance/services/FinanceNotificationService';
 
+// 従来の方法: 個別設定された条件での通知
 const notificationService = new FinanceNotificationService();
 await notificationService.notification('https://example.com/api/notifications');
+
+// 新しい方法: 買い/売りモードでのパターン条件チェック
+import { FINANCE_NOTIFICATION_CONDITION_MODE, FINANCE_NOTIFICATION_FREQUENCY } from '@finance/consts/FinanceNotificationConst';
+import { EXCHANGE_SESSION } from '@finance/consts/ExchangeConsts';
+
+// 買いパターン条件の全チェック（GreaterThan/LessThanは除外）
+const buyResults = await notificationService.checkConditionsByMode(
+  FINANCE_NOTIFICATION_CONDITION_MODE.BUY,
+  'NYSE',
+  'AAPL',
+  EXCHANGE_SESSION.EXTENDED,
+  null,    // パターン条件のみをチェック
+  FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
+  '1'      // 1分足
+);
+
+// 売りパターン条件の全チェック（GreaterThan/LessThanは除外）
+const sellResults = await notificationService.checkConditionsByMode(
+  FINANCE_NOTIFICATION_CONDITION_MODE.SELL,
+  'NYSE',
+  'AAPL',
+  EXCHANGE_SESSION.EXTENDED,
+  null,    // パターン条件のみをチェック
+  FINANCE_NOTIFICATION_FREQUENCY.HOURLY_LEVEL,
+  'D'      // 日足
+);
+
+// 満たされた条件の処理
+buyResults.forEach(result => {
+  if (result.met && result.message) {
+    console.log(result.message);
+  }
+});
 ```
 
 ### TargetPrice算出ツール
@@ -204,5 +242,7 @@ Finance Module
 - [Server Documentation](./server/README.md) - Lambda functions and API endpoints
 - [Client Documentation](./client/README.md) - Next.js application and UI components
 - [Common Module](../common/README.md) - Shared utilities and services
+- **[条件システム](./conditions-system.md)** - 利用可能な条件の詳細説明
 - **[条件ごとの通知頻度設定機能](./per-condition-frequency.md)** - 条件別通知頻度設定・時間枠設定機能
+- **[簡易通知設定 API](./simplified-notification-api.md)** - 買い/売りモードとターゲット価格のみで設定できる新しいAPI
 - **[TargetPrice算出ツール](./target-price-calculation.md)** - 保有株式からの目標価格算出機能

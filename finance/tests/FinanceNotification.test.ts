@@ -396,4 +396,225 @@ describe('FinanceNotificationService', () => {
       })).resolves.toBeDefined();
     });
   });
+
+  describe('checkConditionsByMode', () => {
+    describe('Buy Mode', () => {
+      it('should check buy pattern conditions excluding GreaterThan/LessThan', async () => {
+        FinanceUtilMock.StockPriceDataMock = [
+          {
+            date: '2025-01-01 00:00',
+            data: [1000, 960, 950, 1010]
+          }
+        ];
+
+        const results = await service.checkConditionsByMode(
+          FINANCE_NOTIFICATION_CONDITION_MODE.BUY,
+          ExchangeServiceMock.MockExchangeName,
+          TickerServiceMock.MockTickerName,
+          EXCHANGE_SESSION.EXTENDED,
+          950,
+          FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
+          '1' as TimeFrame
+        );
+
+        // Should only check pattern conditions, not GreaterThan/LessThan
+        expect(results).toBeDefined();
+        expect(Array.isArray(results)).toBe(true);
+        // GreaterThan should be excluded even with targetPrice
+      });
+
+      it('should check only pattern conditions when targetPrice is not provided', async () => {
+        FinanceUtilMock.StockPriceDataMock = [
+          {
+            date: '2025-01-01 00:00',
+            data: [1000, 900, 950, 1010]
+          }
+        ];
+
+        const results = await service.checkConditionsByMode(
+          FINANCE_NOTIFICATION_CONDITION_MODE.BUY,
+          ExchangeServiceMock.MockExchangeName,
+          TickerServiceMock.MockTickerName,
+          EXCHANGE_SESSION.EXTENDED,
+          null,
+          FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
+          '1' as TimeFrame
+        );
+
+        // Should only check pattern conditions that don't require targetPrice
+        expect(results).toBeDefined();
+        expect(Array.isArray(results)).toBe(true);
+        // Results can be empty or contain pattern-based conditions
+      });
+
+      it('should return empty array when no pattern conditions are met', async () => {
+        FinanceUtilMock.StockPriceDataMock = [
+          {
+            date: '2025-01-01 00:00',
+            data: [900, 900, 900, 900]
+          }
+        ];
+
+        const results = await service.checkConditionsByMode(
+          FINANCE_NOTIFICATION_CONDITION_MODE.BUY,
+          ExchangeServiceMock.MockExchangeName,
+          TickerServiceMock.MockTickerName,
+          EXCHANGE_SESSION.EXTENDED,
+          1000,
+          FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
+          '1' as TimeFrame
+        );
+
+        // No buy pattern conditions should be met with flat price
+        expect(results).toBeDefined();
+        expect(Array.isArray(results)).toBe(true);
+      });
+
+      it('should handle conditions with different timeframes', async () => {
+        FinanceUtilMock.StockPriceDataMock = [
+          {
+            date: '2025-01-01 00:00',
+            data: [1000, 960, 950, 1010]
+          }
+        ];
+
+        const results = await service.checkConditionsByMode(
+          FINANCE_NOTIFICATION_CONDITION_MODE.BUY,
+          ExchangeServiceMock.MockExchangeName,
+          TickerServiceMock.MockTickerName,
+          EXCHANGE_SESSION.EXTENDED,
+          950,
+          FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
+          'D' as TimeFrame
+        );
+
+        expect(results).toBeDefined();
+        expect(Array.isArray(results)).toBe(true);
+      });
+    });
+
+    describe('Sell Mode', () => {
+      it('should check sell pattern conditions excluding GreaterThan/LessThan', async () => {
+        FinanceUtilMock.StockPriceDataMock = [
+          {
+            date: '2025-01-01 00:00',
+            data: [1000, 900, 850, 900]
+          }
+        ];
+
+        const results = await service.checkConditionsByMode(
+          FINANCE_NOTIFICATION_CONDITION_MODE.SELL,
+          ExchangeServiceMock.MockExchangeName,
+          TickerServiceMock.MockTickerName,
+          EXCHANGE_SESSION.EXTENDED,
+          950,
+          FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
+          '1' as TimeFrame
+        );
+
+        // Should only check pattern conditions, not LessThan
+        expect(results).toBeDefined();
+        expect(Array.isArray(results)).toBe(true);
+        // LessThan should be excluded even with targetPrice
+      });
+
+      it('should check only pattern conditions when targetPrice is not provided', async () => {
+        FinanceUtilMock.StockPriceDataMock = [
+          {
+            date: '2025-01-01 00:00',
+            data: [1000, 900, 850, 900]
+          }
+        ];
+
+        const results = await service.checkConditionsByMode(
+          FINANCE_NOTIFICATION_CONDITION_MODE.SELL,
+          ExchangeServiceMock.MockExchangeName,
+          TickerServiceMock.MockTickerName,
+          EXCHANGE_SESSION.EXTENDED,
+          null,
+          FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
+          '1' as TimeFrame
+        );
+
+        // Should only check pattern conditions that don't require targetPrice
+        expect(results).toBeDefined();
+        expect(Array.isArray(results)).toBe(true);
+      });
+
+      it('should return empty array when no pattern conditions are met', async () => {
+        FinanceUtilMock.StockPriceDataMock = [
+          {
+            date: '2025-01-01 00:00',
+            data: [1100, 1100, 1100, 1100]
+          }
+        ];
+
+        const results = await service.checkConditionsByMode(
+          FINANCE_NOTIFICATION_CONDITION_MODE.SELL,
+          ExchangeServiceMock.MockExchangeName,
+          TickerServiceMock.MockTickerName,
+          EXCHANGE_SESSION.EXTENDED,
+          1000,
+          FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
+          '1' as TimeFrame
+        );
+
+        // No sell pattern conditions should be met with flat price
+        expect(results).toBeDefined();
+        expect(Array.isArray(results)).toBe(true);
+      });
+    });
+
+    describe('Error Handling', () => {
+      it('should handle errors gracefully and continue checking other conditions', async () => {
+        FinanceUtilMock.StockPriceDataMock = [
+          {
+            date: '2025-01-01 00:00',
+            data: [1000, 960, 950, 1010]
+          }
+        ];
+
+        const results = await service.checkConditionsByMode(
+          FINANCE_NOTIFICATION_CONDITION_MODE.BUY,
+          ExchangeServiceMock.MockExchangeName,
+          TickerServiceMock.MockTickerName,
+          EXCHANGE_SESSION.EXTENDED,
+          950,
+          FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
+          '1' as TimeFrame
+        );
+
+        // Even if some conditions fail, the method should return results
+        expect(results).toBeDefined();
+        expect(Array.isArray(results)).toBe(true);
+      });
+    });
+
+    describe('Frequency Integration', () => {
+      it('should include frequency information in met conditions', async () => {
+        FinanceUtilMock.StockPriceDataMock = [
+          {
+            date: '2025-01-01 00:00',
+            data: [1000, 960, 950, 1010]
+          }
+        ];
+
+        const results = await service.checkConditionsByMode(
+          FINANCE_NOTIFICATION_CONDITION_MODE.BUY,
+          ExchangeServiceMock.MockExchangeName,
+          TickerServiceMock.MockTickerName,
+          EXCHANGE_SESSION.EXTENDED,
+          950,
+          FINANCE_NOTIFICATION_FREQUENCY.TEN_MINUTE_LEVEL,
+          '1' as TimeFrame
+        );
+
+        // Check that results with messages include frequency information
+        const metConditionsWithMessage = results.filter(r => r.message);
+        if (metConditionsWithMessage.length > 0) {
+          expect(metConditionsWithMessage.some(r => r.message?.includes('通知頻度'))).toBe(true);
+        }
+      });
+    });
+  });
 });

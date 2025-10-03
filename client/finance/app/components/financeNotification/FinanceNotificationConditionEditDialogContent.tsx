@@ -46,6 +46,7 @@ export default function FinanceNotificationConditionEditDialogContent({
         isSellCondition: false,
         enableTargetPrice: false,
         enableTimeFrame: false,
+        enableSimplifiedMode: false,
     });
     const [calculationDialogOpen, setCalculationDialogOpen] = useState(false);
 

@@ -10,6 +10,7 @@ export const SanzonConditionInfo: ConditionInfo = {
   isSellCondition: true,
   enableTargetPrice: false,
   enableTimeFrame: true,
+  enableSimplifiedMode: true,
 };
 
 export default class SanzonCondition extends ConditionBase {

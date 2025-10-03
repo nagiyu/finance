@@ -11,9 +11,12 @@ import FinanceNotificationDataAccessor from '@finance/services/FinanceNotificati
 import TickerService from '@finance/services/TickerService';
 import { ExchangeDataType } from '@finance/interfaces/data/ExchangeDataType';
 import { FinanceNotificationCondition } from '@finance/interfaces/FinanceNotificationType';
+import { FinanceNotificationConditionModeType } from '@finance/types/FinanceNotificationType';
 import { FinanceNotificationDataType } from '@finance/interfaces/data/FinanceNotificationDataType';
 import { FinanceNotificationRecordType } from '@finance/interfaces/record/FinanceNotificationRecordType';
-import { FINANCE_NOTIFICATION_FREQUENCY } from '@finance/consts/FinanceNotificationConst';
+import { FINANCE_NOTIFICATION_CONDITION_MODE, FINANCE_NOTIFICATION_FREQUENCY } from '@finance/consts/FinanceNotificationConst';
+import { ExchangeSessionType } from '@finance/types/ExchangeTypes';
+import { TimeFrame } from '@finance/utils/FinanceUtil';
 
 export default class FinanceNotificationService extends CRUDServiceBase<FinanceNotificationDataType, FinanceNotificationRecordType> {
   private readonly exchangeService: ExchangeService;
@@ -343,5 +346,85 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
   private isHourlyInterval(currentTime: Date): boolean {
     const minutes = currentTime.getMinutes();
     return minutes === 0;
+  }
+
+  /**
+   * Simplified notification logic that checks conditions based on buy/sell mode and target price.
+   * This method automatically applies all relevant conditions for the specified mode.
+   * 
+   * Note: Conditions with enableSimplifiedMode=false (like GreaterThan and LessThan)
+   * are excluded from this simplified API as they can apply to both buy and sell scenarios
+   * and should be handled separately.
+   * 
+   * @param mode - Buy or Sell mode
+   * @param exchangeId - Exchange ID
+   * @param tickerId - Ticker ID
+   * @param session - Exchange session type
+   * @param targetPrice - Target price (optional, conditions requiring it will be skipped if not provided)
+   * @param frequency - Notification frequency
+   * @param timeframe - Timeframe for candlestick data
+   * @returns Array of ConditionResults for conditions that were met
+   */
+  public async checkConditionsByMode(
+    mode: FinanceNotificationConditionModeType,
+    exchangeId: string,
+    tickerId: string,
+    session?: ExchangeSessionType,
+    targetPrice?: number | null,
+    frequency?: typeof FINANCE_NOTIFICATION_FREQUENCY[keyof typeof FINANCE_NOTIFICATION_FREQUENCY],
+    timeframe?: TimeFrame | null
+  ): Promise<ConditionResult[]> {
+    // Get list of conditions based on mode
+    const conditionList = mode === FINANCE_NOTIFICATION_CONDITION_MODE.BUY
+      ? this.conditionService.getBuyConditionList()
+      : this.conditionService.getSellConditionList();
+
+    // Filter conditions based on enableSimplifiedMode and targetPrice availability
+    const applicableConditions = conditionList.filter(conditionName => {
+      const conditionInfo = this.conditionService.getConditionInfo(conditionName);
+      
+      // Exclude conditions that are not enabled for simplified mode
+      if (!conditionInfo.enableSimplifiedMode) {
+        return false;
+      }
+
+      // If condition requires target price but none is provided, skip it
+      if (conditionInfo.enableTargetPrice && (targetPrice === null || targetPrice === undefined)) {
+        return false;
+      }
+      
+      return true;
+    });
+
+    // Check all applicable conditions in parallel
+    const conditionPromises = applicableConditions.map(async (conditionName) => {
+      try {
+        return await this.conditionService.checkCondition(
+          conditionName,
+          exchangeId,
+          tickerId,
+          session,
+          targetPrice,
+          frequency,
+          timeframe
+        );
+      } catch (error) {
+        console.error(`Error checking condition ${conditionName}:`, error);
+        return { met: false, message: '' };
+      }
+    });
+
+    // Wait for all conditions to complete
+    const results = await Promise.allSettled(conditionPromises);
+
+    // Return only the conditions that were met
+    const metConditions: ConditionResult[] = [];
+    results.forEach((result) => {
+      if (result.status === 'fulfilled' && result.value.met) {
+        metConditions.push(result.value);
+      }
+    });
+
+    return metConditions;
   }
 }
