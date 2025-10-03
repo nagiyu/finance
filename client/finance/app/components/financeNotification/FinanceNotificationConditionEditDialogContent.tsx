@@ -224,23 +224,27 @@ export default function FinanceNotificationConditionEditDialogContent({
                             })
                         }}
                     />
-                    <OutlinedButton
-                        label="算出ツールを使用"
-                        onClick={() => setCalculationDialogOpen(true)}
-                        disabled={loading}
-                        size="small"
-                        sx={{ mt: 1 }}
-                    />
-                    <TargetPriceCalculationDialog
-                        open={calculationDialogOpen}
-                        onClose={() => setCalculationDialogOpen(false)}
-                        onApply={(targetPrice) => {
-                            onItemChange({
-                                ...item,
-                                targetPrice: targetPrice
-                            });
-                        }}
-                    />
+                    {conditionInfo.isSellCondition && (
+                        <>
+                            <OutlinedButton
+                                label="算出ツールを使用"
+                                onClick={() => setCalculationDialogOpen(true)}
+                                disabled={loading}
+                                size="small"
+                                sx={{ mt: 1 }}
+                            />
+                            <TargetPriceCalculationDialog
+                                open={calculationDialogOpen}
+                                onClose={() => setCalculationDialogOpen(false)}
+                                onApply={(targetPrice) => {
+                                    onItemChange({
+                                        ...item,
+                                        targetPrice: targetPrice
+                                    });
+                                }}
+                            />
+                        </>
+                    )}
                 </div>
             )}
         </>

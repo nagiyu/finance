@@ -102,7 +102,7 @@ const [session, setSession] = useState<string>('extended');
 ```
 
 **TargetPrice算出ツール:**
-目標価格が必要な条件（`enableTargetPrice: true`）では、「算出ツールを使用」ボタンが表示されます。このボタンをクリックすると、TargetPrice算出ダイアログが開き、保有株式情報から目標価格を自動算出できます。
+目標価格が必要な売り条件（`enableTargetPrice: true` かつ `isSellCondition: true`）では、「算出ツールを使用」ボタンが表示されます。このボタンをクリックすると、TargetPrice算出ダイアログが開き、保有株式情報から目標価格を自動算出できます。
 
 詳細は [TargetPrice算出ツール](../target-price-calculation.md#ui統合) を参照してください。
 

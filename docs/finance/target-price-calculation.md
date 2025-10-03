@@ -135,7 +135,7 @@ interface TargetPriceCalculationResult {
 
 ### TargetPrice算出ダイアログ
 
-Finance Notification Conditionの編集画面にて、目標価格の入力欄に「算出ツールを使用」ボタンが表示されます。
+Finance Notification Conditionの編集画面にて、**売り条件で目標価格が必要な場合のみ**、目標価格の入力欄に「算出ツールを使用」ボタンが表示されます。
 
 #### 使用方法
 
