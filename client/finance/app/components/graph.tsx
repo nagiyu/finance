@@ -5,7 +5,6 @@
 import React, { useEffect, useState } from 'react';
 
 import CandleStick, { CandleStickData } from '@client-common/components/echarts/CandleStick';
-import { useResponsiveGraphItems } from '@client-common/hooks/useResponsiveGraphItems';
 import { GetStockPriceDataOptions, TimeFrame } from '@finance/utils/FinanceUtil';
 
 type GraphProps = {
@@ -13,11 +12,11 @@ type GraphProps = {
     ticker: string;
     timeframe: TimeFrame;
     session?: string;
+    candleCount: number;
 };
 
-export default function Graph({ exchange, ticker, timeframe, session }: GraphProps) {
+export default function Graph({ exchange, ticker, timeframe, session, candleCount }: GraphProps) {
     const [data, setData] = useState<CandleStickData[] | null>(null);
-    const itemCount = useResponsiveGraphItems();
 
     useEffect(() => {
         (async () => {
@@ -26,7 +25,7 @@ export default function Graph({ exchange, ticker, timeframe, session }: GraphPro
                 return;
             }
 
-            const options: GetStockPriceDataOptions = { count: itemCount, timeframe };
+            const options: GetStockPriceDataOptions = { count: candleCount, timeframe };
             if (session) {
                 options.session = session;
             }
@@ -45,7 +44,7 @@ export default function Graph({ exchange, ticker, timeframe, session }: GraphPro
 
             setData(json);
         })();
-    }, [ticker, itemCount, timeframe, session]);
+    }, [ticker, candleCount, timeframe, session]);
 
     if (!data) {
         return <div>Loading...</div>;

@@ -161,6 +161,27 @@ const TIMEFRAME_OPTIONS = [
 - `regular`: 通常取引時間
 - `extended`: 時間外取引含む
 
+#### CandleCountUtil
+ローソク足の表示本数選択のためのユーティリティクラス
+
+**表示本数オプション:**
+- 10本
+- 30本（デフォルト）
+- 50本
+
+```typescript
+import CandleCountUtil from '@/utils/CandleCountUtil';
+
+// セレクトオプションの取得
+const options = CandleCountUtil.toSelectOptions();
+
+// デフォルト値の取得
+const defaultCount = CandleCountUtil.getDefaultCandleCount(); // "30"
+
+// 文字列から数値への変換
+const count = CandleCountUtil.toNumber("30"); // 30
+```
+
 ### Services
 
 #### ExchangeFetchService & TickerFetchService
@@ -202,6 +223,45 @@ ECharts for React を使用したチャート表示
 - インタラクティブな操作
 - 複数の時間軸対応
 - レスポンシブデザイン
+- スクロール可能なローソク足チャート
+- 表示本数の選択機能（10本、30本、50本）
+
+**Props:**
+```typescript
+{
+  exchange: string;      // 取引所キー
+  ticker: string;        // ティッカーキー
+  timeframe: TimeFrame;  // 時間軸
+  session?: string;      // セッション（optional）
+  candleCount: number;   // 表示するローソク足の本数
+}
+```
+
+**使用例:**
+```typescript
+<Graph 
+  exchange={exchangeKey} 
+  ticker={tickerKey} 
+  timeframe="D" 
+  session="extended"
+  candleCount={30}
+/>
+```
+
+#### CandleStick Component
+ローソク足チャートの表示コンポーネント（ECharts）
+
+**特徴:**
+- データズーム機能（マウスホイールでズーム、ドラッグで移動）
+- スライダーによるスクロール操作
+- ツールチップ表示（十字線付き）
+- 表示本数に応じた自動幅調整
+- モバイル対応レイアウト
+
+**データズーム操作:**
+- **マウスホイール**: チャートのズームイン/アウト
+- **ドラッグ**: チャートの移動
+- **スライダー**: チャート下部のスライダーでスクロール
 
 ## UI/UX Design
 

@@ -17,6 +17,7 @@ import ExchangeUtil from '@/utils/ExchangeUtil';
 import TickerUtil from '@/utils/TickerUtil';
 import TimeFrameUtil from '@/utils/TimeFrameUtil';
 import SessionUtil from '@/utils/SessionUtil';
+import CandleCountUtil from '@/utils/CandleCountUtil';
 import { ExchangeDataType } from '@/interfaces/data/ExchangeDataType';
 import { TickerDataType } from '@/interfaces/data/TickerDataType';
 
@@ -37,6 +38,7 @@ export default function Home() {
   const [ticker, setTicker] = useState('');
   const [timeframe, setTimeframe] = useState<TimeFrame>(TimeFrameUtil.getDefaultTimeFrame());
   const [session, setSession] = useState<string>(SessionUtil.getDefaultSession());
+  const [candleCount, setCandleCount] = useState<string>(CandleCountUtil.getDefaultCandleCount());
   const [urlParamsProcessed, setUrlParamsProcessed] = useState(false);
 
   const exchangeFetchService = new ExchangeFetchService();
@@ -114,7 +116,7 @@ export default function Home() {
             <BasicSelect label='Exchange' options={exchangeOptions} value={exchange} onChange={(value) => setExchange(value)} />
             <BasicSelect label='Ticker' options={tickerOptions} value={ticker} onChange={(value) => setTicker(value)} />
           </DirectionStack>
-          <Graph exchange={getExchangeKey(exchange)} ticker={getTickerKey(ticker)} timeframe={timeframe} session={session} />
+          <Graph exchange={getExchangeKey(exchange)} ticker={getTickerKey(ticker)} timeframe={timeframe} session={session} candleCount={CandleCountUtil.toNumber(candleCount)} />
           <DirectionStack>
             <BasicSelect label='時間軸' options={TimeFrameUtil.toSelectOptions()} value={timeframe} onChange={(value) => {
               if (TimeFrameUtil.isValidTimeFrame(value)) {
@@ -122,6 +124,7 @@ export default function Home() {
               }
             }} />
             <BasicSelect label='取引時間' options={SessionUtil.toSelectOptions()} value={session} onChange={(value) => setSession(value)} />
+            <BasicSelect label='表示本数' options={CandleCountUtil.toSelectOptions()} value={candleCount} onChange={(value) => setCandleCount(value)} />
           </DirectionStack>
           <AllConditionDisplay 
             exchangeId={exchange}
