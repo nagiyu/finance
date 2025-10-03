@@ -2,7 +2,7 @@
 
 ## 概要
 
-条件システムは、様々な金融通知条件をチェックするためのモジュラーで拡張可能な方法を提供します。このシステムは、`ConditionService`によって管理される各条件タイプごとに個別の条件クラスを提供することで、関心事を分離します。
+条件システムは、様々な金融通知条件をチェックするためのモジュラーで拡張可能な方法を提供します。このシステムは、`ConditionUtil`で管理される条件マップと、`ConditionService`によるチェック機能を組み合わせることで、各条件タイプごとに個別の条件クラスを提供し、関心事を分離します。
 
 ## アーキテクチャ
 
@@ -62,9 +62,30 @@ interface ConditionResult {
 }
 ```
 
+### ConditionUtil
+
+`ConditionUtil`は、すべての条件の定義を管理する静的ユーティリティクラスです。条件マップ（conditionMap）と、それに関連する静的操作を提供します。
+
+```typescript
+// 買い条件のリストを取得
+const buyConditions = ConditionUtil.getBuyConditionList();
+
+// 売り条件のリストを取得
+const sellConditions = ConditionUtil.getSellConditionList();
+
+// 目標価格が不要な条件のリストを取得
+const evaluableConditions = ConditionUtil.getEvaluableConditionList();
+
+// 条件の情報を取得
+const info = ConditionUtil.getConditionInfo('SansenAkenomyojo');
+
+// 条件クラスを取得
+const ConditionClass = ConditionUtil.getCondition('GreaterThan');
+```
+
 ### ConditionService
 
-`ConditionService`はすべての条件を管理し、条件チェックのための統一されたインターフェースを提供します。
+`ConditionService`は条件チェックのための統一されたインターフェースを提供します。内部的には`ConditionUtil`を使用して条件の定義を取得します。
 
 ```typescript
 const conditionService = new ConditionService(exchangeService, tickerService);
@@ -278,7 +299,7 @@ const result = await conditionService.checkCondition(
 1. `ConditionBase`を継承する新しいクラスを作成
 2. メタデータを含む`ConditionInfo`オブジェクトをエクスポート
 3. `checkCondition`メソッドを実装
-4. `ConditionService.conditionMap`に条件を追加
+4. `ConditionUtil.conditionMap`に条件を追加
 5. このドキュメントを更新
 
 例：
