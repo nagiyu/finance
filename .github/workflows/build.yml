@@ -56,7 +56,7 @@ jobs:
         cache-dependency-path: |
           typescript-common/package-lock.json
           finance/package-lock.json
-          client/common/package-lock.json
+          nextjs-common/common/package-lock.json
           client/finance/package-lock.json
     
     - name: Install dependencies for typescript-common
@@ -69,9 +69,9 @@ jobs:
         cd finance
         npm install
     
-    - name: Install dependencies for client/common
+    - name: Install dependencies for nextjs-common
       run: |
-        cd client/common
+        cd nextjs-common/common
         npm install
     
     - name: Install dependencies and build client/finance
