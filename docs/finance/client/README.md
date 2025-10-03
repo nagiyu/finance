@@ -202,6 +202,34 @@ ECharts for React を使用したチャート表示
 - インタラクティブな操作
 - 複数の時間軸対応
 - レスポンシブデザイン
+- 自動リフレッシュ機能（10秒毎）
+- 手動リフレッシュ機能（RefreshButtonから呼び出し可能）
+
+**実装:**
+```typescript
+import Graph, { GraphRef } from '@/app/components/graph';
+
+const graphRef = useRef<GraphRef>(null);
+
+// 手動でグラフをリフレッシュ
+await graphRef.current?.refresh();
+
+<Graph 
+  ref={graphRef}
+  exchange={exchangeKey} 
+  ticker={tickerKey} 
+  timeframe={timeframe} 
+  session={session} 
+/>
+```
+
+**自動リフレッシュ:**
+- グラフは10秒毎に自動的に最新データを取得します
+- コンポーネントのアンマウント時に自動的にクリーンアップされます
+
+**手動リフレッシュ:**
+- `GraphRef`を使用して親コンポーネントから手動でリフレッシュできます
+- RefreshButtonと組み合わせて使用することで、ユーザーが任意のタイミングでデータを更新できます
 
 ## UI/UX Design
 

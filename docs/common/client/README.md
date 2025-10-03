@@ -107,6 +107,48 @@ const options: SelectOptionType[] = [
 - 型安全な選択肢管理
 - アクセシビリティ対応
 
+##### RefreshButton
+データを更新するためのリフレッシュボタンコンポーネントです。
+
+```typescript
+import RefreshButton from '@client-common/components/Inputs/Buttons/RefreshButton';
+
+<RefreshButton 
+  onClick={() => handleRefresh()}
+  disabled={loading}
+/>
+```
+
+**Props:**
+- `onClick`: () => void - クリック時のハンドラー
+- `disabled`: boolean (オプション) - ボタンの無効化状態
+
+**特徴:**
+- Material-UI IconButton をベース
+- Refresh アイコンを使用
+- ローディング中の無効化に対応
+- LoadingContentと組み合わせて使用可能
+
+**使用例（LoadingContentと組み合わせ）:**
+```typescript
+import RefreshButton from '@client-common/components/Inputs/Buttons/RefreshButton';
+import LoadingContent from '@client-common/components/content/LoadingContent';
+
+<LoadingContent>
+  {(loading, runWithLoading) => (
+    <>
+      <RefreshButton 
+        onClick={() => runWithLoading(async () => {
+          await fetchData();
+        })} 
+        disabled={loading}
+      />
+      {/* その他のコンテンツ */}
+    </>
+  )}
+</LoadingContent>
+```
+
 ### Authentication
 
 #### Auth Hooks
