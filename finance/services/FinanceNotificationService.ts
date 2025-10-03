@@ -413,10 +413,14 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
       return true;
     });
 
-    // Check all applicable conditions in parallel
-    const conditionPromises = applicableConditions.map(async (conditionName) => {
+    // Check conditions sequentially with delay to avoid rate limiting
+    const metConditions: ConditionResult[] = [];
+    
+    for (let i = 0; i < applicableConditions.length; i++) {
+      const conditionName = applicableConditions[i];
+      
       try {
-        return await this.conditionService.checkCondition(
+        const result = await this.conditionService.checkCondition(
           conditionName,
           exchangeId,
           tickerId,
@@ -425,22 +429,19 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
           frequency,
           timeframe
         );
+        
+        if (result.met) {
+          metConditions.push(result);
+        }
       } catch (error) {
         console.error(`Error checking condition ${conditionName}:`, error);
-        return { met: false, message: '' };
       }
-    });
-
-    // Wait for all conditions to complete
-    const results = await Promise.allSettled(conditionPromises);
-
-    // Return only the conditions that were met
-    const metConditions: ConditionResult[] = [];
-    results.forEach((result) => {
-      if (result.status === 'fulfilled' && result.value.met) {
-        metConditions.push(result.value);
+      
+      // Add delay between condition checks to avoid rate limiting (except after the last one)
+      if (i < applicableConditions.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, 500)); // 500ms delay
       }
-    });
+    }
 
     return metConditions;
   }
