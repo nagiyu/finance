@@ -81,6 +81,10 @@ const info = ConditionUtil.getConditionInfo('SansenAkenomyojo');
 
 // 条件クラスを取得
 const ConditionClass = ConditionUtil.getCondition('GreaterThan');
+
+// 条件キーから日本語表示名を取得
+const displayName = ConditionUtil.getConditionDisplayName('SansenAkenomyojo');
+// 戻り値: '三川明けの明星'
 ```
 
 ### ConditionService

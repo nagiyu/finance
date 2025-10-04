@@ -18,6 +18,7 @@ import ContainedButton from '@client-common/components/inputs/Buttons/ContainedB
 import DirectionStack from '@client-common/components/Layout/Stacks/DirectionStack';
 import ErrorAlert from '@client-common/components/feedback/alert/ErrorAlert';
 
+import ConditionClientUtil from '@/utils/finance-notification/ConditionUtil';
 import ExchangeUtil from '@/utils/ExchangeUtil';
 import FinanceNotificationConditionEditDialogContent from '@/app/components/financeNotification/FinanceNotificationConditionEditDialogContent';
 import FrequencyUtil from '@/utils/finance-notification/FrequencyUtil';
@@ -80,6 +81,7 @@ export default function FinanceNotificationEditDialogContent({
         {
             id: 'conditionName',
             label: 'Condition',
+            format: (cell) => ConditionClientUtil.formatCondition(cell),
         },
         {
             id: 'frequency',
@@ -253,7 +255,7 @@ export default function FinanceNotificationEditDialogContent({
                 {() => (
                     <>
                         {conditionError && <ErrorAlert message={conditionError} />}
-                        <div>{condition.conditionName}を削除しますか？</div>
+                        <div>{ConditionClientUtil.formatCondition(condition.conditionName)}を削除しますか？</div>
                     </>
                 )}
             </BasicDialog>

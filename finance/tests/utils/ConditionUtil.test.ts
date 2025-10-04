@@ -76,6 +76,28 @@ describe('ConditionUtil', () => {
     });
   });
 
+  describe('getConditionDisplayName', () => {
+    it('returns Japanese display name for valid condition key', () => {
+      const displayName = ConditionUtil.getConditionDisplayName('SansenAkenomyojo');
+      expect(displayName).toBe('三川明けの明星');
+    });
+
+    it('returns Japanese display name for GreaterThan condition', () => {
+      const displayName = ConditionUtil.getConditionDisplayName('GreaterThan');
+      expect(displayName).toBe('指定価格を上回る');
+    });
+
+    it('returns Japanese display name for Sanzon condition', () => {
+      const displayName = ConditionUtil.getConditionDisplayName('Sanzon');
+      expect(displayName).toBe('三尊');
+    });
+
+    it('returns the key itself for invalid condition key', () => {
+      const displayName = ConditionUtil.getConditionDisplayName('InvalidCondition');
+      expect(displayName).toBe('InvalidCondition');
+    });
+  });
+
   describe('multiple conditions', () => {
     it('GreaterThan and LessThan should have target price enabled', () => {
       const greaterInfo = ConditionUtil.getConditionInfo('GreaterThan');

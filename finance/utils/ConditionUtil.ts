@@ -142,4 +142,19 @@ export default class ConditionUtil {
 
     return condition.condition;
   }
+
+  /**
+   * Gets the Japanese display name for a condition.
+   * @param conditionKey Condition key (e.g., "SansenAkenomyojo")
+   * @returns Japanese display name (e.g., "三川明けの明星")
+   */
+  public static getConditionDisplayName(conditionKey: string): string {
+    const condition = this.conditionMap[conditionKey];
+
+    if (!condition) {
+      return conditionKey; // Return the key itself if not found
+    }
+
+    return condition.info.name;
+  }
 }
