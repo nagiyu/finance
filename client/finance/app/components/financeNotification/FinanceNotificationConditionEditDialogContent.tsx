@@ -224,7 +224,7 @@ export default function FinanceNotificationConditionEditDialogContent({
                             })
                         }}
                     />
-                    {conditionInfo.isSellCondition && (
+                    {conditionInfo.isSellCondition && item.mode === FINANCE_NOTIFICATION_CONDITION_MODE.SELL && (
                         <>
                             <OutlinedButton
                                 label="算出ツールを使用"
