@@ -13,9 +13,10 @@ type GraphProps = {
     timeframe: TimeFrame;
     session?: string;
     candleCount: number;
+    refreshTrigger?: number;
 };
 
-export default function Graph({ exchange, ticker, timeframe, session, candleCount }: GraphProps) {
+export default function Graph({ exchange, ticker, timeframe, session, candleCount, refreshTrigger }: GraphProps) {
     const [data, setData] = useState<CandleStickData[] | null>(null);
 
     useEffect(() => {
@@ -44,7 +45,7 @@ export default function Graph({ exchange, ticker, timeframe, session, candleCoun
 
             setData(json);
         })();
-    }, [ticker, candleCount, timeframe, session]);
+    }, [ticker, candleCount, timeframe, session, refreshTrigger]);
 
     if (!data) {
         return <div>Loading...</div>;

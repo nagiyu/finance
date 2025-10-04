@@ -44,6 +44,8 @@ client/finance/
 - 取引所・ティッカー選択UI
 - 時間軸・セッション設定
 - リアルタイムチャート表示
+- **ローディングボタンによるチャート手動更新**
+- **10秒毎の自動チャート更新**
 - 認証状態管理
 - 条件ステータス表示（画面下部）
 
@@ -55,6 +57,28 @@ const [exchange, setExchange] = useState('');
 const [ticker, setTicker] = useState('');
 const [timeframe, setTimeframe] = useState<TimeFrame>('1');
 const [session, setSession] = useState<string>('extended');
+const [refreshTrigger, setRefreshTrigger] = useState<number>(0);
+```
+
+**ローディング機能:**
+- **手動更新**: 「ローディング」ボタンをクリックすることで、現在のチャートを最新の状態に更新できます
+- **自動更新**: 10秒毎に自動的にチャートが最新の状態に更新されます
+
+実装の詳細:
+```typescript
+// 手動更新ハンドラ
+const handleRefresh = () => {
+  setRefreshTrigger(prev => prev + 1);
+};
+
+// 10秒毎の自動更新
+useEffect(() => {
+  const interval = setInterval(() => {
+    setRefreshTrigger(prev => prev + 1);
+  }, 10000);
+
+  return () => clearInterval(interval);
+}, []);
 ```
 
 #### Condition Status (`app/components/ConditionStatus.tsx`)
@@ -234,6 +258,7 @@ ECharts for React を使用したチャート表示
   timeframe: TimeFrame;  // 時間軸
   session?: string;      // セッション（optional）
   candleCount: number;   // 表示するローソク足の本数
+  refreshTrigger?: number; // 更新トリガー（optional、変更時にデータを再取得）
 }
 ```
 
@@ -245,8 +270,12 @@ ECharts for React を使用したチャート表示
   timeframe="D" 
   session="extended"
   candleCount={30}
+  refreshTrigger={refreshTrigger}
 />
 ```
+
+**refreshTrigger について:**
+`refreshTrigger` プロパティは、親コンポーネントからチャートデータの再取得をトリガーするために使用されます。この値が変更されるたびに、チャートは最新のデータを取得して表示を更新します。手動更新ボタンや自動更新タイマーによってこの値が増加され、チャートが更新されます。
 
 #### CandleStick Component
 ローソク足チャートの表示コンポーネント（ECharts）
