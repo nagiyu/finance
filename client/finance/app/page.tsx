@@ -10,6 +10,7 @@ import { TimeFrame } from '@finance/utils/FinanceUtil';
 import BasicSelect from '@client-common/components/inputs/Selects/BasicSelect';
 import BasicStack from '@client-common/components/Layout/Stacks/BasicStack';
 import DirectionStack from '@client-common/components/Layout/Stacks/DirectionStack';
+import ContainedButton from '@client-common/components/inputs/Buttons/ContainedButton';
 
 import { SelectOptionType } from '@client-common/interfaces/SelectOptionType';
 
@@ -40,9 +41,23 @@ export default function Home() {
   const [session, setSession] = useState<string>(SessionUtil.getDefaultSession());
   const [candleCount, setCandleCount] = useState<string>(CandleCountUtil.getDefaultCandleCount());
   const [urlParamsProcessed, setUrlParamsProcessed] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState<number>(0);
 
   const exchangeFetchService = new ExchangeFetchService();
   const tickerFetchService = new TickerFetchService();
+
+  const handleRefresh = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
+
+  // 10秒毎の自動更新
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRefreshTrigger(prev => prev + 1);
+    }, 10000); // 10秒 = 10000ミリ秒
+
+    return () => clearInterval(interval);
+  }, []);
 
   const getExchangeKey = (id: string): string => {
     return exchanges.find(exchange => exchange.id === id)?.key || '';
@@ -116,7 +131,8 @@ export default function Home() {
             <BasicSelect label='Exchange' options={exchangeOptions} value={exchange} onChange={(value) => setExchange(value)} />
             <BasicSelect label='Ticker' options={tickerOptions} value={ticker} onChange={(value) => setTicker(value)} />
           </DirectionStack>
-          <Graph exchange={getExchangeKey(exchange)} ticker={getTickerKey(ticker)} timeframe={timeframe} session={session} candleCount={CandleCountUtil.toNumber(candleCount)} />
+          <ContainedButton label='ローディング' onClick={handleRefresh} />
+          <Graph exchange={getExchangeKey(exchange)} ticker={getTickerKey(ticker)} timeframe={timeframe} session={session} candleCount={CandleCountUtil.toNumber(candleCount)} refreshTrigger={refreshTrigger} />
           <DirectionStack>
             <BasicSelect label='時間軸' options={TimeFrameUtil.toSelectOptions()} value={timeframe} onChange={(value) => {
               if (TimeFrameUtil.isValidTimeFrame(value)) {
