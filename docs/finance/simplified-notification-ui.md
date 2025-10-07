@@ -40,7 +40,7 @@ export const SIMPLIFIED_CONDITION_NAME = 'SimplifiedAll' as const;
 
 ```typescript
 {
-  name: 'SimplifiedAll',
+  name: '簡易設定',
   description: '買い・売りモードに応じた全てのパターン条件を一括で設定します。個別の価格条件（指定価格を上回る・下回る）は含まれません。',
   isBuyCondition: true,
   isSellCondition: true,
