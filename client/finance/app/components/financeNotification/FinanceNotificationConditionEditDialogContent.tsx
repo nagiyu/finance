@@ -9,11 +9,11 @@ import { ExchangeSessionType } from '@finance/types/ExchangeTypes';
 import { FinanceNotificationCondition } from '@finance/interfaces/FinanceNotificationType';
 import { FinanceNotificationConditionModeType, FinanceNotificationFrequencyType } from '@finance/types/FinanceNotificationType';
 import { FINANCE_NOTIFICATION_CONDITION_MODE, FINANCE_NOTIFICATION_FREQUENCY } from '@finance/consts/FinanceNotificationConst';
-import { TimeFrame } from '@finance/utils/FinanceUtil';
 
 import BasicRadioGroup from '@client-common/components/inputs/RadioGroups/BasicRadioGroup';
 import BasicSelect from '@client-common/components/inputs/Selects/BasicSelect';
 import CurrencyNumberField from '@client-common/components/inputs/TextFields/CurrencyNumberField';
+import OutlinedButton from '@client-common/components/inputs/Buttons/OutlinedButton';
 import { SelectOptionType } from '@client-common/interfaces/SelectOptionType';
 
 import FinanceNotificationConditionFetchService from '@/services/financeNotification/FinanceNotificationConditionFetchService.client';
@@ -23,6 +23,7 @@ import SessionSelect from '@/app/components/common/SessionSelect';
 import SessionUtil from '@/utils/SessionUtil';
 import TimeFrameSelect from '@/app/components/common/TimeFrameSelect';
 import TimeFrameUtil from '@/utils/TimeFrameUtil';
+import TargetPriceCalculationDialog from '@/app/components/financeNotification/TargetPriceCalculationDialog';
 
 interface FinanceNotificationEditDialogContentProps {
     item: FinanceNotificationCondition;
@@ -45,7 +46,9 @@ export default function FinanceNotificationConditionEditDialogContent({
         isSellCondition: false,
         enableTargetPrice: false,
         enableTimeFrame: false,
+        enableSimplifiedMode: false,
     });
+    const [calculationDialogOpen, setCalculationDialogOpen] = useState(false);
 
     const conditionFetchService = new FinanceNotificationConditionFetchService();
 
@@ -201,25 +204,48 @@ export default function FinanceNotificationConditionEditDialogContent({
                 />
             )}
             {conditionInfo.enableTargetPrice && (
-                <CurrencyNumberField
-                    label='目標価格'
-                    value={item.targetPrice !== null ? item.targetPrice : 0}
-                    disabled={loading}
-                    onChange={(value) => {
-                        onItemChange({
-                            ...item,
-                            targetPrice: Number(value.target.value)
-                        })
-                    }}
-                    onValueChange={(value) => {
-                        // Ensure the target price is not negative
-                        const validValue = Math.max(0, value);
-                        onItemChange({
-                            ...item,
-                            targetPrice: validValue
-                        })
-                    }}
-                />
+                <div>
+                    <CurrencyNumberField
+                        label='目標価格'
+                        value={item.targetPrice !== null ? item.targetPrice : 0}
+                        disabled={loading}
+                        onChange={(value) => {
+                            onItemChange({
+                                ...item,
+                                targetPrice: Number(value.target.value)
+                            })
+                        }}
+                        onValueChange={(value) => {
+                            // Ensure the target price is not negative
+                            const validValue = Math.max(0, value);
+                            onItemChange({
+                                ...item,
+                                targetPrice: validValue
+                            })
+                        }}
+                    />
+                    {conditionInfo.isSellCondition && item.mode === FINANCE_NOTIFICATION_CONDITION_MODE.SELL && (
+                        <>
+                            <OutlinedButton
+                                label="算出ツールを使用"
+                                onClick={() => setCalculationDialogOpen(true)}
+                                disabled={loading}
+                                size="small"
+                                sx={{ mt: 1 }}
+                            />
+                            <TargetPriceCalculationDialog
+                                open={calculationDialogOpen}
+                                onClose={() => setCalculationDialogOpen(false)}
+                                onApply={(targetPrice) => {
+                                    onItemChange({
+                                        ...item,
+                                        targetPrice: targetPrice
+                                    });
+                                }}
+                            />
+                        </>
+                    )}
+                </div>
             )}
         </>
     );

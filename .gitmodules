@@ -1,3 +1,6 @@
 [submodule "typescript-common"]
 	path = typescript-common
 	url = https://github.com/nagiyu/nagiyu-typescript-common.git
+[submodule "nextjs-common"]
+	path = nextjs-common
+	url = https://github.com/nagiyu/nagiyu-nextjs-common.git

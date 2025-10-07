@@ -10,6 +10,7 @@ export const AscendingTriangleConditionInfo: ConditionInfo = {
   isSellCondition: false,
   enableTargetPrice: false,
   enableTimeFrame: true,
+  enableSimplifiedMode: true,
 };
 
 export default class AscendingTriangleCondition extends ConditionBase {

@@ -11,9 +11,12 @@ import FinanceNotificationDataAccessor from '@finance/services/FinanceNotificati
 import TickerService from '@finance/services/TickerService';
 import { ExchangeDataType } from '@finance/interfaces/data/ExchangeDataType';
 import { FinanceNotificationCondition } from '@finance/interfaces/FinanceNotificationType';
+import { FinanceNotificationConditionModeType } from '@finance/types/FinanceNotificationType';
 import { FinanceNotificationDataType } from '@finance/interfaces/data/FinanceNotificationDataType';
 import { FinanceNotificationRecordType } from '@finance/interfaces/record/FinanceNotificationRecordType';
-import { FINANCE_NOTIFICATION_FREQUENCY } from '@finance/consts/FinanceNotificationConst';
+import { FINANCE_NOTIFICATION_CONDITION_MODE, FINANCE_NOTIFICATION_FREQUENCY, SIMPLIFIED_CONDITION_NAME } from '@finance/consts/FinanceNotificationConst';
+import { ExchangeSessionType } from '@finance/types/ExchangeTypes';
+import { TimeFrame } from '@finance/utils/FinanceUtil';
 
 export default class FinanceNotificationService extends CRUDServiceBase<FinanceNotificationDataType, FinanceNotificationRecordType> {
   private readonly exchangeService: ExchangeService;
@@ -128,6 +131,20 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
         // Start all condition checks in parallel
         const conditionPromises = conditionsToCheck.map(async (condition) => {
           try {
+            // Handle simplified condition - expand to all simplified conditions for the mode
+            if (condition.conditionName === SIMPLIFIED_CONDITION_NAME) {
+              return await this.checkConditionsByMode(
+                condition.mode,
+                exchange.id,
+                ticker.id,
+                condition.session,
+                condition.targetPrice,
+                condition.frequency,
+                condition.timeframe
+              );
+            }
+            
+            // Regular condition check
             return await this.conditionService.checkCondition(
               condition.conditionName,
               exchange.id,
@@ -151,33 +168,36 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
           const condition = conditionsToCheck[i];
           
           if (result.status === 'fulfilled') {
-            const conditionResult: ConditionResult = result.value;
+            // Handle both single ConditionResult and array of ConditionResults (from simplified mode)
+            const conditionResults = Array.isArray(result.value) ? result.value : [result.value];
 
-            if (!conditionResult.met) {
-              console.log(`Condition not met for notification ${notification.id}, skipping push notification`);
-              continue;
-            }
-
-            console.log(`Condition met for notification ${notification.id}, sending push notification`);
-
-            // Prepare subscription object
-            const subscription: SubscriptionType = {
-              endpoint: notification.subscriptionEndpoint,
-              keys: {
-                p256dh: notification.subscriptionKeysP256dh,
-                auth: notification.subscriptionKeysAuth
+            for (const conditionResult of conditionResults) {
+              if (!conditionResult.met) {
+                console.log(`Condition not met for notification ${notification.id}, skipping push notification`);
+                continue;
               }
-            };
 
-            // Include exchange, ticker, and timeframe data in the message
-            const messageWithData = JSON.stringify({
-              message: conditionResult.message || '',
-              exchangeId: notification.exchangeId,
-              tickerId: notification.tickerId,
-              timeframe: condition.timeframe
-            });
+              console.log(`Condition met for notification ${notification.id}, sending push notification`);
 
-            await this.notificationService.sendPushNotification(endpoint, messageWithData, subscription);
+              // Prepare subscription object
+              const subscription: SubscriptionType = {
+                endpoint: notification.subscriptionEndpoint,
+                keys: {
+                  p256dh: notification.subscriptionKeysP256dh,
+                  auth: notification.subscriptionKeysAuth
+                }
+              };
+
+              // Include exchange, ticker, and timeframe data in the message
+              const messageWithData = JSON.stringify({
+                message: conditionResult.message || '',
+                exchangeId: notification.exchangeId,
+                tickerId: notification.tickerId,
+                timeframe: condition.timeframe
+              });
+
+              await this.notificationService.sendPushNotification(endpoint, messageWithData, subscription);
+            }
           }
         }
 
@@ -343,5 +363,86 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
   private isHourlyInterval(currentTime: Date): boolean {
     const minutes = currentTime.getMinutes();
     return minutes === 0;
+  }
+
+  /**
+   * Simplified notification logic that checks conditions based on buy/sell mode and target price.
+   * This method automatically applies all relevant conditions for the specified mode.
+   * 
+   * Note: Conditions with enableSimplifiedMode=false (like GreaterThan and LessThan)
+   * are excluded from this simplified API as they can apply to both buy and sell scenarios
+   * and should be handled separately.
+   * 
+   * @param mode - Buy or Sell mode
+   * @param exchangeId - Exchange ID
+   * @param tickerId - Ticker ID
+   * @param session - Exchange session type
+   * @param targetPrice - Target price (optional, conditions requiring it will be skipped if not provided)
+   * @param frequency - Notification frequency
+   * @param timeframe - Timeframe for candlestick data
+   * @returns Array of ConditionResults for conditions that were met
+   */
+  public async checkConditionsByMode(
+    mode: FinanceNotificationConditionModeType,
+    exchangeId: string,
+    tickerId: string,
+    session?: ExchangeSessionType,
+    targetPrice?: number | null,
+    frequency?: typeof FINANCE_NOTIFICATION_FREQUENCY[keyof typeof FINANCE_NOTIFICATION_FREQUENCY],
+    timeframe?: TimeFrame | null
+  ): Promise<ConditionResult[]> {
+    // Get list of conditions based on mode
+    const conditionList = mode === FINANCE_NOTIFICATION_CONDITION_MODE.BUY
+      ? this.conditionService.getBuyConditionList()
+      : this.conditionService.getSellConditionList();
+
+    // Filter conditions based on enableSimplifiedMode and targetPrice availability
+    const applicableConditions = conditionList.filter(conditionName => {
+      const conditionInfo = this.conditionService.getConditionInfo(conditionName);
+      
+      // Exclude conditions that are not enabled for simplified mode
+      if (!conditionInfo.enableSimplifiedMode) {
+        return false;
+      }
+
+      // If condition requires target price but none is provided, skip it
+      if (conditionInfo.enableTargetPrice && (targetPrice === null || targetPrice === undefined)) {
+        return false;
+      }
+      
+      return true;
+    });
+
+    // Check conditions sequentially with delay to avoid rate limiting
+    const metConditions: ConditionResult[] = [];
+    
+    for (let i = 0; i < applicableConditions.length; i++) {
+      const conditionName = applicableConditions[i];
+      
+      try {
+        const result = await this.conditionService.checkCondition(
+          conditionName,
+          exchangeId,
+          tickerId,
+          session,
+          targetPrice,
+          frequency,
+          timeframe
+        );
+        
+        if (result.met) {
+          metConditions.push(result);
+        }
+      } catch (error) {
+        console.error(`Error checking condition ${conditionName}:`, error);
+      }
+      
+      // Add delay between condition checks to avoid rate limiting (except after the last one)
+      if (i < applicableConditions.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, 500)); // 500ms delay
+      }
+    }
+
+    return metConditions;
   }
 }

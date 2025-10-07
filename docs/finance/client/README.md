@@ -44,6 +44,8 @@ client/finance/
 - 取引所・ティッカー選択UI
 - 時間軸・セッション設定
 - リアルタイムチャート表示
+- **ローディングボタンによるチャート手動更新**
+- **10秒毎の自動チャート更新**
 - 認証状態管理
 - 条件ステータス表示（画面下部）
 
@@ -54,7 +56,29 @@ const [tickers, setTickers] = useState<TickerDataType[]>([]);
 const [exchange, setExchange] = useState('');
 const [ticker, setTicker] = useState('');
 const [timeframe, setTimeframe] = useState<TimeFrame>('1');
-const [session, setSession] = useState<string>('regular');
+const [session, setSession] = useState<string>('extended');
+const [refreshTrigger, setRefreshTrigger] = useState<number>(0);
+```
+
+**ローディング機能:**
+- **手動更新**: 「ローディング」ボタンをクリックすることで、現在のチャートを最新の状態に更新できます
+- **自動更新**: 10秒毎に自動的にチャートが最新の状態に更新されます
+
+実装の詳細:
+```typescript
+// 手動更新ハンドラ
+const handleRefresh = () => {
+  setRefreshTrigger(prev => prev + 1);
+};
+
+// 10秒毎の自動更新
+useEffect(() => {
+  const interval = setInterval(() => {
+    setRefreshTrigger(prev => prev + 1);
+  }, 10000);
+
+  return () => clearInterval(interval);
+}, []);
 ```
 
 #### Condition Status (`app/components/ConditionStatus.tsx`)
@@ -84,6 +108,7 @@ const [session, setSession] = useState<string>('regular');
 - 条件の選択時に詳細な説明を表示
 - 条件の種類（買い・売り）に応じた適切な条件一覧の表示
 - 通知頻度、セッション、時間枠などの詳細設定
+- 目標価格の設定とTargetPrice算出ツールの統合
 
 **条件説明表示:**
 条件を選択すると、選択した条件の詳細説明が条件選択欄の下に表示されます。これにより、ユーザーは各条件の動作を理解してから設定を行うことができます。
@@ -98,6 +123,40 @@ const [session, setSession] = useState<string>('regular');
   enableTargetPrice: true,
   enableTimeFrame: false
 }
+```
+
+**TargetPrice算出ツール:**
+モードが『売り』で、かつ目標価格が必要な売り条件（`enableTargetPrice: true` かつ `isSellCondition: true`）の場合のみ、「算出ツールを使用」ボタンが表示されます。このボタンをクリックすると、TargetPrice算出ダイアログが開き、保有株式情報から目標価格を自動算出できます。
+
+詳細は [TargetPrice算出ツール](../target-price-calculation.md#ui統合) を参照してください。
+
+#### TargetPrice Calculation Dialog
+目標価格を自動算出するためのダイアログコンポーネント
+
+**機能:**
+- 保有株数、総コスト、許容範囲の入力
+- 通貨選択（JPY/USD）と自動為替変換
+- 算出された売り目標価格の自動適用
+
+**入力フィールド:**
+- **保有株数**: 現在の保有株数
+- **総コスト**: 保有株式の総コスト
+- **買い許容範囲**: 買い増し判断の許容範囲（例: 0.9 = 90%）
+- **売り許容範囲**: 売却判断の許容範囲（例: 1.1 = 110%）
+- **入力通貨**: 入力値の通貨（円またはドル）
+- **目標通貨**: 目標価格の通貨（円またはドル）
+
+**実装:**
+```typescript
+import TargetPriceCalculationDialog from '@/app/components/financeNotification/TargetPriceCalculationDialog';
+
+<TargetPriceCalculationDialog
+  open={calculationDialogOpen}
+  onClose={() => setCalculationDialogOpen(false)}
+  onApply={(targetPrice) => {
+    // 目標価格を適用
+  }}
+/>
 ```
 
 #### TimeFrameUtil
@@ -125,6 +184,27 @@ const TIMEFRAME_OPTIONS = [
 **セッションタイプ:**
 - `regular`: 通常取引時間
 - `extended`: 時間外取引含む
+
+#### CandleCountUtil
+ローソク足の表示本数選択のためのユーティリティクラス
+
+**表示本数オプション:**
+- 10本
+- 30本（デフォルト）
+- 50本
+
+```typescript
+import CandleCountUtil from '@/utils/CandleCountUtil';
+
+// セレクトオプションの取得
+const options = CandleCountUtil.toSelectOptions();
+
+// デフォルト値の取得
+const defaultCount = CandleCountUtil.getDefaultCandleCount(); // "30"
+
+// 文字列から数値への変換
+const count = CandleCountUtil.toNumber("30"); // 30
+```
 
 ### Services
 
@@ -167,6 +247,49 @@ ECharts for React を使用したチャート表示
 - インタラクティブな操作
 - 複数の時間軸対応
 - レスポンシブデザイン
+- スクロール可能なローソク足チャート
+- 表示本数の選択機能（10本、30本、50本）
+
+**Props:**
+```typescript
+{
+  exchange: string;      // 取引所キー
+  ticker: string;        // ティッカーキー
+  timeframe: TimeFrame;  // 時間軸
+  session?: string;      // セッション（optional）
+  candleCount: number;   // 表示するローソク足の本数
+  refreshTrigger?: number; // 更新トリガー（optional、変更時にデータを再取得）
+}
+```
+
+**使用例:**
+```typescript
+<Graph 
+  exchange={exchangeKey} 
+  ticker={tickerKey} 
+  timeframe="D" 
+  session="extended"
+  candleCount={30}
+  refreshTrigger={refreshTrigger}
+/>
+```
+
+**refreshTrigger について:**
+`refreshTrigger` プロパティは、親コンポーネントからチャートデータの再取得をトリガーするために使用されます。この値が変更されるたびに、チャートは最新のデータを取得して表示を更新します。手動更新ボタンや自動更新タイマーによってこの値が増加され、チャートが更新されます。
+
+#### CandleStick Component
+ローソク足チャートの表示コンポーネント（ECharts）
+
+**特徴:**
+- スクロール機能（横スクロールで全データを表示）
+- ツールチップ表示（十字線付き）
+- 表示本数に応じた自動幅調整
+- モバイル対応レイアウト
+
+**スクロール操作:**
+- `scrollable` プロパティを `true` に設定することでスクロールが有効になります
+- チャートの幅がデータ数に応じて自動調整され、横スクロールで全データを閲覧できます
+- モバイルでは慣性スクロール（`-webkit-overflow-scrolling: touch`）に対応
 
 ## UI/UX Design
 

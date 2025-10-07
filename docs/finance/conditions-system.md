@@ -2,7 +2,7 @@
 
 ## 概要
 
-条件システムは、様々な金融通知条件をチェックするためのモジュラーで拡張可能な方法を提供します。このシステムは、`ConditionService`によって管理される各条件タイプごとに個別の条件クラスを提供することで、関心事を分離します。
+条件システムは、様々な金融通知条件をチェックするためのモジュラーで拡張可能な方法を提供します。このシステムは、`ConditionUtil`で管理される条件マップと、`ConditionService`によるチェック機能を組み合わせることで、各条件タイプごとに個別の条件クラスを提供し、関心事を分離します。
 
 ## アーキテクチャ
 
@@ -43,8 +43,14 @@ interface ConditionInfo {
   isSellCondition: boolean;        // 売りシグナルかどうか
   enableTargetPrice: boolean;      // 目標価格が必要かどうか
   enableTimeFrame: boolean;        // 時間枠が設定可能かどうか
+  enableSimplifiedMode: boolean;   // 簡易モードAPIで使用可能かどうか
 }
 ```
+
+**enableSimplifiedModeについて:**
+- `true`: 簡易モードAPI（`checkConditionsByMode`）で自動的に適用される条件
+- `false`: 買い・売り両方に適用可能な条件（GreaterThan、LessThanなど）。個別設定が必要
+
 
 #### ConditionResult
 条件チェックの結果を表すインターフェース：
@@ -56,9 +62,34 @@ interface ConditionResult {
 }
 ```
 
+### ConditionUtil
+
+`ConditionUtil`は、すべての条件の定義を管理する静的ユーティリティクラスです。条件マップ（conditionMap）と、それに関連する静的操作を提供します。
+
+```typescript
+// 買い条件のリストを取得
+const buyConditions = ConditionUtil.getBuyConditionList();
+
+// 売り条件のリストを取得
+const sellConditions = ConditionUtil.getSellConditionList();
+
+// 目標価格が不要な条件のリストを取得
+const evaluableConditions = ConditionUtil.getEvaluableConditionList();
+
+// 条件の情報を取得
+const info = ConditionUtil.getConditionInfo('SansenAkenomyojo');
+
+// 条件クラスを取得
+const ConditionClass = ConditionUtil.getCondition('GreaterThan');
+
+// 条件キーから日本語表示名を取得
+const displayName = ConditionUtil.getConditionDisplayName('SansenAkenomyojo');
+// 戻り値: '三川明けの明星'
+```
+
 ### ConditionService
 
-`ConditionService`はすべての条件を管理し、条件チェックのための統一されたインターフェースを提供します。
+`ConditionService`は条件チェックのための統一されたインターフェースを提供します。内部的には`ConditionUtil`を使用して条件の定義を取得します。
 
 ```typescript
 const conditionService = new ConditionService(exchangeService, tickerService);
@@ -196,8 +227,15 @@ const result = await conditionService.checkCondition(
 
 **検出条件：**
 - **高値・安値の上昇**: 両方のトレンドラインが正の傾きを持つ
-- **収束性**: 安値ラインの上昇角度が高値ラインより急で、価格幅が狭まっている
-- **ブレイクダウン確認**: 安値トレンドラインを下抜けし、直近2-3本のローソク足で確認される
+- **収束性**: 安値ラインの上昇角度が高値ラインより急で、価格幅が狭まっている（スプレッド分析と線形回帰による傾き検証を組み合わせて判定）
+- **ブレイクダウン確認**: 安値トレンドラインを下抜けし、直近3本以上のローソク足で確認される（うち少なくとも1本は明確な下抜け）
+
+**検出アルゴリズム：**
+1. **スイング高値・安値の抽出**: 周辺のローソク足と比較して相対的な高値・安値を識別
+2. **トレンドライン計算**: 線形回帰を用いて上限・下限のトレンドラインを算出
+3. **収束判定**: スプレッドの縮小と傾きの関係を複合的に評価（急激な収束から緩やかな収束まで対応）
+4. **サポートレベル算出**: トレンドラインまたは直近安値の平均から動的に計算
+5. **ブレイクダウン検証**: サポートレベルを下回る持続的な価格推移を確認
 
 **価格例：**
 - 高値の推移：1000円 → 1050円 → 1080円（伸びが鈍化）
@@ -265,7 +303,7 @@ const result = await conditionService.checkCondition(
 1. `ConditionBase`を継承する新しいクラスを作成
 2. メタデータを含む`ConditionInfo`オブジェクトをエクスポート
 3. `checkCondition`メソッドを実装
-4. `ConditionService.conditionMap`に条件を追加
+4. `ConditionUtil.conditionMap`に条件を追加
 5. このドキュメントを更新
 
 例：

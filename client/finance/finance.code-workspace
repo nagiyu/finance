@@ -5,7 +5,7 @@
       "name": "client-finance"
     },
     {
-      "path": "../common",
+      "path": "../../nextjs-common/common",
       "name": "client-common"
     },
     {

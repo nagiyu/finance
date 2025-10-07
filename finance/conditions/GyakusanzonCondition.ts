@@ -10,6 +10,7 @@ export const GyakusanzonConditionInfo: ConditionInfo = {
   isSellCondition: false,
   enableTargetPrice: false,
   enableTimeFrame: true,
+  enableSimplifiedMode: true,
 };
 
 export default class GyakusanzonCondition extends ConditionBase {

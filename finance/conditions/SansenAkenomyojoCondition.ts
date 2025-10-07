@@ -10,6 +10,7 @@ export const SansenAkenomyojoConditionInfo: ConditionInfo = {
   isSellCondition: false,
   enableTargetPrice: false,
   enableTimeFrame: true,
+  enableSimplifiedMode: true,
 };
 
 export default class SansenAkenomyojoCondition extends ConditionBase {

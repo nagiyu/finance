@@ -10,12 +10,15 @@ import { TimeFrame } from '@finance/utils/FinanceUtil';
 import BasicSelect from '@client-common/components/inputs/Selects/BasicSelect';
 import BasicStack from '@client-common/components/Layout/Stacks/BasicStack';
 import DirectionStack from '@client-common/components/Layout/Stacks/DirectionStack';
+import ContainedButton from '@client-common/components/inputs/Buttons/ContainedButton';
 
 import { SelectOptionType } from '@client-common/interfaces/SelectOptionType';
 
 import ExchangeUtil from '@/utils/ExchangeUtil';
 import TickerUtil from '@/utils/TickerUtil';
 import TimeFrameUtil from '@/utils/TimeFrameUtil';
+import SessionUtil from '@/utils/SessionUtil';
+import CandleCountUtil from '@/utils/CandleCountUtil';
 import { ExchangeDataType } from '@/interfaces/data/ExchangeDataType';
 import { TickerDataType } from '@/interfaces/data/TickerDataType';
 
@@ -25,43 +28,6 @@ import AllConditionDisplay from '@/app/components/AllConditionDisplay';
 import ExchangeFetchService from '@/services/exchange/ExchangeFetchService.client';
 import Graph from '@/app/components/graph';
 import TickerFetchService from '@/services/ticker/TickerFetchService.client';
-
-interface SessionOption {
-  value: string;
-  label: string;
-}
-
-class SessionUtil {
-  // Available session options with user-friendly labels
-  private static readonly SESSION_OPTIONS: SessionOption[] = [
-    { value: "regular", label: "通常時間" },
-    { value: "extended", label: "時間外取引含む" },
-  ];
-
-  /**
-   * Convert session options to SelectOption format for use with BasicSelect component
-   */
-  public static toSelectOptions(): SelectOptionType[] {
-    return this.SESSION_OPTIONS.map(option => ({
-      label: option.label,
-      value: option.value
-    }));
-  }
-
-  /**
-   * Get the default session
-   */
-  public static getDefaultSession(): string {
-    return "regular";
-  }
-
-  /**
-   * Validate if a string is a valid session
-   */
-  public static isValidSession(value: string): boolean {
-    return this.SESSION_OPTIONS.some(option => option.value === value);
-  }
-}
 
 export default function Home() {
   const searchParams = useSearchParams();
@@ -73,10 +39,25 @@ export default function Home() {
   const [ticker, setTicker] = useState('');
   const [timeframe, setTimeframe] = useState<TimeFrame>(TimeFrameUtil.getDefaultTimeFrame());
   const [session, setSession] = useState<string>(SessionUtil.getDefaultSession());
+  const [candleCount, setCandleCount] = useState<string>(CandleCountUtil.getDefaultCandleCount());
   const [urlParamsProcessed, setUrlParamsProcessed] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState<number>(0);
 
   const exchangeFetchService = new ExchangeFetchService();
   const tickerFetchService = new TickerFetchService();
+
+  const handleRefresh = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
+
+  // 10秒毎の自動更新
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRefreshTrigger(prev => prev + 1);
+    }, 10000); // 10秒 = 10000ミリ秒
+
+    return () => clearInterval(interval);
+  }, []);
 
   const getExchangeKey = (id: string): string => {
     return exchanges.find(exchange => exchange.id === id)?.key || '';
@@ -150,7 +131,8 @@ export default function Home() {
             <BasicSelect label='Exchange' options={exchangeOptions} value={exchange} onChange={(value) => setExchange(value)} />
             <BasicSelect label='Ticker' options={tickerOptions} value={ticker} onChange={(value) => setTicker(value)} />
           </DirectionStack>
-          <Graph exchange={getExchangeKey(exchange)} ticker={getTickerKey(ticker)} timeframe={timeframe} session={session} />
+          <ContainedButton label='ローディング' onClick={handleRefresh} />
+          <Graph exchange={getExchangeKey(exchange)} ticker={getTickerKey(ticker)} timeframe={timeframe} session={session} candleCount={CandleCountUtil.toNumber(candleCount)} refreshTrigger={refreshTrigger} />
           <DirectionStack>
             <BasicSelect label='時間軸' options={TimeFrameUtil.toSelectOptions()} value={timeframe} onChange={(value) => {
               if (TimeFrameUtil.isValidTimeFrame(value)) {
@@ -158,6 +140,7 @@ export default function Home() {
               }
             }} />
             <BasicSelect label='取引時間' options={SessionUtil.toSelectOptions()} value={session} onChange={(value) => setSession(value)} />
+            <BasicSelect label='表示本数' options={CandleCountUtil.toSelectOptions()} value={candleCount} onChange={(value) => setCandleCount(value)} />
           </DirectionStack>
           <AllConditionDisplay 
             exchangeId={exchange}

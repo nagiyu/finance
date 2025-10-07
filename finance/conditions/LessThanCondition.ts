@@ -9,6 +9,7 @@ export const LessThanConditionInfo: ConditionInfo = {
   isSellCondition: true,
   enableTargetPrice: true,
   enableTimeFrame: false,
+  enableSimplifiedMode: false,
 };
 
 export default class LessThanCondition extends ConditionBase {

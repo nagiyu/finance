@@ -13,7 +13,7 @@ WORKDIR /app
 
 COPY typescript-common ./typescript-common
 COPY finance ./finance
-COPY client/common ./client/common
+COPY nextjs-common/common ./nextjs-common/common
 COPY client/finance ./client/finance
 
 WORKDIR /app/typescript-common
@@ -22,7 +22,7 @@ RUN npm install
 WORKDIR /app/finance
 RUN npm install
 
-WORKDIR /app/client/common
+WORKDIR /app/nextjs-common/common
 RUN npm install
 
 WORKDIR /app/client/finance
@@ -55,8 +55,8 @@ COPY --from=builder /app/typescript-common .
 WORKDIR /app/finance
 COPY --from=builder /app/finance .
 
-WORKDIR /app/client/common
-COPY --from=builder /app/client/common .
+WORKDIR /app/nextjs-common/common
+COPY --from=builder /app/nextjs-common/common .
 
 WORKDIR /app/client/finance
 COPY --from=builder /app/client/finance/.next/standalone ./
