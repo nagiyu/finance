@@ -51,5 +51,5 @@ export default function Graph({ exchange, ticker, timeframe, session, candleCoun
         return <div>Loading...</div>;
     }
 
-    return <CandleStick data={data} />;
+    return <CandleStick data={data} scrollable={true} />;
 }
