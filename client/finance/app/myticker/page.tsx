@@ -16,11 +16,8 @@ import Auth from '@/app/components/Auth';
 import ExchangeFetchService from '@/services/exchange/ExchangeFetchService.client';
 import MyTickerEditDialogContent from '@/app/components/myticker/MyTickerEditDialogContent';
 import MyTickerFetchService from '@/services/myticker/MyTickerFetchService.client';
-import MyTickerSummary from '@/app/components/myticker/MyTickerSummary';
-import MyTickerSummaryUtil from '@/utils/MyTickerSummaryUtil';
 import TickerFetchService from '@/services/ticker/TickerFetchService.client';
 import { ExchangeDataType } from '@/interfaces/data/ExchangeDataType';
-import { MyTickerSummaryDataType } from '@/interfaces/data/MyTickerSummaryDataType';
 import { TickerDataType } from '@/interfaces/data/TickerDataType';
 
 interface MyTickerTableType extends MyTickerDataType {
@@ -34,7 +31,6 @@ export interface StateType extends Record<string, unknown> {
 export default function MyTickerPage() {
     const [exchanges, setExchanges] = useState<ExchangeDataType[]>([]);
     const [tickers, setTickers] = useState<TickerDataType[]>([]);
-    const [summary, setSummary] = useState<MyTickerSummaryDataType[]>([]);
     const [currentUser, setCurrentUser] = useState<AuthDataType | null>(null);
 
     const myTickerFetchService = new MyTickerFetchService();
@@ -56,13 +52,13 @@ export default function MyTickerPage() {
         { id: 'quantity', label: 'Quantity' },
         { id: 'averagePrice', label: 'Avg Price' },
         {
-            id: 'averagePrice',
+            id: 'totalCost',
             label: 'Total Cost',
-            // format: (cell, row) => {
-            //     const quantity = row.quantity || 0;
-            //     const avgPrice = cell || 0;
-            //     return (quantity * avgPrice).toFixed(2);
-            // }
+            format: (cell, row) => {
+                const quantity = row.quantity || 0;
+                const avgPrice = row.averagePrice || 0;
+                return (quantity * avgPrice).toFixed(2);
+            }
         },
         { id: 'action', label: 'Action' }
     ];
@@ -110,10 +106,6 @@ export default function MyTickerPage() {
         const result = await myTickerFetchService.get();
         const userHoldings = result.filter(item => item.userId === user.id);
 
-        // Update summary when data is fetched
-        const newSummary = MyTickerSummaryUtil.calculateSummary(userHoldings, exchanges, tickers);
-        setSummary(newSummary);
-
         return userHoldings;
     };
 
@@ -132,20 +124,9 @@ export default function MyTickerPage() {
         return item;
     };
 
-    const refreshSummary = async (): Promise<void> => {
-        const user = await getCurrentUser();
-        const allHoldings = await myTickerFetchService.get();
-        const userHoldings = allHoldings.filter(t => t.userId === user.id);
-        const newSummary = MyTickerSummaryUtil.calculateSummary(userHoldings, exchanges, tickers);
-        setSummary(newSummary);
-    };
-
     const onCreate = async (item: MyTickerDataType): Promise<MyTickerDataType> => {
         const fixedItem = await fixItem(item, true);
         const result = await myTickerFetchService.create(fixedItem);
-
-        // Refresh summary after creating new holding
-        await refreshSummary();
 
         return result;
     };
@@ -154,17 +135,11 @@ export default function MyTickerPage() {
         const fixedItem = await fixItem(item, false);
         const result = await myTickerFetchService.update(fixedItem);
 
-        // Refresh summary after updating holding
-        await refreshSummary();
-
         return result;
     };
 
     const onDelete = async (id: string): Promise<void> => {
         await myTickerFetchService.delete(id);
-
-        // Refresh summary after deleting holding
-        await refreshSummary();
     };
 
     const validateItem = (item: MyTickerDataType): string | null => {
@@ -194,18 +169,10 @@ export default function MyTickerPage() {
         })();
     }, []);
 
-    // Recalculate summary when exchanges or tickers data is updated
-    useEffect(() => {
-        if (exchanges.length > 0 && tickers.length > 0 && currentUser) {
-            refreshSummary();
-        }
-    }, [exchanges, tickers]);
-
     return (
         <Auth
             userContent={
                 <div>
-                    <MyTickerSummary summary={summary} />
                     <AdminManagement<MyTickerDataType, StateType>
                         columns={columns}
                         fetchData={fetchData}
