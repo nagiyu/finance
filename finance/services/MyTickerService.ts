@@ -14,10 +14,8 @@ export default class MyTickerService extends CRUDServiceBase<MyTickerDataType, M
       UserID: data.userId,
       ExchangeID: data.exchangeId,
       TickerID: data.tickerId,
-      Deal: data.deal,
-      Date: data.date,
-      Price: data.price,
       Quantity: data.quantity,
+      AveragePrice: data.averagePrice,
     };
   }
 
@@ -27,10 +25,8 @@ export default class MyTickerService extends CRUDServiceBase<MyTickerDataType, M
       userId: record.UserID,
       exchangeId: record.ExchangeID,
       tickerId: record.TickerID,
-      deal: record.Deal,
-      date: record.Date,
-      price: record.Price,
       quantity: record.Quantity,
+      averagePrice: record.AveragePrice,
       create: record.Create,
       update: record.Update,
     };

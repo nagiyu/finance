@@ -1,3 +1,5 @@
+import { signOut } from 'next-auth/react';
+
 import ResponseValidator from '@client-common/utils/ResponseValidator';
 
 import { AuthResultType } from '@/interfaces/data/AuthResultType';
@@ -7,6 +9,12 @@ export default class AuthAPIUtil {
     const response = await fetch(`/api/auth/authorize/${role}`, {
       method: 'GET'
     });
+
+    // Handle 401 Unauthorized by signing out
+    if (response.status === 401) {
+      await signOut({ callbackUrl: '/' });
+      return false;
+    }
 
     ResponseValidator.ValidateResponse(response);
 
