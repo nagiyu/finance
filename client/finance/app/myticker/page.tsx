@@ -21,6 +21,7 @@ import { ExchangeDataType } from '@/interfaces/data/ExchangeDataType';
 import { TickerDataType } from '@/interfaces/data/TickerDataType';
 
 interface MyTickerTableType extends MyTickerDataType {
+    totalCost?: number;
     action: React.ReactNode;
 }
 
