@@ -148,7 +148,9 @@ interface MyTickerRecordType extends FinanceRecordTypeBase {
 
 **インデックス戦略:**
 - プライマリキー: `ID` (パーティションキー) + `DataType` (ソートキー)
-- GSI（グローバルセカンダリインデックス）: `UserID` (パーティションキー) でユーザーごとの検索を最適化
+
+**今後の課題:**
+- GSI（グローバルセカンダリインデックス）: `UserID` (パーティションキー) でユーザーごとの検索を最適化することも検討可能（現時点では不要）
 
 ---
 
@@ -199,34 +201,13 @@ class MyTickerService extends CRUDServiceBase<MyTickerDataType, MyTickerRecordTy
 }
 ```
 
-**追加メソッド（必要に応じて）:**
+**基本メソッド:**
+- `create()`: 新規レコード作成
+- `update()`: 既存レコード更新
+- `get()`: レコード取得
+- `delete()`: レコード削除
 
-```typescript
-/**
- * 特定ユーザーの保有株式一覧を取得
- */
-async getByUserId(userId: string): Promise<MyTickerDataType[]> {
-  // UserID でフィルタリングして取得
-}
-
-/**
- * 特定ユーザーの特定ティッカーの保有情報を取得
- */
-async getByUserAndTicker(
-  userId: string, 
-  exchangeId: string, 
-  tickerId: string
-): Promise<MyTickerDataType | null> {
-  // 特定の組み合わせでレコードを検索
-}
-
-/**
- * 保有情報を更新または作成（Upsert）
- */
-async upsert(data: MyTickerDataType): Promise<MyTickerDataType> {
-  // 既存レコードがあれば更新、なければ作成
-}
-```
+これらは `CRUDServiceBase` から継承され、基本的なCRUD操作を提供します。
 
 ### MyTickerDataAccessor
 
@@ -497,62 +478,19 @@ function myTickerToTargetPriceInput(
 
 ### 移行方針
 
-後方互換性は考慮しないため、以下の移行方法を推奨します：
+**過去データの扱い:**
+- 既存の売買履歴データは全て破棄します（無いものとして扱う）
+- データ移行は行いません
+- ユーザーは新しい形式で保有株式情報を再登録する必要があります
 
-**オプション1: 手動移行（推奨）**
-1. 既存の売買履歴データをエクスポート
-2. ユーザーが現在の保有株数と平均取得価格を計算
-3. 新しい形式でデータを再登録
+**理由:**
+- 後方互換性は考慮しない方針
+- 複雑な移行処理を避け、クリーンな状態で新システムをスタート
+- ユーザーが現在の保有状況を正確に把握する機会となる
 
-**オプション2: 移行スクリプト使用**
-1. 既存データから最終的な保有状態を自動計算
-2. 新しい形式のレコードに変換
-3. データベースに投入
-
-### 移行スクリプト例
-
-```typescript
-/**
- * 旧形式から新形式へのデータ移行
- * （参考実装）
- */
-async function migrateMyTickerData(
-  oldTransactions: OldMyTickerDataType[],
-  userId: string
-): Promise<MyTickerDataType[]> {
-  // ティッカーごとにグループ化
-  const grouped = groupByTicker(oldTransactions);
-  
-  const newRecords: MyTickerDataType[] = [];
-  
-  for (const [key, transactions] of grouped.entries()) {
-    const [exchangeId, tickerId] = key.split('|');
-    
-    // FIFO方式で現在の保有状態を計算
-    const { quantity, totalCost } = calculateCurrentHoldings(transactions);
-    
-    if (quantity > 0) {
-      newRecords.push({
-        id: generateId(),
-        userId,
-        exchangeId,
-        tickerId,
-        quantity,
-        averagePrice: totalCost / quantity,
-        create: Date.now(),
-        update: Date.now(),
-      });
-    }
-  }
-  
-  return newRecords;
-}
-```
-
-**注意事項:**
-- 移行スクリプトは参考実装であり、実際のデータに応じて調整が必要
-- 移行前に必ずデータのバックアップを取得
-- 移行後は旧データと新データを比較検証
+**ユーザーへの案内:**
+- リファクタリング実施前に、現在の保有状況をユーザー自身で記録してもらう
+- 新システム移行後、保有株式情報を手動で再登録してもらう
 
 ---
 
@@ -592,32 +530,25 @@ async function migrateMyTickerData(
    - `MyTickerSummaryUtil` の削除
    - 関連する State の削除
 
-### Phase 3: 統合とテスト（優先度: 中）
+### Phase 3: テスト（優先度: 中）
 
-1. **TargetPrice 機能との統合**
-   - MyTicker から TargetPrice への自動変換機能
-   - 通知設定画面での連携確認
-
-2. **テストコード作成**
+1. **テストコード作成**
    - `MyTickerService` のユニットテスト
    - バリデーションのテスト
    - UI コンポーネントのテスト
 
-3. **E2Eテスト**
-   - 全体フローの動作確認
-   - エラーケースの確認
+### Phase 4: ドキュメントと将来の拡張（優先度: 低）
 
-### Phase 4: データ移行とドキュメント（優先度: 低）
-
-1. **データ移行**
-   - 移行スクリプトの作成（必要に応じて）
-   - テストデータでの動作確認
-   - 本番データの移行
-
-2. **ドキュメント更新**
+1. **ドキュメント更新**
    - README の更新
    - API ドキュメントの更新
    - ユーザーガイドの作成
+
+2. **将来の拡張（オプション）**
+   - TargetPrice 機能との統合
+     - MyTicker から TargetPrice への自動変換機能
+     - 通知設定画面での連携確認
+   - パフォーマンス最適化（GSI の追加など）
 
 ---
 
@@ -702,28 +633,9 @@ describe('MyTickerService', () => {
    - 特定ユーザーのレコードのみ取得
    - 他のユーザーのデータが含まれないことを確認
 
-### E2E テスト
-
-**テストシナリオ:**
-
-1. **保有株式の登録**
-   - ログイン
-   - MyTicker 画面を開く
-   - 「Add」ボタンをクリック
-   - Exchange, Ticker, Quantity, AveragePrice を入力
-   - 保存
-   - 一覧に表示されることを確認
-
-2. **保有株式の編集**
-   - 一覧から編集ボタンをクリック
-   - Quantity または AveragePrice を変更
-   - 保存
-   - 変更が反映されることを確認
-
-3. **保有株式の削除**
-   - 一覧から削除ボタンをクリック
-   - 確認ダイアログで OK
-   - 一覧から削除されることを確認
+**注記:**
+- E2Eテストについて: Google OAuth によるログインが必要なため、自動化されたE2Eテストの実施は困難です
+- 代わりに、手動での動作確認を実施します
 
 ---
 
@@ -842,7 +754,7 @@ async function getMyTickers(userId: string): Promise<MyTickerDataType[]> {
 
 | 日付 | バージョン | 変更内容 | 作成者 |
 |------|----------|---------|--------|
-| 2024-xx-xx | 1.0 | 初版作成 | - |
+| 2025-01-08 | 1.0 | 初版作成 | Copilot |
 
 ---
 
