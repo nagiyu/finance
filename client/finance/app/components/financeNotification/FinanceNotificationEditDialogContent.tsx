@@ -237,6 +237,8 @@ export default function FinanceNotificationEditDialogContent({
                                 onItemChange={setCondition}
                                 isNew={isNewCondition}
                                 loading={loading}
+                                exchangeId={item.exchangeId}
+                                tickerId={item.tickerId}
                             />
                         </BasicStack>
                     </>

@@ -25,19 +25,23 @@ import TimeFrameSelect from '@/app/components/common/TimeFrameSelect';
 import TimeFrameUtil from '@/utils/TimeFrameUtil';
 import TargetPriceCalculationDialog from '@/app/components/financeNotification/TargetPriceCalculationDialog';
 
-interface FinanceNotificationEditDialogContentProps {
+interface FinanceNotificationConditionEditDialogContentProps {
     item: FinanceNotificationCondition;
     onItemChange: (item: FinanceNotificationCondition) => void;
     isNew: boolean;
     loading?: boolean;
+    exchangeId: string;
+    tickerId: string;
 }
 
 export default function FinanceNotificationConditionEditDialogContent({
     item,
     onItemChange,
     isNew,
-    loading
-}: FinanceNotificationEditDialogContentProps) {
+    loading,
+    exchangeId,
+    tickerId,
+}: FinanceNotificationConditionEditDialogContentProps) {
     const [conditions, setConditions] = useState<SelectOptionType[]>([]);
     const [conditionInfo, setConditionInfo] = useState<ConditionInfo>({
         name: '',
@@ -242,6 +246,8 @@ export default function FinanceNotificationConditionEditDialogContent({
                                         targetPrice: targetPrice
                                     });
                                 }}
+                                exchangeId={exchangeId}
+                                tickerId={tickerId}
                             />
                         </>
                     )}

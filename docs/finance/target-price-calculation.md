@@ -141,24 +141,20 @@ Finance Notification Conditionの編集画面にて、**モードが『売り』
 
 1. **ボタンをクリック**: 目標価格入力欄の下にある「算出ツールを使用」ボタンをクリックします。
 2. **保有情報を入力**: ダイアログにて以下の情報を入力します：
-   - **保有株数**: 現在の保有株数
-   - **総コスト**: 保有株式の総コスト
-   - **許容範囲**: 平均価格からの変動幅（例: 0.1 = ±10%）
-   - **入力通貨**: 入力値の通貨（円またはドル）
-   - **目標通貨**: 目標価格の通貨（円またはドル）
+   - **保有株数**: 現在の保有株数（MyTickerに登録済みの場合は自動的に適用されます）
+   - **総コスト**: 保有株式の総コスト（MyTickerに登録済みの場合は自動的に計算・適用されます）
+   - **許容範囲**: 平均価格からの変動幅をラジオボタンで選択（-15%, -10%, -5%, +5%, +10%, +15%）
 3. **適用をクリック**: 算出された売り目標価格が自動的に目標価格フィールドに設定されます。
 
 #### ダイアログの機能
 
-- **通貨変換**: 入力通貨と目標通貨を異なる通貨に設定することで、自動的に為替変換されます。
+- **MyTicker連動**: ダイアログが開かれた時、開く元のExchange, Tickerの情報に紐づくMyTickerが登録されていれば、保有株数と総コストが自動的に適用されます。
+- **許容範囲選択**: ラジオボタンで簡単に許容範囲を選択できます（買い・売りに関わらず同じ倍率が適用されます）。
+- **シンプルな計算**: ダイアログ内で直接計算を実行します（売り目標価格 = 平均価格 × (1 + 許容範囲)）
 - **バリデーション**: 入力値のバリデーションが行われ、エラーがある場合はアラートが表示されます。
 - **キャンセル**: ダイアログをキャンセルした場合、目標価格は変更されません。
 
 ## 関連ファイル
 
-- `finance/services/TargetPriceService.ts` - メインサービス
-- `finance/interfaces/data/TargetPriceDataType.ts` - 型定義
-- `finance/tests/services/TargetPriceService.test.ts` - テストコード
-- `common/utils/CurrencyUtil.ts` - 通貨変換ユーティリティ
 - `client/finance/app/components/financeNotification/TargetPriceCalculationDialog.tsx` - UI ダイアログコンポーネント
 - `client/finance/app/components/financeNotification/FinanceNotificationConditionEditDialogContent.tsx` - 統合先コンポーネント
