@@ -247,4 +247,4 @@ Finance Module
 - **[簡易通知設定 API](./simplified-notification-api.md)** - 買い/売りモードとターゲット価格のみで設定できる新しいAPI
 - **[簡易通知設定 UI](./simplified-notification-ui.md)** - 簡易モードでパターン条件をまとめて設定するUI改善
 - **[TargetPrice算出ツール](./target-price-calculation.md)** - 保有株式からの目標価格算出機能
-- **[MyTickerリファクタリング設計書](./myticker-refactoring-design.md)** - MyTicker機能のアーキテクチャ見直し設計
+- **[MyTicker](./MyTicker.md)** - 保有株式情報の管理機能
