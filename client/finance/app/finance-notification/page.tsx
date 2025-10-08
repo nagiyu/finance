@@ -49,6 +49,11 @@ export default function FinanceNotificationPage() {
             format: (cell) => cell ? tickers.find(ticker => ticker.id === cell)?.name : ''
         },
         {
+            id: 'conditionList',
+            label: 'Conditions',
+            format: (cell) => Array.isArray(cell) ? cell.length.toString() : '0'
+        },
+        {
             id: 'action',
             label: 'Action'
         }

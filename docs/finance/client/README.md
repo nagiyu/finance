@@ -99,6 +99,46 @@ useEffect(() => {
 - `/api/finance-notification/conditions/check` - 条件評価API
 - `ConditionCheckService` - クライアントサービス
 
+#### Finance Notification Page (`app/finance-notification/page.tsx`)
+
+金融通知設定の管理ページです。
+
+**主要機能:**
+- 通知設定の一覧表示
+- 通知設定の作成・編集・削除
+- 条件数の表示
+
+**表示カラム:**
+- **Exchange**: 取引所名
+- **Ticker**: ティッカー名
+- **Conditions**: 設定されている条件の数
+- **Action**: 編集・削除ボタン
+
+**実装:**
+```typescript
+const columns: Column<FinanceNotificationTableType>[] = [
+    {
+        id: 'exchangeId',
+        label: 'Exchange',
+        format: (cell) => cell ? exchanges.find(exchange => exchange.id === cell)?.name : ''
+    },
+    {
+        id: 'tickerId',
+        label: 'Ticker',
+        format: (cell) => cell ? tickers.find(ticker => ticker.id === cell)?.name : ''
+    },
+    {
+        id: 'conditionList',
+        label: 'Conditions',
+        format: (cell) => Array.isArray(cell) ? cell.length.toString() : '0'
+    },
+    {
+        id: 'action',
+        label: 'Action'
+    }
+];
+```
+
 ### UI Components
 
 #### Finance Notification Condition Edit Dialog
