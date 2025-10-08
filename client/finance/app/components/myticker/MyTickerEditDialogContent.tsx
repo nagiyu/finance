@@ -1,15 +1,10 @@
 import React from 'react';
 
-import DateUtil from '@common/utils/DateUtil';
-
 import { MyTickerDataType } from '@finance/interfaces/data/MyTickerDataType';
-import { MyTickerDealType, MY_TICKER_DEAL_TYPE } from '@finance/types/MyTickerType';
 
 import BasicSelect from '@client-common/components/inputs/Selects/BasicSelect';
-import BasicDatePicker from '@client-common/components/inputs/Dates/BasicDatePicker';
 import BasicNumberField from '@client-common/components/inputs/TextFields/BasicNumberField';
 import CurrencyNumberField from '@client-common/components/inputs/TextFields/CurrencyNumberField';
-import { SelectOptionType } from '@client-common/interfaces/SelectOptionType';
 
 import ExchangeUtil from '@/utils/ExchangeUtil';
 import TickerUtil from '@/utils/TickerUtil';
@@ -25,11 +20,6 @@ interface MyTickerEditDialogContentProps {
     exchanges: ExchangeDataType[];
     tickers: TickerDataType[];
 }
-
-const dealOptions: SelectOptionType[] = [
-    { value: MY_TICKER_DEAL_TYPE.PURCHASE, label: 'Purchase' },
-    { value: MY_TICKER_DEAL_TYPE.SELL, label: 'Sell' },
-];
 
 export default function MyTickerEditDialogContent({
     item,
@@ -57,27 +47,18 @@ export default function MyTickerEditDialogContent({
                 value={item.tickerId}
                 onChange={(value) => onItemChange({ ...item, tickerId: value })}
             />
-            <BasicSelect
-                label='Deal'
-                options={dealOptions}
-                value={item.deal}
-                onChange={(value) => onItemChange({ ...item, deal: value as MyTickerDealType })}
-            />
-            <BasicDatePicker
-                label='Date'
-                value={new Date(item.date)}
-                onChange={(date) => onItemChange({ ...item, date: date ? DateUtil.toStartOfDay(date) : DateUtil.getTodayStartTimestamp() })}
-            />
-            <CurrencyNumberField
-                label='Price'
-                value={item.price}
-                onChange={(e) => onItemChange({ ...item, price: Number(e.target.value) })}
-                onValueChange={(value) => onItemChange({ ...item, price: value })}
-            />
             <BasicNumberField
                 label='Quantity'
                 value={item.quantity}
                 onChange={(e) => onItemChange({ ...item, quantity: Number(e.target.value) })}
+                helperText='Number of shares you own (decimals allowed, e.g., 0.5)'
+            />
+            <CurrencyNumberField
+                label='Average Price per Share'
+                value={item.averagePrice}
+                onChange={(e) => onItemChange({ ...item, averagePrice: Number(e.target.value) })}
+                onValueChange={(value) => onItemChange({ ...item, averagePrice: value })}
+                helperText='Average cost per share (calculate externally)'
             />
         </>
     );
