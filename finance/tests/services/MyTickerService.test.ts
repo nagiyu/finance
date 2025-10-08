@@ -62,9 +62,9 @@ describe('MyTickerService', () => {
 
   describe('recordToData', () => {
     it('should convert RecordType to DataType correctly', () => {
-      const record: MyTickerRecordType = {
+      const record = {
         ID: 'id123',
-        DataType: 'MyTicker',
+        DataType: 'MyTicker' as const,
         UserID: 'user123',
         ExchangeID: 'NYSE',
         TickerID: 'AAPL',
@@ -72,7 +72,7 @@ describe('MyTickerService', () => {
         AveragePrice: 150.5,
         Create: 1234567890,
         Update: 1234567900,
-      };
+      } as MyTickerRecordType;
 
       const data = (service as any).recordToData(record);
 
@@ -87,9 +87,9 @@ describe('MyTickerService', () => {
     });
 
     it('should handle all fields correctly', () => {
-      const record: MyTickerRecordType = {
+      const record = {
         ID: 'abc-def-ghi',
-        DataType: 'MyTicker',
+        DataType: 'MyTicker' as const,
         UserID: 'user456',
         ExchangeID: 'NASDAQ',
         TickerID: 'MSFT',
@@ -97,7 +97,7 @@ describe('MyTickerService', () => {
         AveragePrice: 380.25,
         Create: 1609459200000,
         Update: 1609545600000,
-      };
+      } as MyTickerRecordType;
 
       const data = (service as any).recordToData(record);
 
@@ -112,9 +112,9 @@ describe('MyTickerService', () => {
     });
 
     it('should preserve data types correctly', () => {
-      const record: MyTickerRecordType = {
+      const record = {
         ID: 'test-id',
-        DataType: 'MyTicker',
+        DataType: 'MyTicker' as const,
         UserID: 'test-user',
         ExchangeID: 'TEST',
         TickerID: 'TEST',
@@ -122,7 +122,7 @@ describe('MyTickerService', () => {
         AveragePrice: 99999.99,
         Create: 0,
         Update: 0,
-      };
+      } as MyTickerRecordType;
 
       const data = (service as any).recordToData(record);
 
@@ -150,13 +150,13 @@ describe('MyTickerService', () => {
       const record = (service as any).dataToRecord(originalData);
       
       // Add required fields that would be added by the database
-      const completeRecord: MyTickerRecordType = {
+      const completeRecord = {
         ID: 'generated-id',
-        DataType: 'MyTicker',
+        DataType: 'MyTicker' as const,
         Create: Date.now(),
         Update: Date.now(),
         ...record,
-      };
+      } as MyTickerRecordType;
 
       const convertedData = (service as any).recordToData(completeRecord);
 
