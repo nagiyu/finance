@@ -58,11 +58,11 @@ export default function MyTickerPage() {
         {
             id: 'averagePrice',
             label: 'Total Cost',
-            format: (cell, row) => {
-                const quantity = row.quantity || 0;
-                const avgPrice = cell || 0;
-                return (quantity * avgPrice).toFixed(2);
-            }
+            // format: (cell, row) => {
+            //     const quantity = row.quantity || 0;
+            //     const avgPrice = cell || 0;
+            //     return (quantity * avgPrice).toFixed(2);
+            // }
         },
         { id: 'action', label: 'Action' }
     ];
