@@ -30,8 +30,8 @@ interface FinanceNotificationConditionEditDialogContentProps {
     onItemChange: (item: FinanceNotificationCondition) => void;
     isNew: boolean;
     loading?: boolean;
-    exchangeId?: string;
-    tickerId?: string;
+    exchangeId: string;
+    tickerId: string;
 }
 
 export default function FinanceNotificationConditionEditDialogContent({

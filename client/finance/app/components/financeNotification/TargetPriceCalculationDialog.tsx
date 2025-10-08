@@ -17,8 +17,8 @@ interface TargetPriceCalculationDialogProps {
     open: boolean;
     onClose: () => void;
     onApply: (targetPrice: number) => void;
-    exchangeId?: string;
-    tickerId?: string;
+    exchangeId: string;
+    tickerId: string;
 }
 
 export default function TargetPriceCalculationDialog({
@@ -48,7 +48,7 @@ export default function TargetPriceCalculationDialog({
 
     // Load MyTicker data when dialog opens
     useEffect(() => {
-        if (!open || !exchangeId || !tickerId) {
+        if (!open) {
             return;
         }
 
