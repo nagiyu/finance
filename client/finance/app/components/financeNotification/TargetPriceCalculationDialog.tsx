@@ -2,9 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 
-import { CURRENCY, CurrencyType } from '@finance/consts/CurrencyConst';
-import TargetPriceService from '@finance/services/TargetPriceService';
-
 import BasicDialog from '@client-common/components/feedback/dialog/BasicDialog';
 import BasicNumberField from '@client-common/components/inputs/TextFields/BasicNumberField';
 import BasicRadioGroup, { BasicRadioGroupOption } from '@client-common/components/inputs/RadioGroups/BasicRadioGroup';
@@ -31,8 +28,6 @@ export default function TargetPriceCalculationDialog({
     const [currentQuantity, setCurrentQuantity] = useState<number>(0);
     const [totalCost, setTotalCost] = useState<number>(0);
     const [tolerance, setTolerance] = useState<number>(0.05);
-    const [currency] = useState<CurrencyType>(CURRENCY.JPY);
-    const [targetCurrency] = useState<CurrencyType>(CURRENCY.JPY);
 
     const myTickerFetchService = new MyTickerFetchService();
     const authFetchService = new AuthFetchService();
@@ -48,7 +43,7 @@ export default function TargetPriceCalculationDialog({
 
     // Load MyTicker data when dialog opens
     useEffect(() => {
-        if (!open) {
+        if (!open || !exchangeId || !tickerId) {
             return;
         }
 
@@ -78,20 +73,25 @@ export default function TargetPriceCalculationDialog({
 
     const handleApply = async () => {
         try {
-            const result = TargetPriceService.calculateTargetPriceFromHoldings(
-                currentQuantity,
-                totalCost,
-                Math.abs(tolerance), // Use absolute value of tolerance
-                currency,
-                targetCurrency !== currency ? targetCurrency : undefined
-            );
+            // Validate inputs
+            if (currentQuantity <= 0) {
+                throw new Error('保有株数は0より大きい値を入力してください。');
+            }
+            if (totalCost <= 0) {
+                throw new Error('総コストは0より大きい値を入力してください。');
+            }
+
+            // Calculate average price and sell target price directly
+            const averagePrice = totalCost / currentQuantity;
+            const sellTargetPrice = averagePrice * (1 + Math.abs(tolerance));
 
             // Apply the sell target price to the condition
-            onApply(result.sellTargetPrice);
+            onApply(sellTargetPrice);
             onClose();
         } catch (error) {
             console.error('TargetPrice calculation error:', error);
-            alert('目標価格の算出に失敗しました。入力値を確認してください。');
+            const message = error instanceof Error ? error.message : '目標価格の算出に失敗しました。入力値を確認してください。';
+            alert(message);
         }
     };
 
@@ -124,22 +124,6 @@ export default function TargetPriceCalculationDialog({
                         row={true}
                         onChange={(e) => setTolerance(Number(e.target.value))}
                     />
-                    {/* <BasicRadioGroup
-                        label="入力通貨"
-                        name="currency"
-                        value={currency}
-                        options={currencyOptions}
-                        row={true}
-                        onChange={(e) => setCurrency(e.target.value as CurrencyType)}
-                    />
-                    <BasicRadioGroup
-                        label="目標通貨"
-                        name="targetCurrency"
-                        value={targetCurrency}
-                        options={currencyOptions}
-                        row={true}
-                        onChange={(e) => setTargetCurrency(e.target.value as CurrencyType)}
-                    /> */}
                 </BasicStack>
             )}
         </BasicDialog>
