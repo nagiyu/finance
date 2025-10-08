@@ -10,13 +10,15 @@ interface AllConditionDisplayProps {
   tickerId: string;
   timeframe: string;
   session: string;
+  refreshTrigger?: number;
 }
 
 export default function AllConditionDisplay({
   exchangeId,
   tickerId,
   timeframe,
-  session
+  session,
+  refreshTrigger
 }: AllConditionDisplayProps) {
   const [conditions, setConditions] = useState<AllConditionResult[]>([]);
   const [loading, setLoading] = useState(false);
@@ -49,7 +51,7 @@ export default function AllConditionDisplay({
     };
 
     getAllConditions();
-  }, [exchangeId, tickerId, timeframe, session]);
+  }, [exchangeId, tickerId, timeframe, session, refreshTrigger]);
 
   const handleConditionClick = (condition: AllConditionResult) => {
     setSelectedCondition(condition);
