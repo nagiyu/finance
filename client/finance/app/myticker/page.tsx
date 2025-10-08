@@ -55,11 +55,7 @@ export default function MyTickerPage() {
         {
             id: 'totalCost',
             label: 'Total Cost',
-            format: (cell, row) => {
-                const quantity = row.quantity || 0;
-                const avgPrice = row.averagePrice || 0;
-                return (quantity * avgPrice).toFixed(2);
-            }
+            format: (cell) => cell ? Number(cell).toFixed(2) : '0.00'
         },
         { id: 'action', label: 'Action' }
     ];
@@ -107,7 +103,11 @@ export default function MyTickerPage() {
         const result = await myTickerFetchService.get();
         const userHoldings = result.filter(item => item.userId === user.id);
 
-        return userHoldings;
+        // Add calculated totalCost to each holding
+        return userHoldings.map(item => ({
+            ...item,
+            totalCost: item.quantity * item.averagePrice
+        })) as MyTickerDataType[];
     };
 
     const fixItem = async (item: MyTickerDataType, isNew: boolean): Promise<MyTickerDataType> => {
