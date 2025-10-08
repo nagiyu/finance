@@ -83,7 +83,7 @@ export default function TargetPriceCalculationDialog({
 
             // Calculate average price and sell target price directly
             const averagePrice = totalCost / currentQuantity;
-            const sellTargetPrice = averagePrice * (1 + Math.abs(tolerance));
+            const sellTargetPrice = averagePrice * (1 + tolerance);
 
             // Apply the sell target price to the condition
             onApply(sellTargetPrice);
