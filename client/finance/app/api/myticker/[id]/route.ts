@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 
 import MyTickerService from '@finance/services/MyTickerService';
 import { MyTickerDataType } from '@finance/interfaces/data/MyTickerDataType';
+import MyTickerValidator from '@finance/utils/MyTickerValidator';
 
 import APIUtil from '@client-common/utils/APIUtil';
 
@@ -31,6 +32,12 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
   const id = (await params).id;
   const body: MyTickerDataType = await request.json();
+
+  try {
+    MyTickerValidator.validate(body);
+  } catch (error) {
+    return APIUtil.ReturnBadRequest(error instanceof Error ? error.message : 'Validation failed');
+  }
 
   const service = new MyTickerService();
   const result = await service.update(id, body);
