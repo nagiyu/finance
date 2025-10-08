@@ -1,5 +1,7 @@
 import { signOut } from 'next-auth/react';
 
+import ResponseValidator from '@client-common/utils/ResponseValidator';
+
 import { AuthResultType } from '@/interfaces/data/AuthResultType';
 
 export default class AuthAPIUtil {
@@ -14,10 +16,7 @@ export default class AuthAPIUtil {
       return false;
     }
 
-    // For other error status codes, throw an error
-    if (!response.ok) {
-      throw new Error(`Authorization check failed with status ${response.status}`);
-    }
+    ResponseValidator.ValidateResponse(response);
 
     const result: AuthResultType = await response.json();
 
