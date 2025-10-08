@@ -1,4 +1,4 @@
-import ResponseValidator from '@client-common/utils/ResponseValidator';
+import { signOut } from 'next-auth/react';
 
 import { AuthResultType } from '@/interfaces/data/AuthResultType';
 
@@ -8,7 +8,16 @@ export default class AuthAPIUtil {
       method: 'GET'
     });
 
-    ResponseValidator.ValidateResponse(response);
+    // Handle 401 Unauthorized by signing out
+    if (response.status === 401) {
+      await signOut({ callbackUrl: '/' });
+      return false;
+    }
+
+    // For other error status codes, throw an error
+    if (!response.ok) {
+      throw new Error(`Authorization check failed with status ${response.status}`);
+    }
 
     const result: AuthResultType = await response.json();
 
