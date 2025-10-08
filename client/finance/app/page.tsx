@@ -147,6 +147,7 @@ export default function Home() {
             tickerId={ticker}
             timeframe={timeframe}
             session={session}
+            refreshTrigger={refreshTrigger}
           />
         </BasicStack>
       }
