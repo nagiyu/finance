@@ -1,41 +1,41 @@
-# MyTicker Frontend Implementation - Phase 2 Complete
+# MyTicker フロントエンド実装 - Phase 2 完了
 
-## Overview
-This document summarizes the frontend implementation changes for MyTicker refactoring (Phase 2) as described in `docs/finance/myticker-refactoring-design.md`.
+## 概要
+このドキュメントは、`docs/finance/myticker-refactoring-design.md` に記載されている MyTicker リファクタリング（Phase 2）のフロントエンド実装変更をまとめたものです。
 
-## Changes Implemented
+## 実装された変更
 
-### 1. UI Components Updated ✓
+### 1. UI コンポーネントの更新 ✓
 
 #### MyTickerEditDialogContent (`client/finance/app/components/myticker/MyTickerEditDialogContent.tsx`)
-**Status**: ✓ Already Updated (from Phase 1)
+**ステータス**: ✓ すでに更新済み（Phase 1にて）
 
-The edit dialog component already contains the correct fields:
-- **Exchange** - Dropdown selection from available exchanges
-- **Ticker** - Dropdown selection filtered by selected exchange
-- **Quantity** - Number input field for holding quantity
-- **Average Price per Share** - Currency input field for average acquisition price
+編集ダイアログコンポーネントには正しいフィールドが含まれています：
+- **Exchange（取引所）** - 利用可能な取引所からのドロップダウン選択
+- **Ticker（ティッカー）** - 選択された取引所によってフィルタリングされたドロップダウン選択
+- **Quantity（保有株数）** - 保有株数の数値入力フィールド
+- **Average Price per Share（1株あたりの平均取得価格）** - 平均取得価格の通貨入力フィールド
 
-Removed fields:
-- Deal (purchase/sell) ❌
-- Date ❌
-- Price (total) ❌
+削除されたフィールド：
+- Deal（売買区分） ❌
+- Date（日付） ❌
+- Price（総額） ❌
 
-### 2. Table Display Updated ✓
+### 2. テーブル表示の更新 ✓
 
 #### MyTicker Page (`client/finance/app/myticker/page.tsx`)
 
-**Table Columns:**
-| Column | Type | Format | Status |
+**テーブルカラム：**
+| カラム | 型 | フォーマット | ステータス |
 |--------|------|--------|--------|
-| Exchange | Lookup | Exchange name from ID | ✓ |
-| Ticker | Lookup | Ticker name from ID | ✓ |
-| Quantity | Number | Raw value | ✓ |
-| Avg Price | Number | Raw value | ✓ |
-| Total Cost | Calculated | `quantity × averagePrice` (2 decimal places) | ✓ |
-| Action | Buttons | Edit/Delete actions | ✓ |
+| Exchange | 参照 | IDから取引所名 | ✓ |
+| Ticker | 参照 | IDからティッカー名 | ✓ |
+| Quantity | 数値 | 生の値 | ✓ |
+| Avg Price | 数値 | 生の値 | ✓ |
+| Total Cost | 計算値 | `quantity × averagePrice`（小数点以下2桁） | ✓ |
+| Action | ボタン | 編集/削除アクション | ✓ |
 
-**Total Cost Calculation:**
+**Total Cost の計算：**
 ```typescript
 {
     id: 'totalCost',
@@ -48,55 +48,55 @@ Removed fields:
 }
 ```
 
-### 3. Summary Feature Removed ✓
+### 3. サマリー機能の削除 ✓
 
-**Deleted Components:**
-- ❌ `client/finance/app/components/myticker/MyTickerSummary.tsx` - Removed summary display component
-- ❌ `client/finance/utils/MyTickerSummaryUtil.ts` - Removed summary calculation utility
-- ❌ `client/finance/interfaces/data/MyTickerSummaryDataType.ts` - Removed summary data type
+**削除されたコンポーネント：**
+- ❌ `client/finance/app/components/myticker/MyTickerSummary.tsx` - サマリー表示コンポーネントを削除
+- ❌ `client/finance/utils/MyTickerSummaryUtil.ts` - サマリー計算ユーティリティを削除
+- ❌ `client/finance/interfaces/data/MyTickerSummaryDataType.ts` - サマリーデータ型を削除
 
-**Removed from Page:**
-- ❌ `MyTickerSummary` component usage
-- ❌ `summary` state variable
-- ❌ `setSummary` state setter
-- ❌ `refreshSummary()` function
-- ❌ Summary recalculation in `onCreate`, `onUpdate`, `onDelete`
-- ❌ Summary recalculation useEffect hook
+**ページから削除されたもの：**
+- ❌ `MyTickerSummary` コンポーネントの使用
+- ❌ `summary` state 変数
+- ❌ `setSummary` state セッター
+- ❌ `refreshSummary()` 関数
+- ❌ `onCreate`、`onUpdate`、`onDelete` でのサマリー再計算
+- ❌ サマリー再計算の useEffect フック
 
-**Rationale:**
-The table view itself now serves as the summary since each record represents the current holding state (not transactions). No additional summary calculation is needed.
+**理由：**
+各レコードが現在の保有状態を表すため、テーブルビュー自体がサマリーとして機能します（取引履歴ではありません）。追加のサマリー計算は不要です。
 
-### 4. Legacy Types Removed ✓
+### 4. レガシー型の削除 ✓
 
-**Deleted Files:**
-- ❌ `finance/types/MyTickerType.ts` - Removed `MY_TICKER_DEAL_TYPE` and `MyTickerDealType`
+**削除されたファイル：**
+- ❌ `finance/types/MyTickerType.ts` - `MY_TICKER_DEAL_TYPE` と `MyTickerDealType` を削除
 
-These types were part of the old transaction-based architecture and are no longer needed.
+これらの型は古い取引ベースのアーキテクチャの一部であり、もはや必要ありません。
 
-## Architecture Changes
+## アーキテクチャの変更
 
-### Before: Complex Summary System
-- Stored individual buy/sell transactions
-- `MyTickerSummaryUtil` calculated current holdings using FIFO
-- Separate summary display component
-- Summary refresh after every data modification
+### 変更前：複雑なサマリーシステム
+- 個別の売買取引を保存
+- `MyTickerSummaryUtil` が FIFO を使用して現在の保有株を計算
+- 別個のサマリー表示コンポーネント
+- データ変更のたびにサマリーを更新
 
-### After: Simple Direct Display
-- Each record represents current holding state
-- Table directly displays all holdings
-- Total Cost calculated inline in table
-- No separate summary needed
+### 変更後：シンプルな直接表示
+- 各レコードが現在の保有状態を表す
+- テーブルがすべての保有株を直接表示
+- Total Cost をテーブル内でインライン計算
+- 別個のサマリーは不要
 
-## Benefits
+## メリット
 
-1. **Simplicity**: Removed ~150 lines of code
-2. **Performance**: No summary recalculation overhead
-3. **Consistency**: Single source of truth (the table)
-4. **Maintainability**: Fewer components to maintain
+1. **シンプルさ**：約150行のコードを削除
+2. **パフォーマンス**：サマリー再計算のオーバーヘッドなし
+3. **一貫性**：単一の情報源（テーブル）
+4. **保守性**：保守すべきコンポーネントの削減
 
-## Validation
+## バリデーション
 
-### Client-side Validation (Already in place)
+### クライアント側バリデーション（すでに実装済み）
 ```typescript
 const validateItem = (item: MyTickerDataType): string | null => {
     if (!item.exchangeId.trim()) return 'Exchange is required.';
@@ -107,51 +107,51 @@ const validateItem = (item: MyTickerDataType): string | null => {
 };
 ```
 
-## Files Modified
+## 変更されたファイル
 
-1. `client/finance/app/myticker/page.tsx` - Removed summary, fixed Total Cost column
+1. `client/finance/app/myticker/page.tsx` - サマリーを削除、Total Cost カラムを修正
 
-## Files Deleted
+## 削除されたファイル
 
 1. `client/finance/app/components/myticker/MyTickerSummary.tsx`
 2. `client/finance/utils/MyTickerSummaryUtil.ts`
 3. `client/finance/interfaces/data/MyTickerSummaryDataType.ts`
 4. `finance/types/MyTickerType.ts`
 
-## Files Verified (No Changes Needed)
+## 検証されたファイル（変更不要）
 
-1. `client/finance/app/components/myticker/MyTickerEditDialogContent.tsx` - Already correct
+1. `client/finance/app/components/myticker/MyTickerEditDialogContent.tsx` - すでに正しい
 
-## Testing Recommendations
+## テスト推奨事項
 
-1. **Manual Testing**:
-   - Create new holding → Verify it appears in table with correct Total Cost
-   - Edit holding → Verify table updates with new calculated Total Cost
-   - Delete holding → Verify it's removed from table
-   - Verify Quantity and Average Price validation (must be > 0)
+1. **手動テスト**：
+   - 新規保有株の作成 → 正しい Total Cost でテーブルに表示されることを確認
+   - 保有株の編集 → 新しく計算された Total Cost でテーブルが更新されることを確認
+   - 保有株の削除 → テーブルから削除されることを確認
+   - Quantity と Average Price のバリデーション（0より大きい必要がある）を確認
 
-2. **UI Testing**:
-   - Verify Exchange dropdown populates correctly
-   - Verify Ticker dropdown filters based on selected Exchange
-   - Verify Total Cost calculation is correct: `quantity × averagePrice`
-   - Verify table sorting and filtering works correctly
+2. **UI テスト**：
+   - Exchange ドロップダウンが正しく表示されることを確認
+   - Ticker ドロップダウンが選択された Exchange に基づいてフィルタリングされることを確認
+   - Total Cost の計算が正しいことを確認：`quantity × averagePrice`
+   - テーブルのソートとフィルタリングが正しく機能することを確認
 
-## Integration with Other Features
+## 他機能との統合
 
 ### TargetPrice Service
-The simplified MyTicker structure integrates seamlessly with TargetPriceService:
+シンプル化された MyTicker 構造は TargetPriceService とシームレスに統合されます：
 
 ```typescript
-// Convert MyTicker to TargetPrice input
+// MyTicker を TargetPrice の入力に変換
 const input: TargetPriceCalculationInput = {
     currentQuantity: myTicker.quantity,
     totalCost: myTicker.quantity * myTicker.averagePrice,
     tolerance: userSelectedTolerance,
-    currency: 'JPY' // or 'USD'
+    currency: 'JPY' // または 'USD'
 };
 ```
 
 ---
 
-**Implementation Status**: Phase 2 Frontend Implementation ✓ Complete  
-**Overall Project Status**: MyTicker Refactoring ✓ Complete (Phase 1 + Phase 2)
+**実装ステータス**：Phase 2 フロントエンド実装 ✓ 完了  
+**全体のプロジェクトステータス**：MyTicker リファクタリング ✓ 完了（Phase 1 + Phase 2）
