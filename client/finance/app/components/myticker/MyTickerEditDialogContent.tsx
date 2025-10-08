@@ -51,14 +51,12 @@ export default function MyTickerEditDialogContent({
                 label='Quantity'
                 value={item.quantity}
                 onChange={(e) => onItemChange({ ...item, quantity: Number(e.target.value) })}
-                helperText='Number of shares you own (decimals allowed, e.g., 0.5)'
             />
             <CurrencyNumberField
                 label='Average Price per Share'
                 value={item.averagePrice}
                 onChange={(e) => onItemChange({ ...item, averagePrice: Number(e.target.value) })}
                 onValueChange={(value) => onItemChange({ ...item, averagePrice: value })}
-                helperText='Average cost per share (calculate externally)'
             />
         </>
     );
