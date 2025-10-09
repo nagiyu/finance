@@ -44,8 +44,9 @@ client/finance/
 - 取引所・ティッカー選択UI
 - 時間軸・セッション設定
 - リアルタイムチャート表示
-- **ローディングボタンによるチャート手動更新**
+- **ローディングボタンによるチャートと条件一覧の手動更新**
 - **10秒毎の自動チャート更新**
+- **1分毎の自動条件更新**
 - 認証状態管理
 - 条件ステータス表示（画面下部）
 
@@ -58,24 +59,37 @@ const [ticker, setTicker] = useState('');
 const [timeframe, setTimeframe] = useState<TimeFrame>('1');
 const [session, setSession] = useState<string>('extended');
 const [refreshTrigger, setRefreshTrigger] = useState<number>(0);
+const [conditionRefreshTrigger, setConditionRefreshTrigger] = useState<number>(0);
 ```
 
 **ローディング機能:**
 - **手動更新**: 「ローディング」ボタンをクリックすることで、現在のチャートと条件一覧を最新の状態に更新できます
-- **自動更新**: 10秒毎に自動的にチャートと条件一覧が最新の状態に更新されます
+- **自動更新**: 
+  - **ローソク足チャート**: 10秒毎に自動的に最新の状態に更新されます
+  - **条件一覧**: 1分毎に自動的に最新の状態に更新されます
 
 実装の詳細:
 ```typescript
-// 手動更新ハンドラ
+// 手動更新ハンドラ（チャートと条件一覧の両方を更新）
 const handleRefresh = () => {
   setRefreshTrigger(prev => prev + 1);
+  setConditionRefreshTrigger(prev => prev + 1);
 };
 
-// 10秒毎の自動更新
+// 10秒毎のローソク足自動更新
 useEffect(() => {
   const interval = setInterval(() => {
     setRefreshTrigger(prev => prev + 1);
   }, 10000);
+
+  return () => clearInterval(interval);
+}, []);
+
+// 1分毎の条件自動更新
+useEffect(() => {
+  const interval = setInterval(() => {
+    setConditionRefreshTrigger(prev => prev + 1);
+  }, 60000);
 
   return () => clearInterval(interval);
 }, []);
@@ -123,7 +137,7 @@ useEffect(() => {
 
 **更新条件:**
 - `exchangeId`, `tickerId`, `timeframe`, `session` のいずれかが変更された時
-- `refreshTrigger` が変更された時（ローディングボタン押下、自動更新）
+- `refreshTrigger` が変更された時（ローディングボタン押下、1分毎の自動更新）
 
 **API連携:**
 - `/api/finance-notification/conditions/all` - 全条件取得API
@@ -351,7 +365,7 @@ ECharts for React を使用したチャート表示
 ```
 
 **refreshTrigger について:**
-`refreshTrigger` プロパティは、親コンポーネントからチャートデータと条件一覧の再取得をトリガーするために使用されます。この値が変更されるたびに、チャートと条件一覧は最新のデータを取得して表示を更新します。手動更新ボタンや自動更新タイマーによってこの値が増加され、チャートと条件一覧が更新されます。
+`refreshTrigger` プロパティは、親コンポーネントからチャートデータの再取得をトリガーするために使用されます。この値が変更されるたびに、チャートは最新のデータを取得して表示を更新します。手動更新ボタンや10秒毎の自動更新タイマーによってこの値が増加され、チャートが更新されます。条件一覧は別の `conditionRefreshTrigger` によって1分毎に更新されます。
 
 #### CandleStick Component
 ローソク足チャートの表示コンポーネント（ECharts）
