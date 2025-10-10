@@ -8,7 +8,7 @@
       "name": "server-common"
     },
     {
-      "path": "../../typescript-common",
+      "path": "../../typescript-common/common",
       "name": "common"
     },
     {

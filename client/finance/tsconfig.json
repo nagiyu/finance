@@ -27,7 +27,7 @@
         "./*"
       ],
       "@common/*": [
-        "../../typescript-common/*"
+        "../../typescript-common/common/*"
       ],
       "@client-common/*": [
         "../../nextjs-common/common/*"

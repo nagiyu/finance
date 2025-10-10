@@ -6,7 +6,7 @@
         "./*"
       ],
       "@common/*": [
-        "../../typescript-common/*"
+        "../../typescript-common/common/*"
       ],
       "@server-common/*": [
         "../common/*"
