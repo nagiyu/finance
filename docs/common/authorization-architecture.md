@@ -125,6 +125,10 @@ enum UserType {
 
 機能とユーザータイプの組み合わせで、各ユーザータイプが持つ権限レベルを定義します。
 
+#### 2.1 権限マトリックスの管理
+
+権限マトリックスは**管理画面で設定可能**にし、コード側ではハードコーディングしません。
+
 ```typescript
 // 権限マトリックスの型定義
 type PermissionMatrix = {
@@ -133,45 +137,70 @@ type PermissionMatrix = {
   };
 };
 
-// 権限マトリックスの設定例
-const permissionMatrix: PermissionMatrix = {
-  [Feature.EXCHANGE]: {
-    [UserType.GUEST]: PermissionLevel.NONE,
-    [UserType.AUTHENTICATED]: PermissionLevel.VIEW,
-    [UserType.PREMIUM]: PermissionLevel.VIEW,
-    [UserType.ADMIN]: PermissionLevel.ADMIN,
-  },
-  [Feature.TICKER]: {
-    [UserType.GUEST]: PermissionLevel.NONE,
-    [UserType.AUTHENTICATED]: PermissionLevel.VIEW,
-    [UserType.PREMIUM]: PermissionLevel.VIEW,
-    [UserType.ADMIN]: PermissionLevel.ADMIN,
-  },
-  [Feature.MY_TICKER]: {
-    [UserType.GUEST]: PermissionLevel.NONE,
-    [UserType.AUTHENTICATED]: PermissionLevel.EDIT,
-    [UserType.PREMIUM]: PermissionLevel.EDIT,
-    [UserType.ADMIN]: PermissionLevel.ADMIN,
-  },
-  [Feature.FINANCE_NOTIFICATION]: {
-    [UserType.GUEST]: PermissionLevel.NONE,
-    [UserType.AUTHENTICATED]: PermissionLevel.EDIT,
-    [UserType.PREMIUM]: PermissionLevel.EDIT,
-    [UserType.ADMIN]: PermissionLevel.ADMIN,
-  },
-  [Feature.STOCK_CHART]: {
-    [UserType.GUEST]: PermissionLevel.VIEW,
-    [UserType.AUTHENTICATED]: PermissionLevel.VIEW,
-    [UserType.PREMIUM]: PermissionLevel.VIEW,
-    [UserType.ADMIN]: PermissionLevel.VIEW,
-  },
-  [Feature.TARGET_PRICE]: {
-    [UserType.GUEST]: PermissionLevel.NONE,
-    [UserType.AUTHENTICATED]: PermissionLevel.VIEW,
-    [UserType.PREMIUM]: PermissionLevel.VIEW,
-    [UserType.ADMIN]: PermissionLevel.VIEW,
-  },
-};
+// 権限マトリックスはDynamoDBから動的に取得
+interface PermissionMatrixRecord {
+  Id: string;                    // 'PermissionMatrix'
+  DataType: string;              // 'PermissionMatrix'
+  Matrix: PermissionMatrix;      // 権限マトリックスデータ
+  Create: number;
+  Update: number;
+}
+```
+
+#### 2.2 管理画面での権限設定
+
+管理者権限を持つユーザーは、専用の管理画面から以下を設定できます：
+
+- 各機能（Feature）に対する権限設定
+- ユーザータイプごとの権限レベル（None/View/Edit/Delete/Admin）
+- 権限マトリックスの更新履歴
+
+```typescript
+// 権限マトリックス管理サービス
+class PermissionMatrixService {
+  /**
+   * 権限マトリックスを取得
+   */
+  public static async getPermissionMatrix(): Promise<PermissionMatrix> {
+    const record = await dataAccessor.getById('PermissionMatrix');
+    return record?.Matrix || this.getDefaultMatrix();
+  }
+
+  /**
+   * 権限マトリックスを更新（管理者のみ）
+   */
+  public static async updatePermissionMatrix(
+    matrix: PermissionMatrix,
+    updatedBy: string
+  ): Promise<void> {
+    // 管理者権限チェック
+    if (!await AuthorizationService.authorize(Feature.PERMISSION_ADMIN, PermissionLevel.ADMIN)) {
+      throw new Error('Unauthorized');
+    }
+
+    await dataAccessor.update({
+      Id: 'PermissionMatrix',
+      DataType: 'PermissionMatrix',
+      Matrix: matrix,
+      Update: Date.now()
+    });
+  }
+
+  /**
+   * デフォルトの権限マトリックス
+   */
+  private static getDefaultMatrix(): PermissionMatrix {
+    return {
+      [Feature.EXCHANGE]: {
+        [UserType.GUEST]: PermissionLevel.NONE,
+        [UserType.AUTHENTICATED]: PermissionLevel.VIEW,
+        [UserType.PREMIUM]: PermissionLevel.VIEW,
+        [UserType.ADMIN]: PermissionLevel.ADMIN,
+      },
+      // 他の機能のデフォルト設定...
+    };
+  }
+}
 ```
 
 ### 3. 認可サービス
@@ -194,12 +223,14 @@ class AuthorizationService {
    * @param requiredLevel 必要な権限レベル
    * @returns 権限がある場合true
    */
-  public static hasPermission(
+  public static async hasPermission(
     userType: UserType,
     feature: Feature,
     requiredLevel: PermissionLevel
-  ): boolean {
-    const userPermission = permissionMatrix[feature][userType];
+  ): Promise<boolean> {
+    // データベースから権限マトリックスを取得
+    const permissionMatrix = await PermissionMatrixService.getPermissionMatrix();
+    const userPermission = permissionMatrix[feature]?.[userType] || PermissionLevel.NONE;
     return this.comparePermissionLevel(userPermission, requiredLevel);
   }
 
@@ -496,13 +527,12 @@ export const POST = withAuthorization(
 
 ### DynamoDB テーブル構造（既存の拡張）
 
-既存の認証テーブルに権限情報を追加します。
+既存の `AuthRecordType` を拡張して権限情報を追加します。
 
 ```typescript
-// FinanceAuthRecordType の拡張例
-interface FinanceAuthRecordType {
-  Id: string;                    // ユーザーID (AuthService経由で管理)
-  DataType: string;              // 'FinanceAuth'
+// AuthRecordType の拡張
+// typescript-common の AuthRecordType を継承
+interface FinanceAuthRecordType extends AuthRecordType {
   Finance?: {
     roles: string[];             // ['Admin'] など（後方互換性のため維持）
     userType?: UserType;         // 新しいユーザータイプ
@@ -510,10 +540,10 @@ interface FinanceAuthRecordType {
       [feature: string]: PermissionLevel;
     };
   };
-  Create: number;
-  Update: number;
 }
 ```
+
+**注意**: `AuthRecordType` は typescript-common で定義されており、本機能以外でも使用される基底型です。この設計では、Finance 固有の情報を `Finance` フィールド内にカプセル化することで、他のモジュールへの影響を避けています。
 
 ### カスタム権限のサポート
 
@@ -535,8 +565,9 @@ class AuthorizationService {
       }
     }
 
-    // デフォルトの権限マトリックスをチェック
-    const userPermission = permissionMatrix[feature][userType];
+    // データベースから権限マトリックスを取得してチェック
+    const permissionMatrix = await PermissionMatrixService.getPermissionMatrix();
+    const userPermission = permissionMatrix[feature]?.[userType] || PermissionLevel.NONE;
     return this.comparePermissionLevel(userPermission, requiredLevel);
   }
 
@@ -560,21 +591,29 @@ class AuthorizationService {
 client/finance/
 ├── types/
 │   └── AuthorizationTypes.ts              # Feature, PermissionLevel, UserType の定義
-├── config/
-│   └── permissionMatrix.ts                # 権限マトリックスの設定
 ├── services/
 │   └── auth/
 │       ├── AuthorizationService.ts        # 汎用認可サービス
+│       ├── PermissionMatrixService.ts     # 権限マトリックス管理サービス
 │       └── FinanceAuthorizer.ts           # 既存（互換性のため維持）
 ├── app/
 │   ├── components/
 │   │   └── FeatureGuard.tsx              # 認可コンポーネント
+│   ├── permission-admin/                  # 権限管理画面（管理者専用）
+│   │   ├── page.tsx                      # 権限マトリックス設定UI
+│   │   └── components/
+│   │       ├── PermissionMatrixEditor.tsx # 権限編集コンポーネント
+│   │       └── PermissionHistory.tsx     # 権限変更履歴
 │   └── api/
-│       └── auth/
-│           ├── check-permission/
-│           │   └── route.ts              # 権限チェックAPI
-│           └── authorize/[role]/
-│               └── route.ts              # 既存（互換性のため維持）
+│       ├── auth/
+│       │   ├── check-permission/
+│       │   │   └── route.ts              # 権限チェックAPI
+│       │   └── authorize/[role]/
+│       │       └── route.ts              # 既存（互換性のため維持）
+│       └── permission-matrix/
+│           ├── route.ts                  # 権限マトリックス取得・更新API
+│           └── history/
+│               └── route.ts              # 権限変更履歴API
 └── utils/
     └── authorizationMiddleware.ts        # ミドルウェアヘルパー
 ```
@@ -586,15 +625,17 @@ client/finance/
 ### フェーズ 1: 基盤構築
 
 1. 型定義の追加（`AuthorizationTypes.ts`）
-2. 権限マトリックスの設定（`permissionMatrix.ts`）
+2. `PermissionMatrixService` の実装（DBから権限マトリックスを取得）
 3. `AuthorizationService` の実装
 4. 権限チェックAPIの実装
+5. **権限管理画面の実装**（管理者が権限を設定できるUI）
 
 ### フェーズ 2: 並行運用
 
 1. 既存の `FinanceAuthorizer` は維持
 2. 新しいAPIや画面では `AuthorizationService` を使用
 3. 段階的に既存コードを移行
+4. 権限マトリックスの初期設定を管理画面から登録
 
 ### フェーズ 3: 完全移行
 
@@ -687,33 +728,7 @@ describe('AuthorizationService', () => {
 });
 ```
 
-### 統合テスト
-
-```typescript
-describe('Authorization Integration', () => {
-  it('should reject unauthorized API access', async () => {
-    // ゲストユーザーでログイン
-    const response = await fetch('/api/exchange', {
-      method: 'POST',
-      body: JSON.stringify({ /* data */ })
-    });
-
-    expect(response.status).toBe(401);
-  });
-
-  it('should allow authorized API access', async () => {
-    // 管理者でログイン
-    await signIn('admin-credentials');
-
-    const response = await fetch('/api/exchange', {
-      method: 'POST',
-      body: JSON.stringify({ /* data */ })
-    });
-
-    expect(response.status).toBe(200);
-  });
-});
-```
+**注**: API の統合テストは単体テストでは実施できないため、スキップします。API レベルの動作確認は手動テストまたはE2Eテストで実施してください。
 
 ## パフォーマンス考慮事項
 
@@ -721,49 +736,40 @@ describe('Authorization Integration', () => {
 
 頻繁な権限チェックによるパフォーマンス低下を防ぐため、セッション中は権限情報をキャッシュします。
 
+サーバー側の処理では **typescript-common/utils/CacheUtil.ts** を使用します。
+
 ```typescript
+import CacheUtil from '@common/utils/CacheUtil';
+
 class AuthorizationService {
-  private static permissionCache = new Map<string, Map<Feature, PermissionLevel>>();
+  private static readonly CACHE_PREFIX = 'user_permissions_';
+  private static readonly CACHE_TTL = 300; // 5分
 
   public static async getUserPermissions(userId: string): Promise<Map<Feature, PermissionLevel>> {
-    // キャッシュチェック
-    if (this.permissionCache.has(userId)) {
-      return this.permissionCache.get(userId)!;
+    const cacheKey = `${this.CACHE_PREFIX}${userId}`;
+    
+    // CacheUtil を使用してキャッシュチェック
+    const cached = CacheUtil.get<Map<Feature, PermissionLevel>>(cacheKey);
+    if (cached) {
+      return cached;
     }
 
     // 権限を取得してキャッシュ
     const permissions = await this.loadUserPermissions(userId);
-    this.permissionCache.set(userId, permissions);
+    CacheUtil.set(cacheKey, permissions, this.CACHE_TTL);
 
     return permissions;
   }
 
   public static clearCache(userId?: string): void {
     if (userId) {
-      this.permissionCache.delete(userId);
+      const cacheKey = `${this.CACHE_PREFIX}${userId}`;
+      CacheUtil.delete(cacheKey);
     } else {
-      this.permissionCache.clear();
+      // 全ユーザーのキャッシュをクリア（プレフィックスマッチング）
+      CacheUtil.clear(this.CACHE_PREFIX);
     }
   }
-}
-```
-
-### 2. バッチ権限チェック
-
-複数の権限を一度にチェックする場合は、バッチAPIを使用します。
-
-```typescript
-// app/api/auth/check-permissions/route.ts (複数形)
-export async function POST(request: NextRequest) {
-  const { checks } = await request.json(); // [{ feature, level }, ...]
-
-  const results = await Promise.all(
-    checks.map(({ feature, level }) => 
-      AuthorizationService.authorize(feature, level)
-    )
-  );
-
-  return APIUtil.ReturnSuccessWithObject({ results });
 }
 ```
 
