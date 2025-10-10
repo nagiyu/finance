@@ -17,10 +17,20 @@ export default function Auth({
     const [isAdmin, setIsAdmin] = useState(false);
 
     useEffect(() => {
-        (async () => {
+        const checkAuth = async () => {
             setIsUser(await AuthAPIUtil.isAuthorized('user'));
             setIsAdmin(await AuthAPIUtil.isAuthorized('admin'));
-        })();
+        };
+
+        // Initial check
+        checkAuth();
+
+        // Periodic check every 10 seconds to detect auth expiry
+        const interval = setInterval(() => {
+            checkAuth();
+        }, 10000);
+
+        return () => clearInterval(interval);
     }, []);
 
     if (isAdmin && adminContent) {
