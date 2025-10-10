@@ -289,6 +289,18 @@ const tickerFetchService = new TickerFetchService();
 const tickers = await tickerFetchService.get();
 ```
 
+**キャッシュ制御:**
+すべてのFetchServiceは、管理画面での最新データ取得を保証するため、`cache: 'no-store'` オプションを使用してキャッシュを無効化しています。これにより、常に最新のデータがサーバーから取得されます。
+
+対象サービス:
+- `ExchangeFetchService`
+- `TickerFetchService`
+- `FinanceNotificationFetchService`
+- `MyTickerFetchService`
+- `FinanceNotificationConditionFetchService`
+- `ConditionCheckService`
+- `AllConditionsService`
+
 ### Authentication
 
 #### Auth Component

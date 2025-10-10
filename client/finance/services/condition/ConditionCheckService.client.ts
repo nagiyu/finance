@@ -36,7 +36,8 @@ export default class ConditionCheckService {
 
     try {
       const response = await fetch(`/api/finance-notification/conditions/check?${params.toString()}`, {
-        method: 'GET'
+        method: 'GET',
+        cache: 'no-store'
       });
 
       ResponseValidator.ValidateResponse(response);

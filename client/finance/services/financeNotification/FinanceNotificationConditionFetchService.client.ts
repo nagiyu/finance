@@ -10,7 +10,8 @@ export default class FinanceNotificationConditionFetchService {
   public async getConditionList(mode: FinanceNotificationConditionModeType): Promise<SelectOptionType[]> {
     try {
       const response = await fetch(`/api/finance-notification/conditions/${mode}`, {
-        method: 'GET'
+        method: 'GET',
+        cache: 'no-store'
       });
 
       ResponseValidator.ValidateResponse(response);
@@ -24,7 +25,8 @@ export default class FinanceNotificationConditionFetchService {
   public async getConditionInfo(condition: string): Promise<ConditionInfo> {
     try {
       const response = await fetch(`/api/finance-notification/condition/${condition}`, {
-        method: 'GET'
+        method: 'GET',
+        cache: 'no-store'
       });
 
       ResponseValidator.ValidateResponse(response);

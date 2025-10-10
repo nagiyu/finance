@@ -38,7 +38,8 @@ export default class AllConditionsService {
 
     try {
       const response = await fetch(`/api/finance-notification/conditions/all?${params.toString()}`, {
-        method: 'GET'
+        method: 'GET',
+        cache: 'no-store'
       });
 
       ResponseValidator.ValidateResponse(response);
