@@ -4,7 +4,12 @@ import APIUtil from '@client-common/utils/APIUtil';
 
 import AuthorizationService from '@/services/auth/AuthorizationService';
 import PermissionMatrixService from '@/services/auth/PermissionMatrixService';
-import { Feature, PermissionLevel, PermissionMatrix } from '@/types/AuthorizationTypes';
+import { Feature, PermissionLevel } from '@/types/AuthorizationTypes';
+import { PermissionMatrixUpdateRequestType } from '@/interfaces/data/PermissionMatrixRequestType';
+import {
+  PermissionMatrixGetResponseType,
+  PermissionMatrixUpdateResponseType,
+} from '@/interfaces/data/PermissionMatrixResponseType';
 
 /**
  * 権限マトリックス取得API
@@ -24,7 +29,8 @@ export async function GET() {
     // 権限マトリックスを取得
     const matrix = await PermissionMatrixService.getPermissionMatrix();
 
-    return APIUtil.ReturnSuccessWithObject({ matrix });
+    const response: PermissionMatrixGetResponseType = { matrix };
+    return APIUtil.ReturnSuccessWithObject(response);
   } catch (error) {
     console.error('Error getting permission matrix:', error);
     return APIUtil.ReturnInternalServerErrorWithError(error);
@@ -46,8 +52,8 @@ export async function PUT(request: NextRequest) {
       return APIUtil.ReturnUnauthorized();
     }
 
-    const body = await request.json();
-    const { matrix } = body as { matrix: PermissionMatrix };
+    const body: PermissionMatrixUpdateRequestType = await request.json();
+    const { matrix } = body;
 
     // 入力検証
     if (!matrix) {
@@ -57,7 +63,10 @@ export async function PUT(request: NextRequest) {
     // 権限マトリックスを更新
     await PermissionMatrixService.updatePermissionMatrix(matrix);
 
-    return APIUtil.ReturnSuccessWithObject({ message: 'Permission matrix updated successfully' });
+    const response: PermissionMatrixUpdateResponseType = {
+      message: 'Permission matrix updated successfully',
+    };
+    return APIUtil.ReturnSuccessWithObject(response);
   } catch (error) {
     console.error('Error updating permission matrix:', error);
     return APIUtil.ReturnInternalServerErrorWithError(error);

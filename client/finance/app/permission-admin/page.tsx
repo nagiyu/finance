@@ -2,7 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 
-import { PermissionMatrix } from '@/types/AuthorizationTypes';
+import { Feature, PermissionLevel, PermissionMatrix } from '@/types/AuthorizationTypes';
+import { CheckPermissionRequestType } from '@/interfaces/data/CheckPermissionRequestType';
+import { CheckPermissionResponseType } from '@/interfaces/data/CheckPermissionResponseType';
+import { PermissionMatrixGetResponseType } from '@/interfaces/data/PermissionMatrixResponseType';
+import { PermissionMatrixUpdateRequestType } from '@/interfaces/data/PermissionMatrixRequestType';
 import PermissionMatrixEditor from './components/PermissionMatrixEditor';
 
 /**
@@ -21,13 +25,14 @@ export default function PermissionAdminPage() {
   const checkAuthorization = async () => {
     try {
       // 権限チェック
+      const requestBody: CheckPermissionRequestType = {
+        feature: Feature.PERMISSION_ADMIN,
+        level: PermissionLevel.ADMIN,
+      };
       const response = await fetch('/api/auth/check-permission', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          feature: 'permissionAdmin', 
-          level: 'admin' 
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
@@ -36,7 +41,7 @@ export default function PermissionAdminPage() {
         return;
       }
 
-      const result = await response.json();
+      const result: CheckPermissionResponseType = await response.json();
       setIsAuthorized(result.hasPermission);
 
       if (result.hasPermission) {
@@ -58,7 +63,7 @@ export default function PermissionAdminPage() {
         throw new Error('Failed to fetch permission matrix');
       }
 
-      const data = await response.json();
+      const data: PermissionMatrixGetResponseType = await response.json();
       setMatrix(data.matrix);
     } catch (error) {
       console.error('Error fetching matrix:', error);
@@ -68,10 +73,13 @@ export default function PermissionAdminPage() {
 
   const handleSave = async (updatedMatrix: PermissionMatrix) => {
     try {
+      const requestBody: PermissionMatrixUpdateRequestType = {
+        matrix: updatedMatrix,
+      };
       const response = await fetch('/api/permission-matrix', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ matrix: updatedMatrix }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {

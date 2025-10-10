@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 
 import { Feature, PermissionLevel } from '@/types/AuthorizationTypes';
+import { CheckPermissionRequestType } from '@/interfaces/data/CheckPermissionRequestType';
+import { CheckPermissionResponseType } from '@/interfaces/data/CheckPermissionResponseType';
 
 interface FeatureGuardProps {
   feature: Feature;
@@ -31,10 +33,11 @@ export default function FeatureGuard({
 
   const checkPermission = async () => {
     try {
+      const requestBody: CheckPermissionRequestType = { feature, level };
       const response = await fetch('/api/auth/check-permission', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ feature, level })
+        body: JSON.stringify(requestBody)
       });
 
       if (!response.ok) {
@@ -42,7 +45,7 @@ export default function FeatureGuard({
         return;
       }
 
-      const result = await response.json();
+      const result: CheckPermissionResponseType = await response.json();
       setHasPermission(result.hasPermission);
     } catch (error) {
       console.error('Error checking permission:', error);

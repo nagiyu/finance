@@ -4,6 +4,8 @@ import APIUtil from '@client-common/utils/APIUtil';
 
 import AuthorizationService from '@/services/auth/AuthorizationService';
 import { Feature, PermissionLevel } from '@/types/AuthorizationTypes';
+import { CheckPermissionRequestType } from '@/interfaces/data/CheckPermissionRequestType';
+import { CheckPermissionResponseType } from '@/interfaces/data/CheckPermissionResponseType';
 
 /**
  * 権限チェックAPI
@@ -11,7 +13,7 @@ import { Feature, PermissionLevel } from '@/types/AuthorizationTypes';
  */
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const body: CheckPermissionRequestType = await request.json();
     const { feature, level } = body;
 
     // 入力検証
@@ -25,11 +27,12 @@ export async function POST(request: NextRequest) {
 
     // 権限チェック
     const hasPermission = await AuthorizationService.authorize(
-      feature as Feature,
-      level as PermissionLevel
+      feature,
+      level
     );
 
-    return APIUtil.ReturnSuccessWithObject({ hasPermission });
+    const response: CheckPermissionResponseType = { hasPermission };
+    return APIUtil.ReturnSuccessWithObject(response);
   } catch (error) {
     console.error('Error in check-permission API:', error);
     return APIUtil.ReturnInternalServerErrorWithError(error);
