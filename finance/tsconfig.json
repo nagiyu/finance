@@ -6,6 +6,9 @@
       ],
       "@common/*": [
         "../typescript-common/common/*"
+      ],
+      "@common-mock/*": [
+        "../typescript-common/tests/mock/*"
       ]
     },
     "esModuleInterop": true
