@@ -48,6 +48,25 @@ export async function GET() {
 4. **宣言的な権限設定**: 設定ファイルで権限マトリックスを定義
 5. **統一的な認可チェック**: API と画面で同じ認可ロジックを使用
 
+### ユーザー識別の考え方
+
+本設計では、ユーザーの識別に **AuthService が管理する UserID** を使用します。これは以下の理由によるものです：
+
+- **抽象化**: 認証プロバイダー（Google、GitHub等）に依存しない設計
+- **一貫性**: typescript-common の AuthService を通じて統一的にユーザーを管理
+- **拡張性**: 将来的に複数の認証プロバイダーに対応可能
+
+```typescript
+// AuthService経由でUserIDを取得
+const authService = new FinanceAuthService();
+const userId = await authService.getUserIdFromSession();
+
+// UserIDベースで認証データを取得
+const authData = await authService.getById(userId);
+```
+
+GoogleUserID などのプロバイダー固有のIDは、AuthService の内部で管理され、直接使用しません。
+
 ## アーキテクチャ設計
 
 ### 1. 権限の構造
@@ -211,6 +230,7 @@ class AuthorizationService {
 
   /**
    * セッションからユーザータイプを取得
+   * AuthServiceを通じてUserIDベースで認証情報を取得
    * 
    * @returns ユーザータイプ
    */
@@ -221,9 +241,23 @@ class AuthorizationService {
       return UserType.GUEST;
     }
 
-    // 管理者チェック（既存のFinanceAuthorizerを使用）
-    const isAdmin = await FinanceAuthorizer.isAdmin();
-    if (isAdmin) {
+    // AuthService経由でUserIDを取得し、認証情報をチェック
+    const authService = new FinanceAuthService();
+    const userId = await authService.getUserIdFromSession();
+    
+    if (!userId) {
+      return UserType.GUEST;
+    }
+
+    // ユーザーの認証データを取得
+    const authData = await authService.getById(userId);
+    
+    if (!authData) {
+      return UserType.GUEST;
+    }
+
+    // 管理者チェック
+    if (authData.finance === 'Admin') {
       return UserType.ADMIN;
     }
 
@@ -467,9 +501,8 @@ export const POST = withAuthorization(
 ```typescript
 // FinanceAuthRecordType の拡張例
 interface FinanceAuthRecordType {
-  Id: string;                    // ユーザーID
+  Id: string;                    // ユーザーID (AuthService経由で管理)
   DataType: string;              // 'FinanceAuth'
-  GoogleUserID?: string;         // Google User ID
   Finance?: {
     roles: string[];             // ['Admin'] など（後方互換性のため維持）
     userType?: UserType;         // 新しいユーザータイプ
