@@ -10,7 +10,7 @@ ARG PROJECT_AWS_REGION
 
 WORKDIR /app
 
-COPY typescript-common ./typescript-common/common
+COPY typescript-common/common ./typescript-common/common
 COPY finance ./finance
 COPY server/common ./server/common
 COPY server/finance ./server/finance

@@ -11,7 +11,7 @@ ARG NEXTAUTH_URL
 
 WORKDIR /app
 
-COPY typescript-common ./typescript-common/common
+COPY typescript-common/common ./typescript-common/common
 COPY finance ./finance
 COPY nextjs-common/common ./nextjs-common/common
 COPY client/finance ./client/finance
