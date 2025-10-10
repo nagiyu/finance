@@ -42,19 +42,30 @@ export default function Home() {
   const [candleCount, setCandleCount] = useState<string>(CandleCountUtil.getDefaultCandleCount());
   const [urlParamsProcessed, setUrlParamsProcessed] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState<number>(0);
+  const [conditionRefreshTrigger, setConditionRefreshTrigger] = useState<number>(0);
 
   const exchangeFetchService = new ExchangeFetchService();
   const tickerFetchService = new TickerFetchService();
 
   const handleRefresh = () => {
     setRefreshTrigger(prev => prev + 1);
+    setConditionRefreshTrigger(prev => prev + 1);
   };
 
-  // 10秒毎の自動更新
+  // 10秒毎のローソク足自動更新
   useEffect(() => {
     const interval = setInterval(() => {
       setRefreshTrigger(prev => prev + 1);
     }, 10000); // 10秒 = 10000ミリ秒
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // 1分毎の条件自動更新
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setConditionRefreshTrigger(prev => prev + 1);
+    }, 60000); // 60秒 = 60000ミリ秒
 
     return () => clearInterval(interval);
   }, []);
@@ -147,7 +158,7 @@ export default function Home() {
             tickerId={ticker}
             timeframe={timeframe}
             session={session}
-            refreshTrigger={refreshTrigger}
+            refreshTrigger={conditionRefreshTrigger}
           />
         </BasicStack>
       }
