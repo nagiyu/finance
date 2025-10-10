@@ -65,28 +65,22 @@ export default class AuthorizationService {
         return UserType.GUEST;
       }
 
-      // AuthService経由でUserIDを取得し、認証情報をチェック
+      // AuthService経由で認証情報をチェック
       const authService = new FinanceAuthService();
-      const userId = await authService.getUserIdByGoogle(googleUserID);
       
-      if (!userId) {
-        return UserType.GUEST;
-      }
-
-      // ユーザーの認証データを取得
-      const authData = await authService.getById(userId);
-      
-      if (!authData) {
-        return UserType.GUEST;
-      }
-
-      // 管理者チェック
-      if (authData.finance === 'Admin') {
+      // isAuthorizedByGoogleで管理者権限をチェック
+      const isAdmin = await authService.isAuthorizedByGoogle(googleUserID, 'finance', ['Admin']);
+      if (isAdmin) {
         return UserType.ADMIN;
       }
 
-      // 認証済みユーザー
-      return UserType.AUTHENTICATED;
+      // 認証済みユーザーかチェック
+      const isAuthenticated = await authService.isAuthorizedByGoogle(googleUserID, 'finance');
+      if (isAuthenticated) {
+        return UserType.AUTHENTICATED;
+      }
+
+      return UserType.GUEST;
     } catch (error) {
       console.error('Error getting user type:', error);
       return UserType.GUEST;
