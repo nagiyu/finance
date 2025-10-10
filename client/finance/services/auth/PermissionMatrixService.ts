@@ -39,8 +39,7 @@ export default class PermissionMatrixService {
     
     if (existingRecord) {
       // 既存レコードを更新
-      await dataAccessor.update({
-        ...existingRecord,
+      await dataAccessor.update(this.PERMISSION_MATRIX_ID, {
         Matrix: matrix,
         Update: Date.now(),
       });
