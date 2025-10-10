@@ -27,7 +27,7 @@ export async function GET() {
     return APIUtil.ReturnSuccessWithObject({ matrix });
   } catch (error) {
     console.error('Error getting permission matrix:', error);
-    return APIUtil.ReturnInternalServerError();
+    return APIUtil.ReturnInternalServerErrorWithError(error);
   }
 }
 
@@ -60,6 +60,6 @@ export async function PUT(request: NextRequest) {
     return APIUtil.ReturnSuccessWithObject({ message: 'Permission matrix updated successfully' });
   } catch (error) {
     console.error('Error updating permission matrix:', error);
-    return APIUtil.ReturnInternalServerError();
+    return APIUtil.ReturnInternalServerErrorWithError(error);
   }
 }

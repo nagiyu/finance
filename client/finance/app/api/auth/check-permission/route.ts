@@ -32,6 +32,6 @@ export async function POST(request: NextRequest) {
     return APIUtil.ReturnSuccessWithObject({ hasPermission });
   } catch (error) {
     console.error('Error in check-permission API:', error);
-    return APIUtil.ReturnInternalServerError();
+    return APIUtil.ReturnInternalServerErrorWithError(error);
   }
 }
