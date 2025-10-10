@@ -5,7 +5,7 @@
       "name": "finance"
     },
     {
-      "path": "../typescript-common",
+      "path": "../typescript-common/common",
       "name": "common"
     }
   ],

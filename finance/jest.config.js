@@ -10,6 +10,7 @@ module.exports = {
   },
   moduleNameMapper: {
     "^@finance/(.*)$": "<rootDir>/$1",
-    "^@common/(.*)$": "<rootDir>/../typescript-common/$1",
+    "^@common/(.*)$": "<rootDir>/../typescript-common/common/$1",
+    "^@common-mock/(.*)$": "<rootDir>/../typescript-common/tests/mock/$1",
   }
 };

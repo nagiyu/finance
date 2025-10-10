@@ -461,7 +461,7 @@ npm run dev
     "baseUrl": ".",
     "paths": {
       "@/*": ["./app/*"],
-      "@client-common/*": ["../typescript-common/*"],
+      "@client-common/*": ["../typescript-common/common/*"],
       "@finance/*": ["../../finance/*"],
       "@common/*": ["../../common/*"]
     }

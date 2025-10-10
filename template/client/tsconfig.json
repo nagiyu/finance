@@ -21,7 +21,7 @@
     "paths": {
       "@/*": ["./*"],
       "@common/*": ["../../common/*"],
-      "@client-common/*": ["../typescript-common/*"],
+      "@client-common/*": ["../typescript-common/common/*"],
       "@sample/*": ["../sample/*"]
     }
   },

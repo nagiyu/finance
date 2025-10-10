@@ -11,12 +11,12 @@ ARG NEXTAUTH_URL
 
 WORKDIR /app
 
-COPY typescript-common ./typescript-common
+COPY typescript-common ./typescript-common/common
 COPY finance ./finance
 COPY nextjs-common/common ./nextjs-common/common
 COPY client/finance ./client/finance
 
-WORKDIR /app/typescript-common
+WORKDIR /app/typescript-common/common
 RUN npm install
 
 WORKDIR /app/finance
@@ -49,8 +49,8 @@ COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:0.9.1 /lambda-adapter /opt
 
 ENV AWS_LWA_PORT=3000
 
-WORKDIR /app/typescript-common
-COPY --from=builder /app/typescript-common .
+WORKDIR /app/typescript-common/common
+COPY --from=builder /app/typescript-common/common .
 
 WORKDIR /app/finance
 COPY --from=builder /app/finance .
