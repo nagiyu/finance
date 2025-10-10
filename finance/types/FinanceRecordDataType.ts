@@ -3,6 +3,7 @@ export const FINANCE_RECORD_DATA_TYPE = {
   TICKER: 'Ticker',
   MY_TICKER: 'MyTicker',
   FINANCE_NOTIFICATION: 'FinanceNotification',
+  PERMISSION_MATRIX: 'PermissionMatrix',
 } as const;
 
 export type FinanceRecordDataType = typeof FINANCE_RECORD_DATA_TYPE[keyof typeof FINANCE_RECORD_DATA_TYPE];
