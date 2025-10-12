@@ -3,14 +3,14 @@
 import React, { useState, useEffect } from 'react';
 
 import { Feature, PermissionLevel, PermissionMatrix } from '@/types/AuthorizationTypes';
-import {
+import type {
   CheckPermissionRequestType,
   CheckPermissionResponseType,
-} from '@/app/api/auth/check-permission/types';
-import {
+} from '@/app/api/auth/check-permission/route';
+import type {
   PermissionMatrixGetResponseType,
-} from '@/app/api/permission-matrix/types';
-import { PermissionMatrixUpdateRequestType } from '@/app/api/permission-matrix/types';
+  PermissionMatrixUpdateRequestType,
+} from '@/app/api/permission-matrix/route';
 import PermissionMatrixEditor from './components/PermissionMatrixEditor';
 
 /**

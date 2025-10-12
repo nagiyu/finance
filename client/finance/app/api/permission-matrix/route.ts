@@ -4,12 +4,28 @@ import APIUtil from '@client-common/utils/APIUtil';
 
 import AuthorizationService from '@/services/auth/AuthorizationService';
 import PermissionMatrixService from '@/services/auth/PermissionMatrixService';
-import { Feature, PermissionLevel } from '@/types/AuthorizationTypes';
-import {
-  PermissionMatrixUpdateRequestType,
-  PermissionMatrixGetResponseType,
-  PermissionMatrixUpdateResponseType,
-} from './types';
+import { Feature, PermissionLevel, PermissionMatrix } from '@/types/AuthorizationTypes';
+
+/**
+ * 権限マトリックス更新APIのリクエスト型
+ */
+export interface PermissionMatrixUpdateRequestType {
+  matrix: PermissionMatrix;
+}
+
+/**
+ * 権限マトリックス取得APIのレスポンス型
+ */
+export interface PermissionMatrixGetResponseType {
+  matrix: PermissionMatrix;
+}
+
+/**
+ * 権限マトリックス更新APIのレスポンス型
+ */
+export interface PermissionMatrixUpdateResponseType {
+  message: string;
+}
 
 /**
  * 権限マトリックス取得API

@@ -4,10 +4,21 @@ import APIUtil from '@client-common/utils/APIUtil';
 
 import AuthorizationService from '@/services/auth/AuthorizationService';
 import { Feature, PermissionLevel } from '@/types/AuthorizationTypes';
-import {
-  CheckPermissionRequestType,
-  CheckPermissionResponseType,
-} from './types';
+
+/**
+ * 権限チェックAPIのリクエスト型
+ */
+export interface CheckPermissionRequestType {
+  feature: Feature;
+  level: PermissionLevel;
+}
+
+/**
+ * 権限チェックAPIのレスポンス型
+ */
+export interface CheckPermissionResponseType {
+  hasPermission: boolean;
+}
 
 /**
  * 権限チェックAPI
