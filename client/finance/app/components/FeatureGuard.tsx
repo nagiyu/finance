@@ -3,8 +3,10 @@
 import { useEffect, useState } from 'react';
 
 import { Feature, PermissionLevel } from '@/types/AuthorizationTypes';
-import { CheckPermissionRequestType } from '@/interfaces/data/CheckPermissionRequestType';
-import { CheckPermissionResponseType } from '@/interfaces/data/CheckPermissionResponseType';
+import {
+  CheckPermissionRequestType,
+  CheckPermissionResponseType,
+} from '@/app/api/auth/check-permission/types';
 
 interface FeatureGuardProps {
   feature: Feature;

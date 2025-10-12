@@ -4,8 +4,10 @@ import APIUtil from '@client-common/utils/APIUtil';
 
 import AuthorizationService from '@/services/auth/AuthorizationService';
 import { Feature, PermissionLevel } from '@/types/AuthorizationTypes';
-import { CheckPermissionRequestType } from '@/interfaces/data/CheckPermissionRequestType';
-import { CheckPermissionResponseType } from '@/interfaces/data/CheckPermissionResponseType';
+import {
+  CheckPermissionRequestType,
+  CheckPermissionResponseType,
+} from './types';
 
 /**
  * 権限チェックAPI

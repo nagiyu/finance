@@ -5,11 +5,11 @@ import APIUtil from '@client-common/utils/APIUtil';
 import AuthorizationService from '@/services/auth/AuthorizationService';
 import PermissionMatrixService from '@/services/auth/PermissionMatrixService';
 import { Feature, PermissionLevel } from '@/types/AuthorizationTypes';
-import { PermissionMatrixUpdateRequestType } from '@/interfaces/data/PermissionMatrixRequestType';
 import {
+  PermissionMatrixUpdateRequestType,
   PermissionMatrixGetResponseType,
   PermissionMatrixUpdateResponseType,
-} from '@/interfaces/data/PermissionMatrixResponseType';
+} from './types';
 
 /**
  * 権限マトリックス取得API
