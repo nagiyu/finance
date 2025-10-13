@@ -106,50 +106,42 @@ curl -X POST https://your-app.com/api/finance-notification/sync-cache \
 
 ### クライアント側での呼び出し
 
+#### FetchServiceを使用した呼び出し（推奨）
+
 ```typescript
+import ExchangeFetchService from '@/services/exchange/ExchangeFetchService.client';
+import TickerFetchService from '@/services/ticker/TickerFetchService.client';
+import MyTickerFetchService from '@/services/myticker/MyTickerFetchService.client';
+import FinanceNotificationFetchService from '@/services/financeNotification/FinanceNotificationFetchService.client';
+
 // Exchange キャッシュ同期
-const syncExchangeCache = async () => {
-  const response = await fetch('/api/exchange/sync-cache', {
-    method: 'POST',
-  });
-  
-  if (response.ok) {
-    console.log('Exchange cache synced successfully');
-  }
-};
+const exchangeFetchService = new ExchangeFetchService();
+await exchangeFetchService.syncCache();
 
 // Ticker キャッシュ同期
-const syncTickerCache = async () => {
-  const response = await fetch('/api/ticker/sync-cache', {
-    method: 'POST',
-  });
-  
-  if (response.ok) {
-    console.log('Ticker cache synced successfully');
-  }
-};
+const tickerFetchService = new TickerFetchService();
+await tickerFetchService.syncCache();
 
 // MyTicker キャッシュ同期
-const syncMyTickerCache = async () => {
-  const response = await fetch('/api/myticker/sync-cache', {
-    method: 'POST',
-  });
-  
-  if (response.ok) {
-    console.log('MyTicker cache synced successfully');
-  }
-};
+const myTickerFetchService = new MyTickerFetchService();
+await myTickerFetchService.syncCache();
 
 // FinanceNotification キャッシュ同期
-const syncFinanceNotificationCache = async () => {
-  const response = await fetch('/api/finance-notification/sync-cache', {
-    method: 'POST',
-  });
-  
-  if (response.ok) {
-    console.log('FinanceNotification cache synced successfully');
-  }
-};
+const financeNotificationFetchService = new FinanceNotificationFetchService();
+await financeNotificationFetchService.syncCache();
+```
+
+#### 直接fetchを使用した呼び出し（非推奨）
+
+```typescript
+// Exchange キャッシュ同期
+const response = await fetch('/api/exchange/sync-cache', {
+  method: 'POST',
+});
+
+if (response.ok) {
+  console.log('Exchange cache synced successfully');
+}
 ```
 
 ---
