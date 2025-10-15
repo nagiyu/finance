@@ -1,5 +1,3 @@
-import { FinanceRecordTypeBase } from '@finance/interfaces/record/FinanceRecordTypeBase';
-
 /**
  * 認可システムの型定義
  */
@@ -50,16 +48,4 @@ export type PermissionMatrix = {
     [userType in UserType]: PermissionLevel;
   };
 };
-
-/**
- * 権限マトリックスレコード
- * DynamoDBに保存される形式
- */
-export interface PermissionMatrixRecord extends FinanceRecordTypeBase {
-  Id: string;                    // 'PermissionMatrix'
-  DataType: 'PermissionMatrix';  // 'PermissionMatrix'
-  Matrix: PermissionMatrix;      // 権限マトリックスデータ
-  Create: number;
-  Update: number;
-}
 

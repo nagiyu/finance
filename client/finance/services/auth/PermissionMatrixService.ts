@@ -56,6 +56,15 @@ export default class PermissionMatrixService {
   }
 
   /**
+   * 権限マトリックスを削除
+   * 注意: 権限チェックは AuthorizationService で行う必要がある
+   */
+  public static async deletePermissionMatrix(): Promise<void> {
+    const dataAccessor = new PermissionMatrixDataAccessor();
+    await dataAccessor.delete(this.PERMISSION_MATRIX_ID);
+  }
+
+  /**
    * デフォルトの権限マトリックス
    * 既存の権限設定との互換性を保つ
    */
