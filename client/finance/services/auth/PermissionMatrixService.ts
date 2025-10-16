@@ -41,16 +41,12 @@ export default class PermissionMatrixService {
       // 既存レコードを更新
       await dataAccessor.update(this.PERMISSION_MATRIX_ID, {
         Matrix: matrix,
-        Update: Date.now(),
       });
     } else {
       // 新規レコードを作成
       await dataAccessor.create({
-        Id: this.PERMISSION_MATRIX_ID,
         DataType: 'PermissionMatrix',
         Matrix: matrix,
-        Create: Date.now(),
-        Update: Date.now(),
       });
     }
   }
