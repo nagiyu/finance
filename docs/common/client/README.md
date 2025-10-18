@@ -178,6 +178,28 @@ class MyAPIService extends BaseAPIService {
 - レスポンス型安全性
 - リクエスト・レスポンスインターセプター
 
+**キャッシュ制御:**
+`FetchServiceBase` を使用するすべてのサービスは、GET リクエスト時に `cache: 'no-store'` オプションを使用してキャッシュを無効化します。これにより、管理画面の Refresh ボタン押下時や、データ取得時に常に最新のデータを取得できます。
+
+```typescript
+// FetchServiceBase.client.ts 内部実装
+public async get(): Promise<T[]> {
+  const response = await fetch(this.endpoint, {
+    method: 'GET',
+    cache: 'no-store'  // Next.js のキャッシュを無効化
+  });
+  // ...
+}
+
+public async getById(id: string): Promise<T | null> {
+  const response = await fetch(`${this.endpoint}/${id}`, {
+    method: 'GET',
+    cache: 'no-store'  // Next.js のキャッシュを無効化
+  });
+  // ...
+}
+```
+
 #### HTTP Client
 HTTP通信のユーティリティを提供します。
 

@@ -61,7 +61,9 @@ export default function PermissionAdminPage() {
 
   const fetchMatrix = async () => {
     try {
-      const response = await fetch('/api/permission-matrix');
+      const response = await fetch('/api/permission-matrix', {
+        cache: 'no-store'
+      });
       
       if (!response.ok) {
         throw new Error('Failed to fetch permission matrix');

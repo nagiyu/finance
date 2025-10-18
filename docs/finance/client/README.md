@@ -303,6 +303,20 @@ const tickerFetchService = new TickerFetchService();
 const tickers = await tickerFetchService.get();
 ```
 
+**キャッシュ無効化:**
+すべてのFetchServiceは、GET リクエスト時に `cache: 'no-store'` オプションを使用してキャッシュを無効化しています。これにより、管理画面の Refresh ボタンを押下した際に、常に最新のデータを取得できます。
+
+```typescript
+// FetchServiceBase内部実装
+public async get(): Promise<T[]> {
+  const response = await fetch(this.endpoint, {
+    method: 'GET',
+    cache: 'no-store'  // キャッシュを使用しない
+  });
+  // ...
+}
+```
+
 ### Authentication
 
 #### Auth Component
