@@ -9,9 +9,9 @@ import { AuthDataType } from '@common/interfaces/data/AuthDataType';
 import { MyTickerDataType } from '@finance/interfaces/data/MyTickerDataType';
 
 import AuthFetchService from '@client-common/services/auth/AuthFetchService.client';
-import AdminManagement from '@client-common/components/admin/AdminManagement';
 import { Column } from '@client-common/components/data/table/BasicTable';
 
+import AdminManagementWithCache from '@/app/components/admin/AdminManagementWithCache';
 import Auth from '@/app/components/Auth';
 import ExchangeFetchService from '@/services/exchange/ExchangeFetchService.client';
 import MyTickerEditDialogContent from '@/app/components/myticker/MyTickerEditDialogContent';
@@ -178,7 +178,7 @@ export default function MyTickerPage() {
         <Auth
             userContent={
                 <div>
-                    <AdminManagement<MyTickerDataType, StateType>
+                    <AdminManagementWithCache<MyTickerDataType, StateType>
                         columns={columns}
                         fetchData={fetchData}
                         itemName='My Ticker'
@@ -203,7 +203,7 @@ export default function MyTickerPage() {
                                 />
                             );
                         }}
-                    </AdminManagement>
+                    </AdminManagementWithCache>
                 </div>
             }
         />

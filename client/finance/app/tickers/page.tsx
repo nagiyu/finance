@@ -5,9 +5,9 @@
 
 import React, { useEffect, useState } from 'react';
 
-import AdminManagement from '@client-common/components/admin/AdminManagement';
 import { Column } from '@client-common/components/data/table/BasicTable';
 
+import AdminManagementWithCache from '@/app/components/admin/AdminManagementWithCache';
 import Auth from '@/app/components/Auth';
 import ExchangeFetchService from '@/services/exchange/ExchangeFetchService.client';
 import TickerEditDialogContent from '@/app/components/ticker/TickerEditDialogContent';
@@ -82,7 +82,7 @@ export default function TickersPage() {
     return (
         <Auth
             adminContent={
-                <AdminManagement<TickerDataType>
+                <AdminManagementWithCache<TickerDataType>
                     columns={columns}
                     fetchData={fetchData}
                     itemName='Ticker'
@@ -100,7 +100,7 @@ export default function TickersPage() {
                             exchanges={exchanges}
                         />
                     )}
-                </AdminManagement>
+                </AdminManagementWithCache>
             }
             userContent={
                 <div>権限がありません。</div>

@@ -8,11 +8,11 @@ import ErrorUtil from '@common/utils/ErrorUtil';
 
 import { FinanceNotificationDataType } from '@finance/interfaces/data/FinanceNotificationDataType';
 
-import AdminManagement from '@client-common/components/admin/AdminManagement';
+import { Column } from '@client-common/components/data/table/BasicTable';
 import NotificationUtil from '@client-common/utils/NotificationUtil.client';
 import TerminalUtil from '@client-common/utils/TerminalUtil.client';
-import { Column } from '@client-common/components/data/table/BasicTable';
 
+import AdminManagementWithCache from '@/app/components/admin/AdminManagementWithCache';
 import ExchangeFetchService from '@/services/exchange/ExchangeFetchService.client';
 import FinanceNotificationEditDialogContent from '@/app/components/financeNotification/FinanceNotificationEditDialogContent';
 import FinanceNotificationFetchService from '@/services/financeNotification/FinanceNotificationFetchService.client';
@@ -156,7 +156,7 @@ export default function FinanceNotificationPage() {
     return (
         <LoadingAuthPage
             userContent={(loading, runWithLoading) => (
-                <AdminManagement<FinanceNotificationDataType, StateType>
+                <AdminManagementWithCache<FinanceNotificationDataType, StateType>
                     columns={columns}
                     loading={loading}
                     fetchData={() => runWithLoading(fetchData)}
@@ -183,7 +183,7 @@ export default function FinanceNotificationPage() {
                             />
                         );
                     }}
-                </AdminManagement>
+                </AdminManagementWithCache>
             )}
         />
     )

@@ -133,10 +133,10 @@ await financeNotificationFetchService.syncCache();
 
 #### AdminManagement コンポーネントでの使用
 
-管理画面コンポーネント（`AdminManagement`）では、`onRefresh` プロパティを使用して Refresh ボタン押下時にキャッシュ同期を実行できます：
+管理画面コンポーネント（`AdminManagementWithCache`）では、`onRefresh` プロパティを使用して Refresh ボタン押下時にキャッシュ同期を実行できます：
 
 ```typescript
-import AdminManagement from '@client-common/components/admin/AdminManagement';
+import AdminManagementWithCache from '@/app/components/admin/AdminManagementWithCache';
 import ExchangeFetchService from '@/services/exchange/ExchangeFetchService.client';
 import { ExchangeDataType } from '@/interfaces/data/ExchangeDataType';
 
@@ -152,7 +152,7 @@ export default function ExchangesPage() {
     };
 
     return (
-        <AdminManagement<ExchangeDataType>
+        <AdminManagementWithCache<ExchangeDataType>
             columns={columns}
             fetchData={fetchData}
             onRefresh={onRefresh}
@@ -161,6 +161,12 @@ export default function ExchangesPage() {
     );
 }
 ```
+
+`AdminManagementWithCache` は、従来の `AdminManagement` を拡張したコンポーネントで、以下の管理画面で使用されています：
+- Exchange 管理画面 (`/app/exchanges/page.tsx`)
+- Ticker 管理画面 (`/app/tickers/page.tsx`)
+- MyTicker 管理画面 (`/app/myticker/page.tsx`)
+- FinanceNotification 管理画面 (`/app/finance-notification/page.tsx`)
 
 このように設定すると、Refresh ボタンを押した時に以下の処理が実行されます：
 1. `onRefresh` が呼ばれ、`syncCache()` でキャッシュを最新化

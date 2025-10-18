@@ -4,9 +4,9 @@ import React from 'react';
 
 import TimeUtil from '@common/utils/TimeUtil';
 
-import AdminManagement from '@client-common/components/admin/AdminManagement';
 import { Column } from '@client-common/components/data/table/BasicTable';
 
+import AdminManagementWithCache from '@/app/components/admin/AdminManagementWithCache';
 import Auth from '@/app/components/Auth';
 import ExchangeEditDialogContent from '@/app/components/exchange/ExchangeEditDialogContent';
 import ExchangeFetchService from '@/services/exchange/ExchangeFetchService.client';
@@ -84,7 +84,7 @@ export default function ExchangesPage() {
     return (
         <Auth
             adminContent={
-                <AdminManagement<ExchangeDataType>
+                <AdminManagementWithCache<ExchangeDataType>
                     columns={columns}
                     fetchData={fetchData}
                     itemName='Exchange'
@@ -98,7 +98,7 @@ export default function ExchangesPage() {
                     {(item, _, onItemChange) => (
                         <ExchangeEditDialogContent item={item} onItemChange={onItemChange} />
                     )}
-                </AdminManagement>
+                </AdminManagementWithCache>
             }
             userContent={
                 <div>権限がありません。</div>
