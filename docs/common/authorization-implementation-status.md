@@ -165,12 +165,66 @@ const isAdmin = await FinanceAuthorizer.isAdmin();
 const isUser = await FinanceAuthorizer.isUser();
 ```
 
-## 次のステップ（フェーズ2）
+## フェーズ2の実装状況
 
-1. 新しいAPIや画面では`AuthorizationService`を使用
-2. 段階的に既存コードを新しいシステムに移行
-3. 実際のユースケースでテストして改善
-4. パフォーマンス監視とキャッシュ実装の検討
+### ✅ 完了した移行
+
+すべての既存APIルートを新しい`AuthorizationService`に移行しました。
+
+#### 移行済みAPIルート
+
+1. **Exchange API** (`Feature.EXCHANGE`)
+   - GET `/api/exchange` - VIEW権限
+   - POST `/api/exchange` - ADMIN権限
+   - PUT `/api/exchange/[id]` - ADMIN権限
+   - DELETE `/api/exchange/[id]` - ADMIN権限
+   - POST `/api/exchange/sync-cache` - ADMIN権限
+
+2. **Ticker API** (`Feature.TICKER`)
+   - GET `/api/ticker` - VIEW権限
+   - POST `/api/ticker` - ADMIN権限
+   - PUT `/api/ticker/[id]` - ADMIN権限
+   - DELETE `/api/ticker/[id]` - ADMIN権限
+   - POST `/api/ticker/sync-cache` - ADMIN権限
+
+3. **MyTicker API** (`Feature.MY_TICKER`)
+   - GET `/api/myticker` - VIEW権限
+   - POST `/api/myticker` - EDIT権限
+   - GET `/api/myticker/[id]` - VIEW権限
+   - PUT `/api/myticker/[id]` - EDIT権限
+   - DELETE `/api/myticker/[id]` - EDIT権限
+   - POST `/api/myticker/sync-cache` - EDIT権限
+
+4. **FinanceNotification API** (`Feature.FINANCE_NOTIFICATION`)
+   - GET `/api/finance-notification` - VIEW権限
+   - POST `/api/finance-notification` - EDIT権限
+   - GET `/api/finance-notification/[id]` - VIEW権限
+   - PUT `/api/finance-notification/[id]` - EDIT権限
+   - DELETE `/api/finance-notification/[id]` - EDIT権限
+   - POST `/api/finance-notification/sync-cache` - EDIT権限
+   - GET `/api/finance-notification/condition/[condition]` - VIEW権限
+   - GET `/api/finance-notification/conditions/all` - VIEW権限
+   - GET `/api/finance-notification/conditions/check` - VIEW権限
+   - GET `/api/finance-notification/conditions/[mode]` - VIEW権限
+
+5. **StockChart API** (`Feature.STOCK_CHART`)
+   - POST `/api/candle-stick` - VIEW権限
+
+6. **Layout** (`app/layout.tsx`)
+   - メニュー表示制御を`AuthorizationService`に移行
+
+### 後方互換性
+
+- `FinanceAuthorizer.isAdmin()` と `FinanceAuthorizer.isUser()` は内部で `AuthorizationService` を使用する互換レイヤーとして維持
+- `/api/auth/authorize/[role]` エンドポイントは互換性のため維持
+- 既存コードは段階的に新しいシステムに移行可能
+
+## 次のステップ（フェーズ3）
+
+1. 実際のユースケースでテストして改善
+2. パフォーマンス監視とキャッシュ実装の検討
+3. 必要に応じて追加の機能（リソースレベルの認可、動的権限など）を実装
+4. ドキュメントの更新と開発者ガイドの整備
 
 ## 注意事項
 

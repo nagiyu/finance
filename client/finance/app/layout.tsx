@@ -4,7 +4,8 @@ import './globals.css';
 import CommonLayout from '@client-common/components/layout/CommonLayout';
 import { MenuItemData } from '@client-common/components/navigations/Menus/LinkMenu';
 
-import FinanceAuthorizer from '@/services/finance/FinanceAuthorizer';
+import AuthorizationService from '@/services/auth/AuthorizationService';
+import { Feature, PermissionLevel } from '@/types/AuthorizationTypes';
 
 export const metadata: Metadata = {
   title: 'Finance',
@@ -14,7 +15,8 @@ export const metadata: Metadata = {
 const getMenuItems = async (): Promise<MenuItemData[]> => {
   const menuItems: MenuItemData[] = [];
 
-  if (await FinanceAuthorizer.isUser()) {
+  // ユーザー向けメニュー（VIEW権限があれば表示）
+  if (await AuthorizationService.authorize(Feature.MY_TICKER, PermissionLevel.VIEW)) {
     menuItems.push(
       { title: 'Home', url: '/' },
       { title: 'My Ticker', url: '/myticker' },
@@ -22,7 +24,8 @@ const getMenuItems = async (): Promise<MenuItemData[]> => {
     );
   }
 
-  if (await FinanceAuthorizer.isAdmin()) {
+  // 管理者向けメニュー（ADMIN権限があれば表示）
+  if (await AuthorizationService.authorize(Feature.EXCHANGE, PermissionLevel.ADMIN)) {
     menuItems.push(
       { title: 'Exchange', url: '/exchanges' },
       { title: 'Ticker', url: '/tickers' },
