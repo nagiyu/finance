@@ -2,7 +2,7 @@
 
 ## 概要 (Overview)
 
-`AdminManagementWithCache` は、`AdminManagement` コンポーネントを拡張した管理画面用のコンポーネントです。Refresh ボタン押下時にキャッシュを同期する機能を追加しています。
+`AdminManagementWithCache` は、`AdminManagement` コンポーネントを拡張した管理画面用のコンポーネントです。Refresh ボタン押下時のキャッシュ同期機能を追加しています。
 
 ## 特徴
 
@@ -27,7 +27,7 @@ export default function ExchangesPage() {
     };
 
     const onRefresh = async (): Promise<void> => {
-        // Refresh ボタン押下時にキャッシュを同期
+        // Refresh ボタン押下時のキャッシュ同期
         await exchangeFetchService.syncCache();
     };
 
@@ -57,7 +57,7 @@ export default function ExchangesPage() {
 
 | プロパティ | 型 | 必須 | 説明 |
 |-----------|-----|------|------|
-| `onRefresh` | `() => Promise<void>` | No | Refresh ボタン押下時に実行される処理。通常は `syncCache()` を呼び出す |
+| `onRefresh` | `() => Promise<void>` | No | Refresh ボタン押下時の処理。通常は `syncCache()` を呼び出す |
 
 その他のプロパティは `AdminManagement` と同じです：
 
@@ -108,5 +108,5 @@ Refresh ボタンを押すと、以下の順序で処理が実行されます：
 
 ## 関連ドキュメント
 
-- [Sync Cache API ドキュメント](../../../docs/finance/sync-cache-api.md)
-- [AdminManagement コンポーネント](../../../nextjs-common/common/components/admin/AdminManagement.tsx)
+- [Sync Cache API ドキュメント](../../../../docs/finance/sync-cache-api.md)
+- [Finance Client ドキュメント](../../../../docs/finance/client/README.md)
