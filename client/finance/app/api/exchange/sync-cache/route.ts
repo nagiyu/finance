@@ -2,12 +2,13 @@ import ExchangeService from '@finance/services/ExchangeService';
 
 import APIUtil from '@client-common/utils/APIUtil';
 
-import FinanceAuthorizer from '@/services/finance/FinanceAuthorizer';
+import AuthorizationService from '@/services/auth/AuthorizationService';
+import { Feature, PermissionLevel } from '@/types/AuthorizationTypes';
 
 const service = new ExchangeService();
 
 export async function POST() {
-  if (!await FinanceAuthorizer.isAdmin()) {
+  if (!await AuthorizationService.authorize(Feature.EXCHANGE, PermissionLevel.ADMIN)) {
     return APIUtil.ReturnUnauthorized();
   }
 

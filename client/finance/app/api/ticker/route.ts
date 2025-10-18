@@ -4,12 +4,13 @@ import CommonUtil from "@common/utils/CommonUtil";
 
 import APIUtil from '@client-common/utils/APIUtil';
 
-import FinanceAuthorizer from '@/services/finance/FinanceAuthorizer';
+import AuthorizationService from '@/services/auth/AuthorizationService';
+import { Feature, PermissionLevel } from '@/types/AuthorizationTypes';
 import TickerDataAccessor from "@/services/ticker/TickerDataAcceesor";
 import { TickerDataType } from "@/interfaces/data/TickerDataType";
 
 export async function GET() {
-  if (!await FinanceAuthorizer.isUser()) {
+  if (!await AuthorizationService.authorize(Feature.TICKER, PermissionLevel.VIEW)) {
     return APIUtil.ReturnUnauthorized();
   }
 
@@ -19,7 +20,7 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  if (!await FinanceAuthorizer.isAdmin()) {
+  if (!await AuthorizationService.authorize(Feature.TICKER, PermissionLevel.ADMIN)) {
     return APIUtil.ReturnUnauthorized();
   }
 

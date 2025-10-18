@@ -11,7 +11,8 @@ import { FinanceNotificationDataType } from '@finance/interfaces/data/FinanceNot
 
 import APIUtil from '@client-common/utils/APIUtil';
 
-import FinanceAuthorizer from '@/services/finance/FinanceAuthorizer';
+import AuthorizationService from '@/services/auth/AuthorizationService';
+import { Feature, PermissionLevel } from '@/types/AuthorizationTypes';
 
 const dataAccessor = new FinanceNotificationDataAccessor();
 const exchangeService = new ExchangeService();
@@ -28,7 +29,7 @@ const service = new FinanceNotificationService(
 );
 
 export async function GET() {
-  if (!await FinanceAuthorizer.isUser()) {
+  if (!await AuthorizationService.authorize(Feature.FINANCE_NOTIFICATION, PermissionLevel.VIEW)) {
     return APIUtil.ReturnUnauthorized();
   }
 
@@ -38,7 +39,7 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  if (!await FinanceAuthorizer.isUser()) {
+  if (!await AuthorizationService.authorize(Feature.FINANCE_NOTIFICATION, PermissionLevel.EDIT)) {
     return APIUtil.ReturnUnauthorized();
   }
 

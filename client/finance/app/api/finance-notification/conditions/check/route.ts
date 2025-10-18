@@ -7,11 +7,12 @@ import { TimeFrame } from '@finance/utils/FinanceUtil';
 
 import APIUtil from '@client-common/utils/APIUtil';
 
-import FinanceAuthorizer from '@/services/finance/FinanceAuthorizer';
+import AuthorizationService from '@/services/auth/AuthorizationService';
+import { Feature, PermissionLevel } from '@/types/AuthorizationTypes';
 import TimeFrameUtil from '@/utils/TimeFrameUtil';
 
 export async function GET(request: NextRequest) {
-  if (!await FinanceAuthorizer.isUser()) {
+  if (!await AuthorizationService.authorize(Feature.FINANCE_NOTIFICATION, PermissionLevel.VIEW)) {
     return APIUtil.ReturnUnauthorized();
   }
 
