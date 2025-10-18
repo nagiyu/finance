@@ -144,6 +144,10 @@ export default function MyTickerPage() {
         await myTickerFetchService.delete(id);
     };
 
+    const onRefresh = async (): Promise<void> => {
+        await myTickerFetchService.syncCache();
+    };
+
     const validateItem = (item: MyTickerDataType): string | null => {
         if (!item.exchangeId.trim()) return 'Exchange is required.';
         if (!item.tickerId.trim()) return 'Ticker is required.';
@@ -188,6 +192,7 @@ export default function MyTickerPage() {
                     onCreate={onCreate}
                     onUpdate={onUpdate}
                     onDelete={onDelete}
+                    onRefresh={onRefresh}
                 >
                     {(item, state, onItemChange, onStateChange) => {
                         return (
