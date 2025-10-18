@@ -15,14 +15,9 @@ export const metadata: Metadata = {
 const getMenuItems = async (): Promise<MenuItemData[]> => {
   const menuItems: MenuItemData[] = [];
 
-  // Homeは認証済みユーザー全員に表示（MY_TICKERのVIEW権限で判定）
-  const hasUserAccess = await AuthorizationService.authorize(Feature.MY_TICKER, PermissionLevel.VIEW);
-  if (hasUserAccess) {
-    menuItems.push({ title: 'Home', url: '/' });
-  }
-
-  // My Tickerメニュー
+  // ユーザー向けメニュー（MY_TICKERのVIEW権限があれば認証済みユーザー）
   if (await AuthorizationService.authorize(Feature.MY_TICKER, PermissionLevel.VIEW)) {
+    menuItems.push({ title: 'Home', url: '/' });
     menuItems.push({ title: 'My Ticker', url: '/myticker' });
   }
 
