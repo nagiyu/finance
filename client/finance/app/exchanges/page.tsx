@@ -6,8 +6,8 @@ import TimeUtil from '@common/utils/TimeUtil';
 
 import { Column } from '@client-common/components/data/table/BasicTable';
 
-import AdminManagementWithCache from '@/app/components/admin/AdminManagementWithCache';
-import Auth from '@/app/components/Auth';
+import FeatureGuard from '@/app/components/FeatureGuard';
+import { Feature, PermissionLevel } from '@/types/AuthorizationTypes';
 import ExchangeEditDialogContent from '@/app/components/exchange/ExchangeEditDialogContent';
 import ExchangeFetchService from '@/services/exchange/ExchangeFetchService.client';
 import { ExchangeDataType } from '@/interfaces/data/ExchangeDataType';
@@ -82,27 +82,26 @@ export default function ExchangesPage() {
     };
 
     return (
-        <Auth
-            adminContent={
-                <AdminManagementWithCache<ExchangeDataType>
-                    columns={columns}
-                    fetchData={fetchData}
-                    itemName='Exchange'
-                    defaultItem={defaultItem}
-                    validateItem={validateItem}
-                    onCreate={onCreate}
-                    onUpdate={onUpdate}
-                    onDelete={onDelete}
-                    onRefresh={onRefresh}
-                >
-                    {(item, _, onItemChange) => (
-                        <ExchangeEditDialogContent item={item} onItemChange={onItemChange} />
-                    )}
-                </AdminManagementWithCache>
-            }
-            userContent={
-                <div>権限がありません。</div>
-            }
-        />
+        <FeatureGuard 
+            feature={Feature.EXCHANGE} 
+            level={PermissionLevel.ADMIN}
+            fallback={<div>権限がありません。</div>}
+        >
+            <AdminManagement<ExchangeDataType>
+                columns={columns}
+                fetchData={fetchData}
+                itemName='Exchange'
+                defaultItem={defaultItem}
+                validateItem={validateItem}
+                onCreate={onCreate}
+                onUpdate={onUpdate}
+                onDelete={onDelete}
+                onRefresh={onRefresh}
+            >
+                {(item, _, onItemChange) => (
+                    <ExchangeEditDialogContent item={item} onItemChange={onItemChange} />
+                )}
+            </AdminManagement>
+        </FeatureGuard>
     );
 }

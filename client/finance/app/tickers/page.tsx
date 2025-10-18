@@ -7,8 +7,8 @@ import React, { useEffect, useState } from 'react';
 
 import { Column } from '@client-common/components/data/table/BasicTable';
 
-import AdminManagementWithCache from '@/app/components/admin/AdminManagementWithCache';
-import Auth from '@/app/components/Auth';
+import FeatureGuard from '@/app/components/FeatureGuard';
+import { Feature, PermissionLevel } from '@/types/AuthorizationTypes';
 import ExchangeFetchService from '@/services/exchange/ExchangeFetchService.client';
 import TickerEditDialogContent from '@/app/components/ticker/TickerEditDialogContent';
 import TickerFetchService from '@/services/ticker/TickerFetchService.client';
@@ -80,31 +80,30 @@ export default function TickersPage() {
     }, []);
 
     return (
-        <Auth
-            adminContent={
-                <AdminManagementWithCache<TickerDataType>
-                    columns={columns}
-                    fetchData={fetchData}
-                    itemName='Ticker'
-                    defaultItem={defaultItem}
-                    validateItem={validateItem}
-                    onCreate={onCreate}
-                    onUpdate={onUpdate}
-                    onDelete={onDelete}
-                    onRefresh={onRefresh}
-                >
-                    {(item, _, onItemChange) => (
-                        <TickerEditDialogContent
-                            item={item}
-                            onItemChange={onItemChange}
-                            exchanges={exchanges}
-                        />
-                    )}
-                </AdminManagementWithCache>
-            }
-            userContent={
-                <div>権限がありません。</div>
-            }
-        />
+        <FeatureGuard 
+            feature={Feature.TICKER} 
+            level={PermissionLevel.ADMIN}
+            fallback={<div>権限がありません。</div>}
+        >
+            <AdminManagement<TickerDataType>
+                columns={columns}
+                fetchData={fetchData}
+                itemName='Ticker'
+                defaultItem={defaultItem}
+                validateItem={validateItem}
+                onCreate={onCreate}
+                onUpdate={onUpdate}
+                onDelete={onDelete}
+                onRefresh={onRefresh}
+            >
+                {(item, _, onItemChange) => (
+                    <TickerEditDialogContent
+                        item={item}
+                        onItemChange={onItemChange}
+                        exchanges={exchanges}
+                    />
+                )}
+            </AdminManagement>
+        </FeatureGuard>
     );
 }

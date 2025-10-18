@@ -11,8 +11,8 @@ import { MyTickerDataType } from '@finance/interfaces/data/MyTickerDataType';
 import AuthFetchService from '@client-common/services/auth/AuthFetchService.client';
 import { Column } from '@client-common/components/data/table/BasicTable';
 
-import AdminManagementWithCache from '@/app/components/admin/AdminManagementWithCache';
-import Auth from '@/app/components/Auth';
+import FeatureGuard from '@/app/components/FeatureGuard';
+import { Feature, PermissionLevel } from '@/types/AuthorizationTypes';
 import ExchangeFetchService from '@/services/exchange/ExchangeFetchService.client';
 import MyTickerEditDialogContent from '@/app/components/myticker/MyTickerEditDialogContent';
 import MyTickerFetchService from '@/services/myticker/MyTickerFetchService.client';
@@ -175,37 +175,38 @@ export default function MyTickerPage() {
     }, []);
 
     return (
-        <Auth
-            userContent={
-                <div>
-                    <AdminManagementWithCache<MyTickerDataType, StateType>
-                        columns={columns}
-                        fetchData={fetchData}
-                        itemName='My Ticker'
-                        defaultItem={defaultItem}
-                        defaultState={defaultState}
-                        generateState={generateState}
-                        validateItem={validateItem}
-                        onCreate={onCreate}
-                        onUpdate={onUpdate}
-                        onDelete={onDelete}
-                        onRefresh={onRefresh}
-                    >
-                        {(item, state, onItemChange, onStateChange) => {
-                            return (
-                                <MyTickerEditDialogContent
-                                    item={item}
-                                    state={state}
-                                    onItemChange={onItemChange}
-                                    onStateChange={onStateChange}
-                                    exchanges={exchanges}
-                                    tickers={tickers}
-                                />
-                            );
-                        }}
-                    </AdminManagementWithCache>
-                </div>
-            }
-        />
+        <FeatureGuard 
+            feature={Feature.MY_TICKER} 
+            level={PermissionLevel.VIEW}
+        >
+            <div>
+                <AdminManagement<MyTickerDataType, StateType>
+                    columns={columns}
+                    fetchData={fetchData}
+                    itemName='My Ticker'
+                    defaultItem={defaultItem}
+                    defaultState={defaultState}
+                    generateState={generateState}
+                    validateItem={validateItem}
+                    onCreate={onCreate}
+                    onUpdate={onUpdate}
+                    onDelete={onDelete}
+                    onRefresh={onRefresh}
+                >
+                    {(item, state, onItemChange, onStateChange) => {
+                        return (
+                            <MyTickerEditDialogContent
+                                item={item}
+                                state={state}
+                                onItemChange={onItemChange}
+                                onStateChange={onStateChange}
+                                exchanges={exchanges}
+                                tickers={tickers}
+                            />
+                        );
+                    }}
+                </AdminManagement>
+            </div>
+        </FeatureGuard>
     )
 }
