@@ -249,10 +249,109 @@ const isUser = await FinanceAuthorizer.isUser();
 - ボタンの有効/無効化は AdminManagement コンポーネントによって自動的に処理される
 - 冗長なコンポーネントを削除し、コードベースを簡素化
 
+## キャッシュ制御の実装 ✅
+
+### 問題
+
+初期実装では、以下の問題が発生していました：
+
+1. **権限マトリックス更新後、再読み込みで古い状態に戻る**
+   - Next.js 15のRoute HandlersはデフォルトでGETリクエストをキャッシュする
+   - 権限マトリックスAPI (`/api/permission-matrix`) がキャッシュされていた
+
+2. **権限変更が即座に反映されない**
+   - 権限チェックAPI (`/api/auth/check-permission`) の結果がキャッシュされていた
+   - クライアント側のfetch呼び出しでもブラウザキャッシュが使用されていた
+
+3. **新規レコード作成時のID問題**
+   - `PermissionMatrixService.updatePermissionMatrix()` が新規レコード作成時に、
+     `DataAccessorBase.create()` を使用していた
+   - `create()` メソッドはIDを自動生成するため、固定ID "PermissionMatrix" が使用されなかった
+
+### 解決策
+
+#### 1. API Route のキャッシュ無効化
+
+**変更ファイル**:
+- `client/finance/app/api/permission-matrix/route.ts`
+- `client/finance/app/api/auth/check-permission/route.ts`
+
+**実装内容**:
+```typescript
+// APIルートでキャッシュを無効化
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+```
+
+これにより、Next.js 15のRoute Handlersがレスポンスをキャッシュしなくなります。
+
+#### 2. クライアント側のキャッシュ制御
+
+**変更ファイル**:
+- `client/finance/app/permission-admin/page.tsx`
+- `client/finance/app/components/FeatureGuard.tsx`
+- `client/finance/app/hooks/usePermission.ts`
+
+**実装内容**:
+```typescript
+// fetch呼び出しにcache: 'no-store'を追加
+const response = await fetch('/api/auth/check-permission', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(requestBody),
+  cache: 'no-store', // ブラウザキャッシュを無効化
+});
+```
+
+これにより、ブラウザがレスポンスをキャッシュせず、常に最新のデータを取得します。
+
+#### 3. PermissionMatrixService の修正
+
+**変更ファイル**:
+- `client/finance/services/auth/PermissionMatrixService.ts`
+
+**実装内容**:
+```typescript
+public static async updatePermissionMatrix(matrix: PermissionMatrix): Promise<void> {
+  const dataAccessor = new PermissionMatrixDataAccessor();
+  const existingRecord = await dataAccessor.getById(this.PERMISSION_MATRIX_ID);
+  
+  if (existingRecord) {
+    // 既存レコードを更新
+    await dataAccessor.update(this.PERMISSION_MATRIX_ID, { Matrix: matrix });
+  } else {
+    // 新規レコードは固定IDで直接DynamoDB PutItemを実行
+    await this.initializePermissionMatrix(matrix);
+  }
+}
+
+private static async initializePermissionMatrix(matrix: PermissionMatrix): Promise<void> {
+  // DynamoDB SDKを直接使用してPutItemを実行
+  // IDを "PermissionMatrix" に固定して作成
+  const item = {
+    ID: this.PERMISSION_MATRIX_ID,
+    DataType: this.PERMISSION_MATRIX_DATA_TYPE,
+    Matrix: matrix,
+    Create: Date.now(),
+    Update: Date.now(),
+  };
+  // ... DynamoDB PutItem実行
+}
+```
+
+これにより、新規レコード作成時も固定ID "PermissionMatrix" が使用されます。
+
+### 効果
+
+- ✅ 権限マトリックスの更新が即座にDBに保存される
+- ✅ ページ再読み込み後も最新の権限設定が反映される
+- ✅ 権限変更（例：ゲストユーザーにSTOCK_CHARTのVIEW権限を付与）が即座に有効になる
+- ✅ 権限管理画面での更新後、保存成功メッセージが表示される
+
 ## 次のステップ（フェーズ3）
 
 1. 実際のユースケースでテストして改善
-2. パフォーマンス監視とキャッシュ実装の検討
+2. パフォーマンス監視とキャッシュ実装の検討（適切なキャッシュ戦略の導入）
 3. 必要に応じて追加の機能（リソースレベルの認可、動的権限など）を実装
 4. ドキュメントの更新と開発者ガイドの整備
 
@@ -262,3 +361,4 @@ const isUser = await FinanceAuthorizer.isUser();
 - クライアントサイドの権限チェックはUI表示制御のみ
 - 権限マトリックスの変更は管理画面から行う（コード変更不要）
 - デフォルト権限は既存の動作と互換性を保つよう設定
+- **キャッシュ無効化により、権限チェックは毎回DBアクセスが発生するため、将来的には適切なキャッシュ戦略（TTL付きキャッシュなど）の導入を検討**
