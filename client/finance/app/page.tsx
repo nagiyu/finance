@@ -22,8 +22,8 @@ import CandleCountUtil from '@/utils/CandleCountUtil';
 import { ExchangeDataType } from '@/interfaces/data/ExchangeDataType';
 import { TickerDataType } from '@/interfaces/data/TickerDataType';
 
-import Auth from '@/app/components/Auth';
-import AuthAPIUtil from '@/app/utils/AuthAPIUtil';
+import FeatureGuard from '@/app/components/FeatureGuard';
+import { Feature, PermissionLevel } from '@/types/AuthorizationTypes';
 import AllConditionDisplay from '@/app/components/AllConditionDisplay';
 import ExchangeFetchService from '@/services/exchange/ExchangeFetchService.client';
 import Graph from '@/app/components/graph';
@@ -80,10 +80,8 @@ export default function Home() {
 
   useEffect(() => {
     (async () => {
-      if (await AuthAPIUtil.isAuthorized('user')) {
-        setExchanges(await exchangeFetchService.get());
-        setTickers(await tickerFetchService.get());
-      }
+      setExchanges(await exchangeFetchService.get());
+      setTickers(await tickerFetchService.get());
     })();
   }, []);
 
@@ -135,33 +133,34 @@ export default function Home() {
   }, [tickerOptions, searchParams, urlParamsProcessed]);
 
   return (
-    <Auth
-      userContent={
-        <BasicStack>
-          <DirectionStack>
-            <BasicSelect label='Exchange' options={exchangeOptions} value={exchange} onChange={(value) => setExchange(value)} />
-            <BasicSelect label='Ticker' options={tickerOptions} value={ticker} onChange={(value) => setTicker(value)} />
-          </DirectionStack>
-          <ContainedButton label='ローディング' onClick={handleRefresh} />
-          <Graph exchange={getExchangeKey(exchange)} ticker={getTickerKey(ticker)} timeframe={timeframe} session={session} candleCount={CandleCountUtil.toNumber(candleCount)} refreshTrigger={refreshTrigger} />
-          <DirectionStack>
-            <BasicSelect label='時間軸' options={TimeFrameUtil.toSelectOptions()} value={timeframe} onChange={(value) => {
-              if (TimeFrameUtil.isValidTimeFrame(value)) {
-                setTimeframe(value);
-              }
-            }} />
-            <BasicSelect label='取引時間' options={SessionUtil.toSelectOptions()} value={session} onChange={(value) => setSession(value)} />
-            <BasicSelect label='表示本数' options={CandleCountUtil.toSelectOptions()} value={candleCount} onChange={(value) => setCandleCount(value)} />
-          </DirectionStack>
-          <AllConditionDisplay 
-            exchangeId={exchange}
-            tickerId={ticker}
-            timeframe={timeframe}
-            session={session}
-            refreshTrigger={conditionRefreshTrigger}
-          />
-        </BasicStack>
-      }
-    />
+    <FeatureGuard 
+      feature={Feature.STOCK_CHART} 
+      level={PermissionLevel.VIEW}
+    >
+      <BasicStack>
+        <DirectionStack>
+          <BasicSelect label='Exchange' options={exchangeOptions} value={exchange} onChange={(value) => setExchange(value)} />
+          <BasicSelect label='Ticker' options={tickerOptions} value={ticker} onChange={(value) => setTicker(value)} />
+        </DirectionStack>
+        <ContainedButton label='ローディング' onClick={handleRefresh} />
+        <Graph exchange={getExchangeKey(exchange)} ticker={getTickerKey(ticker)} timeframe={timeframe} session={session} candleCount={CandleCountUtil.toNumber(candleCount)} refreshTrigger={refreshTrigger} />
+        <DirectionStack>
+          <BasicSelect label='時間軸' options={TimeFrameUtil.toSelectOptions()} value={timeframe} onChange={(value) => {
+            if (TimeFrameUtil.isValidTimeFrame(value)) {
+              setTimeframe(value);
+            }
+          }} />
+          <BasicSelect label='取引時間' options={SessionUtil.toSelectOptions()} value={session} onChange={(value) => setSession(value)} />
+          <BasicSelect label='表示本数' options={CandleCountUtil.toSelectOptions()} value={candleCount} onChange={(value) => setCandleCount(value)} />
+        </DirectionStack>
+        <AllConditionDisplay 
+          exchangeId={exchange}
+          tickerId={ticker}
+          timeframe={timeframe}
+          session={session}
+          refreshTrigger={conditionRefreshTrigger}
+        />
+      </BasicStack>
+    </FeatureGuard>
   );
 }

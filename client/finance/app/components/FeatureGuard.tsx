@@ -31,6 +31,7 @@ export default function FeatureGuard({
 
   useEffect(() => {
     checkPermission();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [feature, level]);
 
   const checkPermission = async () => {

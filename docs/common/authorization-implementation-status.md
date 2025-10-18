@@ -219,6 +219,36 @@ const isUser = await FinanceAuthorizer.isUser();
 - `/api/auth/authorize/[role]` エンドポイントは互換性のため維持
 - 既存コードは段階的に新しいシステムに移行可能
 
+### ✅ クライアントコンポーネントの移行
+
+すべての主要なクライアントコンポーネントを新しい認可システムに移行しました。
+
+#### 移行済みコンポーネント
+
+1. **usePermission フック** (`app/hooks/usePermission.ts`)
+   - クライアントサイドで権限チェックを行うカスタムフック
+   - 機能と権限レベルに基づいた権限確認
+   - ローディング状態の管理
+
+2. **ページコンポーネントの移行**
+   - `app/page.tsx`: FeatureGuard を使用（Feature.STOCK_CHART、PermissionLevel.VIEW）
+   - `app/exchanges/page.tsx`: FeatureGuard を使用（Feature.EXCHANGE、PermissionLevel.ADMIN）
+   - `app/tickers/page.tsx`: FeatureGuard を使用（Feature.TICKER、PermissionLevel.ADMIN）
+   - `app/myticker/page.tsx`: FeatureGuard を使用（Feature.MY_TICKER、PermissionLevel.VIEW）
+   - `app/finance-notification/page.tsx`: FeatureGuard + LoadingContent を使用（Feature.FINANCE_NOTIFICATION、PermissionLevel.EDIT）
+
+3. **削除されたコンポーネント**
+   - `app/components/Auth.tsx`: FeatureGuard で完全に置き換え可能なため削除
+   - `app/components/pages/LoadingAuthPage.tsx`: FeatureGuard + LoadingContent の組み合わせで置き換え可能なため削除
+
+#### 移行の影響
+
+- すべてのページが新しい認可システムで動作
+- 権限マトリックスによる柔軟な権限管理が可能
+- UI レベルでの権限制御が統一的に実装
+- ボタンの有効/無効化は AdminManagement コンポーネントによって自動的に処理される
+- 冗長なコンポーネントを削除し、コードベースを簡素化
+
 ## 次のステップ（フェーズ3）
 
 1. 実際のユースケースでテストして改善
