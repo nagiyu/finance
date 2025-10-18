@@ -23,30 +23,39 @@ const { hasPermission, loading } = usePermission(Feature.MY_TICKER, PermissionLe
 - ローディング状態の管理
 - メモリリーク防止のためのクリーンアップ処理
 
-### 2. Auth コンポーネントの更新
+### 2. 既存コンポーネントの削除
 
-**ファイル**: `client/finance/app/components/Auth.tsx`
+#### Auth コンポーネント (`app/components/Auth.tsx`) - 削除済み
 
-既存の Auth コンポーネントを新しい認可システムを使用するように更新しました。
+FeatureGuard コンポーネントで完全に置き換え可能なため、削除しました。
+すべてのページが FeatureGuard を直接使用するように移行済みです。
 
-**変更点**:
-- `AuthAPIUtil` の使用を廃止し、`/api/auth/check-permission` API を直接使用
-- `feature`, `userLevel`, `adminLevel` パラメータを追加（デフォルト値あり）
-- 後方互換性を維持（既存の使用箇所は動作し続ける）
-- 定期的な権限チェック（10秒毎）を維持
+#### LoadingAuthPage コンポーネント (`app/components/pages/LoadingAuthPage.tsx`) - 削除済み
 
-### 3. LoadingAuthPage コンポーネントの更新
+FeatureGuard と LoadingContent の組み合わせで置き換え可能なため、削除しました。
 
-**ファイル**: `client/finance/app/components/pages/LoadingAuthPage.tsx`
+**移行パターン**:
+```typescript
+// 旧: LoadingAuthPage
+<LoadingAuthPage
+  feature={Feature.FINANCE_NOTIFICATION}
+  userLevel={PermissionLevel.EDIT}
+  userContent={(loading, runWithLoading) => (
+    <Component loading={loading} runWithLoading={runWithLoading} />
+  )}
+/>
 
-LoadingAuthPage コンポーネントも新しい認可システムを使用するように更新しました。
+// 新: FeatureGuard + LoadingContent
+<FeatureGuard feature={Feature.FINANCE_NOTIFICATION} level={PermissionLevel.EDIT}>
+  <LoadingContent>
+    {(loading, runWithLoading) => (
+      <Component loading={loading} runWithLoading={runWithLoading} />
+    )}
+  </LoadingContent>
+</FeatureGuard>
+```
 
-**変更点**:
-- Auth コンポーネントと同様に `AuthAPIUtil` の使用を廃止
-- `feature`, `userLevel`, `adminLevel` パラメータを追加
-- 後方互換性を維持
-
-### 4. ページコンポーネントの移行
+### 3. ページコンポーネントの移行
 
 すべての主要なページコンポーネントを FeatureGuard または更新された Auth/LoadingAuthPage を使用するように移行しました。
 
@@ -75,7 +84,7 @@ LoadingAuthPage コンポーネントも新しい認可システムを使用す�
 - 認証されたユーザーはVIEW権限で自分のティッカーを管理可能
 
 #### app/finance-notification/page.tsx (通知設定)
-- `LoadingAuthPage` の使用を継続
+- `LoadingAuthPage` から `FeatureGuard` + `LoadingContent` に変更
 - Feature: `FINANCE_NOTIFICATION`
 - PermissionLevel: `EDIT`
 - 認証されたユーザーが通知設定を編集可能
@@ -88,11 +97,11 @@ LoadingAuthPage コンポーネントも新しい認可システムを使用す�
 ### 2. 柔軟な権限制御
 権限マトリックスを変更することで、コード変更なしに権限設定を調整できます。
 
-### 3. 後方互換性
-既存の Auth および LoadingAuthPage コンポーネントは後方互換性を維持しており、段階的な移行が可能です。
+### 3. コードベースの簡素化
+冗長なコンポーネント（Auth、LoadingAuthPage）を削除し、FeatureGuard に統一しました。
 
 ### 4. クリーンなコード
-- `AuthAPIUtil` への依存を削除
+- `AuthAPIUtil` への依存を完全に削除
 - 認証ロジックが `/api/auth/check-permission` API に統一
 - 各ページで適切な Feature と PermissionLevel を明示的に指定
 
