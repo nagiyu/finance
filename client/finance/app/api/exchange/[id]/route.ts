@@ -9,7 +9,7 @@ import { ExchangeDataType } from "@/interfaces/data/ExchangeDataType";
 import ExchangeUtil from '@/utils/ExchangeUtil';
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  if (!await AuthorizationService.authorize(Feature.EXCHANGE, PermissionLevel.ADMIN)) {
+  if (!await AuthorizationService.authorize(Feature.EXCHANGE, PermissionLevel.EDIT)) {
     return APIUtil.ReturnUnauthorized();
   }
 
@@ -34,7 +34,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 }
 
 export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  if (!await AuthorizationService.authorize(Feature.EXCHANGE, PermissionLevel.ADMIN)) {
+  if (!await AuthorizationService.authorize(Feature.EXCHANGE, PermissionLevel.DELETE)) {
     return APIUtil.ReturnUnauthorized();
   }
 

@@ -8,7 +8,7 @@ import { Feature, PermissionLevel } from '@/types/AuthorizationTypes';
 const service = new ExchangeService();
 
 export async function POST() {
-  if (!await AuthorizationService.authorize(Feature.EXCHANGE, PermissionLevel.ADMIN)) {
+  if (!await AuthorizationService.authorize(Feature.EXCHANGE, PermissionLevel.EDIT)) {
     return APIUtil.ReturnUnauthorized();
   }
 

@@ -8,7 +8,7 @@ import TickerDataAccessor from "@/services/ticker/TickerDataAcceesor";
 import { TickerDataType } from "@/interfaces/data/TickerDataType";
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  if (!await AuthorizationService.authorize(Feature.TICKER, PermissionLevel.ADMIN)) {
+  if (!await AuthorizationService.authorize(Feature.TICKER, PermissionLevel.EDIT)) {
     return APIUtil.ReturnUnauthorized();
   }
 
@@ -33,7 +33,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 }
 
 export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  if (!await AuthorizationService.authorize(Feature.TICKER, PermissionLevel.ADMIN)) {
+  if (!await AuthorizationService.authorize(Feature.TICKER, PermissionLevel.DELETE)) {
     return APIUtil.ReturnUnauthorized();
   }
 

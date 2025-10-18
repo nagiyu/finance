@@ -8,7 +8,7 @@ import { Feature, PermissionLevel } from '@/types/AuthorizationTypes';
 const service = new TickerService();
 
 export async function POST() {
-  if (!await AuthorizationService.authorize(Feature.TICKER, PermissionLevel.ADMIN)) {
+  if (!await AuthorizationService.authorize(Feature.TICKER, PermissionLevel.EDIT)) {
     return APIUtil.ReturnUnauthorized();
   }
 

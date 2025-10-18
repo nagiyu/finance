@@ -56,7 +56,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 }
 
 export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  if (!await AuthorizationService.authorize(Feature.FINANCE_NOTIFICATION, PermissionLevel.EDIT)) {
+  if (!await AuthorizationService.authorize(Feature.FINANCE_NOTIFICATION, PermissionLevel.DELETE)) {
     return APIUtil.ReturnUnauthorized();
   }
 

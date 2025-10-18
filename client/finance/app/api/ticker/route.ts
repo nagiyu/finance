@@ -20,7 +20,7 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  if (!await AuthorizationService.authorize(Feature.TICKER, PermissionLevel.ADMIN)) {
+  if (!await AuthorizationService.authorize(Feature.TICKER, PermissionLevel.EDIT)) {
     return APIUtil.ReturnUnauthorized();
   }
 

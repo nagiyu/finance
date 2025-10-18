@@ -16,10 +16,13 @@ const getMenuItems = async (): Promise<MenuItemData[]> => {
   const menuItems: MenuItemData[] = [];
 
   // ユーザー向けメニュー
-  // HomeとMy Tickerは認証済みユーザー全員に表示するため、MY_TICKERのVIEW権限で判定
-  // 将来的に異なる権限が必要になった場合は、個別にチェックを分離すること
-  if (await AuthorizationService.authorize(Feature.MY_TICKER, PermissionLevel.VIEW)) {
+  // Homeは株価チャート機能のVIEW権限で判定
+  if (await AuthorizationService.authorize(Feature.STOCK_CHART, PermissionLevel.VIEW)) {
     menuItems.push({ title: 'Home', url: '/' });
+  }
+
+  // My Tickerメニュー
+  if (await AuthorizationService.authorize(Feature.MY_TICKER, PermissionLevel.VIEW)) {
     menuItems.push({ title: 'My Ticker', url: '/myticker' });
   }
 
