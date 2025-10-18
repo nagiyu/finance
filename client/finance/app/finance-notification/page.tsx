@@ -126,6 +126,10 @@ export default function FinanceNotificationPage() {
         await financeNotificationFetchService.delete(id);
     };
 
+    const onRefresh = async (): Promise<void> => {
+        await financeNotificationFetchService.syncCache();
+    };
+
     const validateItem = (item: FinanceNotificationDataType): string | null => {
         if (!item.exchangeId.trim()) {
             return 'Exchange is required.';
@@ -164,6 +168,7 @@ export default function FinanceNotificationPage() {
                     onCreate={(item) => runWithLoading(() => onCreate(item))}
                     onUpdate={(item) => runWithLoading(() => onUpdate(item))}
                     onDelete={(id) => runWithLoading(() => onDelete(id))}
+                    onRefresh={() => runWithLoading(onRefresh)}
                 >
                     {(item, state, onItemChange, onStateChange, loading) => {
                         return (

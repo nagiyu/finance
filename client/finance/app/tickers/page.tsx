@@ -61,6 +61,10 @@ export default function TickersPage() {
         await tickerFetchService.delete(id);
     };
 
+    const onRefresh = async (): Promise<void> => {
+        await tickerFetchService.syncCache();
+    };
+
     const validateItem = (item: TickerDataType): string | null => {
         if (!item.name.trim()) return 'Name is required.';
         if (!item.key.trim()) return 'Key is required.';
@@ -87,6 +91,7 @@ export default function TickersPage() {
                     onCreate={onCreate}
                     onUpdate={onUpdate}
                     onDelete={onDelete}
+                    onRefresh={onRefresh}
                 >
                     {(item, _, onItemChange) => (
                         <TickerEditDialogContent

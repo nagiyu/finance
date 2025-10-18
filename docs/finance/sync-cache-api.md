@@ -131,6 +131,41 @@ const financeNotificationFetchService = new FinanceNotificationFetchService();
 await financeNotificationFetchService.syncCache();
 ```
 
+#### AdminManagement コンポーネントでの使用
+
+管理画面コンポーネント（`AdminManagement`）では、`onRefresh` プロパティを使用して Refresh ボタン押下時にキャッシュ同期を実行できます：
+
+```typescript
+import AdminManagement from '@client-common/components/admin/AdminManagement';
+import ExchangeFetchService from '@/services/exchange/ExchangeFetchService.client';
+import { ExchangeDataType } from '@/interfaces/data/ExchangeDataType';
+
+export default function ExchangesPage() {
+    const exchangeFetchService = new ExchangeFetchService();
+
+    const fetchData = async (): Promise<ExchangeDataType[]> => {
+        return await exchangeFetchService.get();
+    };
+
+    const onRefresh = async (): Promise<void> => {
+        await exchangeFetchService.syncCache();
+    };
+
+    return (
+        <AdminManagement<ExchangeDataType>
+            columns={columns}
+            fetchData={fetchData}
+            onRefresh={onRefresh}
+            // ... その他のプロパティ
+        />
+    );
+}
+```
+
+このように設定すると、Refresh ボタンを押した時に以下の処理が実行されます：
+1. `onRefresh` が呼ばれ、`syncCache()` でキャッシュを最新化
+2. その後 `fetchData` が呼ばれ、最新のデータを取得して画面を更新
+
 #### 直接fetchを使用した呼び出し（非推奨）
 
 ```typescript
@@ -188,6 +223,8 @@ public async syncCache(): Promise<void> {
 
 ### 3. 手動でのキャッシュリフレッシュ
 - 管理画面からの手動トリガー
+  - Exchange、Ticker、MyTicker、FinanceNotification 管理画面の Refresh ボタン押下で自動的にキャッシュ同期が実行されます
+  - Refresh ボタン押下時、`syncCache()` API が呼ばれてキャッシュが最新化され、その後データが再取得されます
 - デバッグやメンテナンス作業
 
 ---
