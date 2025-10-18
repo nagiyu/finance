@@ -32,12 +32,17 @@ const getMenuItems = async (): Promise<MenuItemData[]> => {
   }
 
   // 管理者向けメニュー
-  if (await AuthorizationService.authorize(Feature.EXCHANGE, PermissionLevel.ADMIN)) {
+  if (await AuthorizationService.authorize(Feature.EXCHANGE, PermissionLevel.VIEW)) {
     menuItems.push({ title: 'Exchange', url: '/exchanges' });
   }
 
-  if (await AuthorizationService.authorize(Feature.TICKER, PermissionLevel.ADMIN)) {
+  if (await AuthorizationService.authorize(Feature.TICKER, PermissionLevel.VIEW)) {
     menuItems.push({ title: 'Ticker', url: '/tickers' });
+  }
+
+  // 認可設定メニュー
+  if (await AuthorizationService.authorize(Feature.PERMISSION_ADMIN, PermissionLevel.VIEW)) {
+    menuItems.push({ title: 'Permission Admin', url: '/permission-admin' });
   }
 
   return menuItems;
