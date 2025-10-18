@@ -61,7 +61,9 @@ export default function PermissionAdminPage() {
 
   const fetchMatrix = async () => {
     try {
-      const response = await fetch('/api/permission-matrix');
+      const response = await fetch('/api/permission-matrix', {
+        cache: 'no-store', // Ensure fresh data on every request
+      });
       
       if (!response.ok) {
         throw new Error('Failed to fetch permission matrix');
@@ -84,6 +86,7 @@ export default function PermissionAdminPage() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestBody),
+        cache: 'no-store', // Ensure the update is not cached
       });
 
       if (!response.ok) {
@@ -91,6 +94,7 @@ export default function PermissionAdminPage() {
       }
 
       setMatrix(updatedMatrix);
+      alert('権限マトリックスを保存しました。');
     } catch (error) {
       console.error('Error saving matrix:', error);
       throw error;

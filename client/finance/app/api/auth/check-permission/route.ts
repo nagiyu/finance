@@ -20,6 +20,10 @@ export interface CheckPermissionResponseType {
   hasPermission: boolean;
 }
 
+// Disable caching for this route to ensure fresh permission checks
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 /**
  * 権限チェックAPI
  * クライアントから指定された機能と権限レベルに対する権限を確認
