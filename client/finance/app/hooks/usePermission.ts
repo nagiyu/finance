@@ -29,7 +29,8 @@ export function usePermission(feature: Feature, level: PermissionLevel) {
         const response = await fetch('/api/auth/check-permission', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(requestBody)
+          body: JSON.stringify(requestBody),
+          cache: 'no-store',
         });
 
         if (!response.ok) {

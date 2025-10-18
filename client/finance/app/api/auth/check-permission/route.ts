@@ -45,7 +45,17 @@ export async function POST(request: NextRequest) {
     );
 
     const response: CheckPermissionResponseType = { hasPermission };
-    return APIUtil.ReturnSuccessWithObject(response);
+    
+    // キャッシュを無効化するヘッダーを追加
+    return new Response(JSON.stringify({ Success: true, Data: response }), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      },
+    });
   } catch (error) {
     console.error('Error in check-permission API:', error);
     return APIUtil.ReturnInternalServerErrorWithError(error);

@@ -46,7 +46,7 @@ export default function PermissionMatrixEditor({
     setIsSaving(true);
     try {
       await onSave(matrix);
-      alert('権限マトリックスを保存しました。');
+      alert('権限マトリックスを保存しました。変更が反映されました。');
     } catch (error) {
       console.error('Error saving matrix:', error);
       alert('権限マトリックスの保存に失敗しました。');

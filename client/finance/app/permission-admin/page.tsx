@@ -61,7 +61,11 @@ export default function PermissionAdminPage() {
 
   const fetchMatrix = async () => {
     try {
-      const response = await fetch('/api/permission-matrix');
+      // キャッシュを回避するためにタイムスタンプを追加
+      const timestamp = new Date().getTime();
+      const response = await fetch(`/api/permission-matrix?t=${timestamp}`, {
+        cache: 'no-store',
+      });
       
       if (!response.ok) {
         throw new Error('Failed to fetch permission matrix');
@@ -84,13 +88,16 @@ export default function PermissionAdminPage() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestBody),
+        cache: 'no-store',
       });
 
       if (!response.ok) {
         throw new Error('Failed to update permission matrix');
       }
 
-      setMatrix(updatedMatrix);
+      // 保存成功後、最新のデータを再取得
+      await fetchMatrix();
+      alert('権限マトリックスを保存しました。変更が反映されました。');
     } catch (error) {
       console.error('Error saving matrix:', error);
       throw error;

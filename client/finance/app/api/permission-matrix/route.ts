@@ -46,7 +46,17 @@ export async function GET() {
     const matrix = await PermissionMatrixService.getPermissionMatrix();
 
     const response: PermissionMatrixGetResponseType = { matrix };
-    return APIUtil.ReturnSuccessWithObject(response);
+    
+    // キャッシュを無効化するヘッダーを追加
+    return new Response(JSON.stringify({ Success: true, Data: response }), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      },
+    });
   } catch (error) {
     console.error('Error getting permission matrix:', error);
     return APIUtil.ReturnInternalServerErrorWithError(error);
