@@ -6,7 +6,8 @@ import { FinanceNotificationConditionModeType } from '@finance/types/FinanceNoti
 import APIUtil from '@client-common/utils/APIUtil';
 import { SelectOptionType } from '@client-common/interfaces/SelectOptionType';
 
-import FinanceAuthorizer from '@/services/finance/FinanceAuthorizer';
+import AuthorizationService from '@/services/auth/AuthorizationService';
+import { Feature, PermissionLevel } from '@/types/AuthorizationTypes';
 import { FINANCE_NOTIFICATION_CONDITION_MODE, SIMPLIFIED_CONDITION_NAME } from '@finance/consts/FinanceNotificationConst';
 import ErrorUtil from '@common/utils/ErrorUtil';
 
@@ -26,7 +27,7 @@ const getConditionList = (mode: FinanceNotificationConditionModeType): string[] 
 }
 
 export async function GET(_: NextRequest, { params }: { params: Promise<{ mode: FinanceNotificationConditionModeType }> }) {
-  if (!await FinanceAuthorizer.isUser()) {
+  if (!await AuthorizationService.authorize(Feature.FINANCE_NOTIFICATION, PermissionLevel.VIEW)) {
     return APIUtil.ReturnUnauthorized();
   }
 
