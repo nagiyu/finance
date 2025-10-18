@@ -12,8 +12,10 @@
 
 クライアント側で権限チェックを行うための再利用可能なカスタムフックを作成しました。
 
+**使用例**:
 ```typescript
-const { hasPermission, loading } = usePermission(Feature.EXCHANGE, PermissionLevel.VIEW);
+// 任意の機能と権限レベルでチェック可能
+const { hasPermission, loading } = usePermission(Feature.MY_TICKER, PermissionLevel.EDIT);
 ```
 
 **特徴**:
@@ -107,6 +109,15 @@ AdminManagement コンポーネントは、以下のように動作します：
 - ティッカー管理ページ: ADMIN 権限が必要 → 管理者のみアクセス可能
 - 個人ティッカーページ: VIEW 権限で表示、EDIT 権限で操作 → API で権限チェック
 - 通知設定ページ: EDIT 権限が必要 → 認証済みユーザーが操作可能
+
+### 権限不足時の動作
+
+**ページアクセス時**: ページレベルで権限がない場合、フォールバックメッセージ（「この機能へのアクセス権限がありません。」または「権限がありません。」）が表示されます。
+
+**ボタン操作時**: ページにアクセスできても、特定の操作権限がない場合：
+- API は 401 Unauthorized エラーを返します
+- AdminManagement コンポーネントがエラーを処理し、ユーザーにエラーメッセージを表示します
+- 操作は実行されず、データは変更されません
 
 ## 今後の拡張可能性
 
