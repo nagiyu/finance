@@ -4,6 +4,8 @@ import AuthUtil from '@client-common/auth/AuthUtil';
 
 import { FinanceAuthDataType } from '@/interfaces/data/FinanceAuthDataType';
 import { FinanceAuthRecordType } from '@/interfaces/records/FinanceAuthRecordType';
+import AuthorizationService from '@/services/auth/AuthorizationService';
+import { Feature, PermissionLevel, UserType } from '@/types/AuthorizationTypes';
 
 class FinanceAuthService extends AuthService<FinanceAuthDataType, FinanceAuthRecordType> {
   public constructor() {
@@ -25,18 +27,29 @@ class FinanceAuthService extends AuthService<FinanceAuthDataType, FinanceAuthRec
   }
 }
 
+/**
+ * 既存のFinanceAuthorizerを互換レイヤーとして維持
+ * 新しいAuthorizationServiceを内部で使用
+ */
 export default class FinanceAuthorizer {
   private static readonly feature = 'finance';
 
+  /**
+   * 管理者権限チェック
+   * @deprecated 新しいコードでは AuthorizationService.authorize() を使用してください
+   */
   public static async isAdmin(): Promise<boolean> {
-    const service = new FinanceAuthService();
-    const googleUserID = await AuthUtil.getGoogleUserIdFromSession();
-    return service.isAuthorizedByGoogle(googleUserID, this.feature, ['Admin']);
+    // 新しいAuthorizationServiceを使用して管理者権限をチェック
+    return AuthorizationService.authorize(Feature.EXCHANGE, PermissionLevel.ADMIN);
   }
 
+  /**
+   * ユーザー権限チェック（認証済みユーザー）
+   * @deprecated 新しいコードでは AuthorizationService.authorize() を使用してください
+   */
   public static async isUser(): Promise<boolean> {
-    const service = new FinanceAuthService();
-    const googleUserID = await AuthUtil.getGoogleUserIdFromSession();
-    return service.isAuthorizedByGoogle(googleUserID, this.feature);
+    const userType = await AuthorizationService.getUserType();
+    return userType !== UserType.GUEST;
   }
 }
+
