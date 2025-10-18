@@ -40,6 +40,11 @@ const getMenuItems = async (): Promise<MenuItemData[]> => {
     menuItems.push({ title: 'Ticker', url: '/tickers' });
   }
 
+  // 認可設定メニュー
+  if (await AuthorizationService.authorize(Feature.PERMISSION_ADMIN, PermissionLevel.ADMIN)) {
+    menuItems.push({ title: 'Permission Admin', url: '/permission-admin' });
+  }
+
   return menuItems;
 }
 
