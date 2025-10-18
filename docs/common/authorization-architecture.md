@@ -732,9 +732,89 @@ describe('AuthorizationService', () => {
 
 ## パフォーマンス考慮事項
 
-### 1. 権限キャッシュ
+### 1. 権限マトリックスキャッシュ（実装済み）
 
-頻繁な権限チェックによるパフォーマンス低下を防ぐため、セッション中は権限情報をキャッシュします。
+頻繁な権限チェックによるパフォーマンス低下を防ぐため、権限マトリックスをサーバー側でキャッシュします。
+
+**実装内容**:
+
+```typescript
+export default class PermissionMatrixService {
+  private static readonly PERMISSION_MATRIX_ID = 'PermissionMatrix';
+  private static readonly CACHE_TTL = 300; // 5分（秒単位）
+  
+  // インメモリキャッシュ
+  private static cachedMatrix: PermissionMatrix | null = null;
+  private static cacheTimestamp: number | null = null;
+
+  /**
+   * 権限マトリックスを取得
+   * キャッシュが有効な場合はキャッシュから返す
+   */
+  public static async getPermissionMatrix(): Promise<PermissionMatrix> {
+    // キャッシュが有効な場合はキャッシュから返す
+    if (this.isCacheValid()) {
+      return this.cachedMatrix!;
+    }
+
+    // DBから取得してキャッシュに保存
+    const dataAccessor = new PermissionMatrixDataAccessor();
+    const record = await dataAccessor.getById(this.PERMISSION_MATRIX_ID);
+    const matrix = record?.Matrix || this.getDefaultMatrix();
+    
+    this.cachedMatrix = matrix;
+    this.cacheTimestamp = Date.now();
+    
+    return matrix;
+  }
+
+  /**
+   * キャッシュをクリア
+   * 権限マトリックス更新時に自動的に呼び出される
+   */
+  public static clearCache(): void {
+    this.cachedMatrix = null;
+    this.cacheTimestamp = null;
+  }
+}
+```
+
+**キャッシュの特徴**:
+- インメモリキャッシュで高速アクセス
+- キャッシュ有効期限: 5分（300秒）
+- 権限マトリックス更新時に自動的にクリア
+- サーバー再起動時にクリアされる
+
+### 2. クライアント側キャッシュの無効化（実装済み）
+
+ブラウザが権限チェックAPIの結果をキャッシュしないよう、以下を実装済み：
+
+**APIレスポンスヘッダー**:
+```typescript
+return new Response(JSON.stringify({ Success: true, Data: response }), {
+  status: 200,
+  headers: {
+    'Content-Type': 'application/json',
+    'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+    'Pragma': 'no-cache',
+    'Expires': '0',
+  },
+});
+```
+
+**フェッチリクエスト**:
+```typescript
+const response = await fetch('/api/auth/check-permission', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(requestBody),
+  cache: 'no-store', // ブラウザキャッシュを無効化
+});
+```
+
+### 3. 将来的な拡張: ユーザーごとのキャッシュ
+
+必要に応じて、ユーザーごとの権限をキャッシュすることも可能です。
 
 サーバー側の処理では **typescript-common/utils/CacheUtil.ts** を使用します。
 
