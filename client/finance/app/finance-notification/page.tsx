@@ -16,6 +16,7 @@ import { Column } from '@client-common/components/data/table/BasicTable';
 import ExchangeFetchService from '@/services/exchange/ExchangeFetchService.client';
 import FinanceNotificationEditDialogContent from '@/app/components/financeNotification/FinanceNotificationEditDialogContent';
 import FinanceNotificationFetchService from '@/services/financeNotification/FinanceNotificationFetchService.client';
+import { Feature, PermissionLevel } from '@/types/AuthorizationTypes';
 import LoadingAuthPage from '@/app/components/pages/LoadingAuthPage';
 import TickerFetchService from '@/services/ticker/TickerFetchService.client';
 import { ExchangeDataType } from '@/interfaces/data/ExchangeDataType';
@@ -151,6 +152,8 @@ export default function FinanceNotificationPage() {
 
     return (
         <LoadingAuthPage
+            feature={Feature.FINANCE_NOTIFICATION}
+            userLevel={PermissionLevel.EDIT}
             userContent={(loading, runWithLoading) => (
                 <AdminManagement<FinanceNotificationDataType, StateType>
                     columns={columns}
