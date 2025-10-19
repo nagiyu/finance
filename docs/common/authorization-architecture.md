@@ -732,46 +732,67 @@ describe('AuthorizationService', () => {
 
 ## パフォーマンス考慮事項
 
-### 1. 権限キャッシュ
+### 1. 権限マトリックスのキャッシュ
 
-頻繁な権限チェックによるパフォーマンス低下を防ぐため、セッション中は権限情報をキャッシュします。
+頻繁な権限チェックによるパフォーマンス低下を防ぐため、権限マトリックスをインメモリでキャッシュします。
 
-サーバー側の処理では **typescript-common/utils/CacheUtil.ts** を使用します。
+**PermissionMatrixService** で実装されたキャッシュ機構：
 
 ```typescript
-import CacheUtil from '@common/utils/CacheUtil';
+export default class PermissionMatrixService {
+  private static readonly CACHE_TTL = 300000; // 5分（ミリ秒）
+  
+  // インメモリキャッシュ
+  private static cachedMatrix: PermissionMatrix | null = null;
+  private static cacheTimestamp: number = 0;
 
-class AuthorizationService {
-  private static readonly CACHE_PREFIX = 'user_permissions_';
-  private static readonly CACHE_TTL = 300; // 5分
-
-  public static async getUserPermissions(userId: string): Promise<Map<Feature, PermissionLevel>> {
-    const cacheKey = `${this.CACHE_PREFIX}${userId}`;
+  /**
+   * 権限マトリックスを取得
+   * キャッシュが有効な場合はキャッシュを返す
+   */
+  public static async getPermissionMatrix(): Promise<PermissionMatrix> {
+    const now = Date.now();
     
-    // CacheUtil を使用してキャッシュチェック
-    const cached = CacheUtil.get<Map<Feature, PermissionLevel>>(cacheKey);
-    if (cached) {
-      return cached;
+    // キャッシュが有効な場合はキャッシュを返す
+    if (this.cachedMatrix && (now - this.cacheTimestamp) < this.CACHE_TTL) {
+      return this.cachedMatrix;
     }
-
-    // 権限を取得してキャッシュ
-    const permissions = await this.loadUserPermissions(userId);
-    CacheUtil.set(cacheKey, permissions, this.CACHE_TTL);
-
-    return permissions;
+    
+    // DBから取得してキャッシュを更新
+    const dataAccessor = new PermissionMatrixDataAccessor();
+    const record = await dataAccessor.getById(this.PERMISSION_MATRIX_ID);
+    const matrix = record?.Matrix || this.getDefaultMatrix();
+    
+    this.cachedMatrix = matrix;
+    this.cacheTimestamp = now;
+    
+    return matrix;
   }
 
-  public static clearCache(userId?: string): void {
-    if (userId) {
-      const cacheKey = `${this.CACHE_PREFIX}${userId}`;
-      CacheUtil.delete(cacheKey);
-    } else {
-      // 全ユーザーのキャッシュをクリア（プレフィックスマッチング）
-      CacheUtil.clear(this.CACHE_PREFIX);
-    }
+  /**
+   * キャッシュをクリア
+   * 権限マトリックスが更新された際に自動的に呼び出される
+   */
+  public static clearCache(): void {
+    this.cachedMatrix = null;
+    this.cacheTimestamp = 0;
+  }
+  
+  /**
+   * 強制的にキャッシュを更新
+   */
+  public static async refreshCache(): Promise<PermissionMatrix> {
+    this.clearCache();
+    return this.getPermissionMatrix();
   }
 }
 ```
+
+**キャッシュの特徴**:
+- **TTL（Time-To-Live）**: 5分間キャッシュを保持
+- **自動無効化**: 権限マトリックス更新時に自動的にキャッシュをクリア
+- **パフォーマンス**: DB読み取りを最小限に抑える
+- **整合性**: 更新後すぐに新しい権限が反映される
 
 ## 将来的な拡張
 

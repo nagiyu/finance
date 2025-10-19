@@ -90,7 +90,11 @@ export default function PermissionAdminPage() {
         throw new Error('Failed to update permission matrix');
       }
 
+      // ローカル状態を更新
       setMatrix(updatedMatrix);
+      
+      // DBから最新データを再取得して整合性を確認
+      await fetchMatrix();
     } catch (error) {
       console.error('Error saving matrix:', error);
       throw error;

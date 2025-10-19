@@ -13,15 +13,35 @@ import {
  */
 export default class PermissionMatrixService {
   private static readonly PERMISSION_MATRIX_ID = 'PermissionMatrix';
+  private static readonly CACHE_TTL = 300000; // 5分（ミリ秒）
+  
+  // インメモリキャッシュ
+  private static cachedMatrix: PermissionMatrix | null = null;
+  private static cacheTimestamp: number = 0;
 
   /**
    * 権限マトリックスを取得
    * DBに存在しない場合はデフォルトマトリックスを返す
+   * キャッシュを使用してパフォーマンスを最適化
    */
   public static async getPermissionMatrix(): Promise<PermissionMatrix> {
+    const now = Date.now();
+    
+    // キャッシュが有効な場合はキャッシュを返す
+    if (this.cachedMatrix && (now - this.cacheTimestamp) < this.CACHE_TTL) {
+      return this.cachedMatrix;
+    }
+    
+    // DBから取得
     const dataAccessor = new PermissionMatrixDataAccessor();
     const record = await dataAccessor.getById(this.PERMISSION_MATRIX_ID);
-    return record?.Matrix || this.getDefaultMatrix();
+    const matrix = record?.Matrix || this.getDefaultMatrix();
+    
+    // キャッシュを更新
+    this.cachedMatrix = matrix;
+    this.cacheTimestamp = now;
+    
+    return matrix;
   }
 
   /**
@@ -49,6 +69,9 @@ export default class PermissionMatrixService {
         Matrix: matrix,
       });
     }
+    
+    // キャッシュをクリア
+    this.clearCache();
   }
 
   /**
@@ -58,6 +81,27 @@ export default class PermissionMatrixService {
   public static async deletePermissionMatrix(): Promise<void> {
     const dataAccessor = new PermissionMatrixDataAccessor();
     await dataAccessor.delete(this.PERMISSION_MATRIX_ID);
+    
+    // キャッシュをクリア
+    this.clearCache();
+  }
+  
+  /**
+   * キャッシュをクリア
+   * 権限マトリックスが更新された際に呼び出す
+   */
+  public static clearCache(): void {
+    this.cachedMatrix = null;
+    this.cacheTimestamp = 0;
+  }
+  
+  /**
+   * 強制的にキャッシュを更新
+   * キャッシュをクリアして最新のデータを取得
+   */
+  public static async refreshCache(): Promise<PermissionMatrix> {
+    this.clearCache();
+    return this.getPermissionMatrix();
   }
 
   /**
