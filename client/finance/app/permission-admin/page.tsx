@@ -61,8 +61,10 @@ export default function PermissionAdminPage() {
 
   const fetchMatrix = async () => {
     try {
-      const response = await fetch('/api/permission-matrix');
-      
+      const response = await fetch('/api/permission-matrix', {
+        cache: 'no-store', // Ensure fresh data on every request
+      });
+
       if (!response.ok) {
         throw new Error('Failed to fetch permission matrix');
       }
@@ -84,6 +86,7 @@ export default function PermissionAdminPage() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestBody),
+        cache: 'no-store', // Ensure the update is not cached
       });
 
       if (!response.ok) {

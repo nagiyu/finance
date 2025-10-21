@@ -27,6 +27,10 @@ export interface PermissionMatrixUpdateResponseType {
   message: string;
 }
 
+// Disable caching for this route to ensure fresh data
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 /**
  * 権限マトリックス取得API
  */

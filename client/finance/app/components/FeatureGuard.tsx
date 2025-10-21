@@ -40,7 +40,8 @@ export default function FeatureGuard({
       const response = await fetch('/api/auth/check-permission', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody)
+        body: JSON.stringify(requestBody),
+        cache: 'no-store', // Ensure fresh permission checks
       });
 
       if (!response.ok) {

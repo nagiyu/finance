@@ -12,16 +12,19 @@ import {
  * データベースから権限マトリックスを取得・更新
  */
 export default class PermissionMatrixService {
-  private static readonly PERMISSION_MATRIX_ID = 'PermissionMatrix';
-
   /**
    * 権限マトリックスを取得
    * DBに存在しない場合はデフォルトマトリックスを返す
    */
   public static async getPermissionMatrix(): Promise<PermissionMatrix> {
     const dataAccessor = new PermissionMatrixDataAccessor();
-    const record = await dataAccessor.getById(this.PERMISSION_MATRIX_ID);
-    return record?.Matrix || this.getDefaultMatrix();
+    const records = await dataAccessor.get();
+
+    if (records.length === 0) {
+      return this.getDefaultMatrix();
+    }
+
+    return records[0].Matrix;
   }
 
   /**
@@ -34,30 +37,21 @@ export default class PermissionMatrixService {
     matrix: PermissionMatrix
   ): Promise<void> {
     const dataAccessor = new PermissionMatrixDataAccessor();
-    
-    const existingRecord = await dataAccessor.getById(this.PERMISSION_MATRIX_ID);
-    
-    if (existingRecord) {
-      // 既存レコードを更新
-      await dataAccessor.update(this.PERMISSION_MATRIX_ID, {
-        Matrix: matrix,
-      });
-    } else {
-      // 新規レコードを作成
+
+    const records = await dataAccessor.get();
+
+    if (records.length === 0) {
       await dataAccessor.create({
         DataType: 'PermissionMatrix',
         Matrix: matrix,
       });
-    }
-  }
+    } else {
+      const record = records[0];
 
-  /**
-   * 権限マトリックスを削除
-   * 注意: 権限チェックは AuthorizationService で行う必要がある
-   */
-  public static async deletePermissionMatrix(): Promise<void> {
-    const dataAccessor = new PermissionMatrixDataAccessor();
-    await dataAccessor.delete(this.PERMISSION_MATRIX_ID);
+      await dataAccessor.update(record.ID, {
+        Matrix: matrix,
+      });
+    }
   }
 
   /**
