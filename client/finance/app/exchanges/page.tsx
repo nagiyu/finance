@@ -68,6 +68,10 @@ export default function ExchangesPage() {
         await exchangeFetchService.delete(id);
     };
 
+    const onRefresh = async (): Promise<void> => {
+        await exchangeFetchService.syncCache();
+    };
+
     const validateItem = (item: ExchangeDataType): string | null => {
         if (!item.name.trim()) return 'Name is required.';
         if (!item.key.trim()) return 'Key is required.';
@@ -93,6 +97,7 @@ export default function ExchangesPage() {
                 onCreate={onCreate}
                 onUpdate={onUpdate}
                 onDelete={onDelete}
+                onRefresh={onRefresh}
             >
                 {(item, _, onItemChange) => (
                     <ExchangeEditDialogContent item={item} onItemChange={onItemChange} />

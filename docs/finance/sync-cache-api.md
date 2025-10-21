@@ -144,6 +144,40 @@ if (response.ok) {
 }
 ```
 
+#### AdminManagementコンポーネントでの使用
+
+管理画面で `AdminManagement` コンポーネントを使用している場合、`onRefresh` プロパティを設定することで、Refreshボタンクリック時に自動的にキャッシュ同期を実行できます：
+
+```typescript
+import AdminManagement from '@client-common/components/admin/AdminManagement';
+import TickerFetchService from '@/services/ticker/TickerFetchService.client';
+
+const tickerFetchService = new TickerFetchService();
+
+const onRefresh = async (): Promise<void> => {
+    await tickerFetchService.syncCache();
+};
+
+<AdminManagement<TickerDataType>
+    columns={columns}
+    fetchData={fetchData}
+    itemName='Ticker'
+    defaultItem={defaultItem}
+    validateItem={validateItem}
+    onCreate={onCreate}
+    onUpdate={onUpdate}
+    onDelete={onDelete}
+    onRefresh={onRefresh}  // Refreshボタンでキャッシュ同期
+>
+    {/* ... */}
+</AdminManagement>
+```
+
+この設定により、ユーザーがRefreshボタンをクリックすると：
+1. `onRefresh()` が呼ばれ、サーバー側のキャッシュが最新化される
+2. その後 `fetchData()` が呼ばれ、更新されたデータが取得される
+3. 画面が最新のデータで再描画される
+
 ---
 
 ## 仕組み
