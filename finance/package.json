@@ -5,6 +5,8 @@
     "test": "jest"
   },
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.883.0",
+    "@aws-sdk/util-dynamodb": "^3.883.0",
     "@mathieuc/tradingview": "^3.5.1"
   },
   "devDependencies": {

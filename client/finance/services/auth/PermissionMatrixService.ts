@@ -45,71 +45,10 @@ export default class PermissionMatrixService {
         Matrix: matrix,
       });
     } else {
-      // 新規レコードの場合、DynamoDB PutItemを使用して初期化
-      await this.initializePermissionMatrix(matrix);
-    }
-  }
-
-  /**
-   * 権限マトリックスを初期化する
-   * create()はIDを自動生成するため、直接DynamoDB PutItemを使用
-   * 
-   * @param matrix 初期権限マトリックス
-   */
-  private static async initializePermissionMatrix(matrix: PermissionMatrix): Promise<void> {
-    const { DynamoDBClient, PutItemCommand } = await import('@aws-sdk/client-dynamodb');
-    const { marshall } = await import('@aws-sdk/util-dynamodb');
-    const SecretsManagerUtil = (await import('@common/aws/SecretsManagerUtil')).default;
-    
-    const tableName = this.getFinanceTableName();
-    const item = {
-      ID: this.PERMISSION_MATRIX_ID,
-      DataType: this.PERMISSION_MATRIX_DATA_TYPE,
-      Matrix: matrix,
-      Create: Date.now(),
-      Update: Date.now(),
-    };
-    
-    // DynamoDBクライアントを作成
-    const secretName = process.env.PROJECT_SECRET!;
-    let dynamoClient: DynamoDBClient;
-    
-    if (process.env.PROCESS_ENV !== 'local') {
-      // 本番環境: IAMロールを使用
-      const region = await SecretsManagerUtil.getSecretValue(secretName, 'AWS_REGION');
-      dynamoClient = new DynamoDBClient({ region });
-    } else {
-      // ローカル環境: 環境変数の認証情報を使用
-      dynamoClient = new DynamoDBClient({
-        region: process.env.PROJECT_AWS_REGION || 'ap-northeast-1',
-        credentials: {
-          accessKeyId: process.env.PROJECT_AWS_ACCESS_KEY!,
-          secretAccessKey: process.env.PROJECT_AWS_SECRET_ACCESS_KEY!,
-        },
+      // 新規レコードを固定IDで作成
+      await dataAccessor.createWithFixedId(this.PERMISSION_MATRIX_ID, {
+        Matrix: matrix,
       });
-    }
-    
-    const command = new PutItemCommand({
-      TableName: tableName,
-      Item: marshall(item, { removeUndefinedValues: true }),
-    });
-    
-    await dynamoClient.send(command);
-  }
-
-  /**
-   * Financeテーブル名を取得
-   */
-  private static getFinanceTableName(): string {
-    const processEnv = process.env.PROCESS_ENV;
-    switch (processEnv) {
-      case 'local':
-      case 'development':
-        return 'DevFinance';
-      case 'production':
-        return 'Finance';
-      default:
-        return 'DevFinance';
     }
   }
 
