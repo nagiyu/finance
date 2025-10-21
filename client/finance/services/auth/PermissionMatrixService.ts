@@ -13,7 +13,6 @@ import {
  */
 export default class PermissionMatrixService {
   private static readonly PERMISSION_MATRIX_ID = 'PermissionMatrix';
-  private static readonly PERMISSION_MATRIX_DATA_TYPE = 'PermissionMatrix';
 
   /**
    * 権限マトリックスを取得
@@ -26,7 +25,7 @@ export default class PermissionMatrixService {
   }
 
   /**
-   * 権限マトリックスを更新または作成
+   * 権限マトリックスを更新
    * 注意: 権限チェックは AuthorizationService で行う必要がある
    * 
    * @param matrix 新しい権限マトリックス
@@ -36,7 +35,6 @@ export default class PermissionMatrixService {
   ): Promise<void> {
     const dataAccessor = new PermissionMatrixDataAccessor();
     
-    // 既存のレコードを確認
     const existingRecord = await dataAccessor.getById(this.PERMISSION_MATRIX_ID);
     
     if (existingRecord) {
@@ -45,8 +43,9 @@ export default class PermissionMatrixService {
         Matrix: matrix,
       });
     } else {
-      // 新規レコードを固定IDで作成
-      await dataAccessor.createWithFixedId(this.PERMISSION_MATRIX_ID, {
+      // 新規レコードを作成
+      await dataAccessor.create({
+        DataType: 'PermissionMatrix',
         Matrix: matrix,
       });
     }
