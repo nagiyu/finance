@@ -1,3 +1,4 @@
+import CacheUtil from '@common/utils/CacheUtil';
 import PermissionMatrixDataAccessor from '@finance/services/PermissionMatrixDataAccessor';
 
 import {
@@ -13,23 +14,19 @@ import {
  */
 export default class PermissionMatrixService {
   private static readonly PERMISSION_MATRIX_ID = 'PermissionMatrix';
+  private static readonly CACHE_KEY = 'permission_matrix';
   private static readonly CACHE_TTL = 300000; // 5分（ミリ秒）
-  
-  // インメモリキャッシュ
-  private static cachedMatrix: PermissionMatrix | null = null;
-  private static cacheTimestamp: number = 0;
 
   /**
    * 権限マトリックスを取得
    * DBに存在しない場合はデフォルトマトリックスを返す
-   * キャッシュを使用してパフォーマンスを最適化
+   * CacheUtilを使用してパフォーマンスを最適化
    */
   public static async getPermissionMatrix(): Promise<PermissionMatrix> {
-    const now = Date.now();
-    
-    // キャッシュが有効な場合はキャッシュを返す
-    if (this.cachedMatrix && (now - this.cacheTimestamp) < this.CACHE_TTL) {
-      return this.cachedMatrix;
+    // キャッシュから取得を試みる
+    const cachedMatrix = CacheUtil.get<PermissionMatrix>(this.CACHE_KEY);
+    if (cachedMatrix) {
+      return cachedMatrix;
     }
     
     // DBから取得
@@ -37,9 +34,8 @@ export default class PermissionMatrixService {
     const record = await dataAccessor.getById(this.PERMISSION_MATRIX_ID);
     const matrix = record?.Matrix || this.getDefaultMatrix();
     
-    // キャッシュを更新
-    this.cachedMatrix = matrix;
-    this.cacheTimestamp = now;
+    // キャッシュに保存
+    CacheUtil.set(this.CACHE_KEY, matrix, this.CACHE_TTL);
     
     return matrix;
   }
@@ -91,8 +87,7 @@ export default class PermissionMatrixService {
    * 権限マトリックスが更新された際に呼び出す
    */
   public static clearCache(): void {
-    this.cachedMatrix = null;
-    this.cacheTimestamp = 0;
+    CacheUtil.delete(this.CACHE_KEY);
   }
   
   /**

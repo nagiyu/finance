@@ -9,36 +9,32 @@
 
 ## 実装内容
 
-### 1. インメモリキャッシュの実装
+### 1. キャッシュ実装の更新
 
 **ファイル**: `client/finance/services/auth/PermissionMatrixService.ts`
 
-権限マトリックスをインメモリでキャッシュすることで、DB読み取り回数を大幅に削減しました。
+権限マトリックスを **typescript-common/common/utils/CacheUtil** を使用してキャッシュすることで、DB読み取り回数を大幅に削減しました。
 
 ```typescript
+import CacheUtil from '@common/utils/CacheUtil';
+
 export default class PermissionMatrixService {
-  // キャッシュTTL: 5分 = 5 * 60 * 1000ミリ秒
-  private static readonly CACHE_TTL = 300000;
-  
-  // インメモリキャッシュ
-  private static cachedMatrix: PermissionMatrix | null = null;
-  private static cacheTimestamp: number = 0;
+  private static readonly CACHE_KEY = 'permission_matrix';
+  private static readonly CACHE_TTL = 300000; // 5分
 
   public static async getPermissionMatrix(): Promise<PermissionMatrix> {
-    const now = Date.now();
-    
-    // キャッシュが有効な場合はキャッシュを返す
-    if (this.cachedMatrix && (now - this.cacheTimestamp) < this.CACHE_TTL) {
-      return this.cachedMatrix;
+    // キャッシュから取得を試みる
+    const cachedMatrix = CacheUtil.get<PermissionMatrix>(this.CACHE_KEY);
+    if (cachedMatrix) {
+      return cachedMatrix;
     }
     
-    // DBから取得してキャッシュを更新
+    // DBから取得してキャッシュに保存
     const dataAccessor = new PermissionMatrixDataAccessor();
     const record = await dataAccessor.getById(this.PERMISSION_MATRIX_ID);
     const matrix = record?.Matrix || this.getDefaultMatrix();
     
-    this.cachedMatrix = matrix;
-    this.cacheTimestamp = now;
+    CacheUtil.set(this.CACHE_KEY, matrix, this.CACHE_TTL);
     
     return matrix;
   }
@@ -46,9 +42,10 @@ export default class PermissionMatrixService {
 ```
 
 **特徴**:
+- **CacheUtil使用**: typescript-common の統一的なキャッシュユーティリティを使用
 - **TTL（Time-To-Live）**: 5分間キャッシュを保持
 - **自動更新**: TTL経過後は次回アクセス時にDBから再取得
-- **メモリ効率**: 静的変数でキャッシュを保持し、複数インスタンス間で共有
+- **一貫性**: 他のサービスと同じキャッシュ機構を使用
 
 ### 2. キャッシュ無効化の実装
 
@@ -78,8 +75,7 @@ public static async updatePermissionMatrix(
 }
 
 public static clearCache(): void {
-  this.cachedMatrix = null;
-  this.cacheTimestamp = 0;
+  CacheUtil.delete(this.CACHE_KEY);
 }
 ```
 

@@ -734,37 +734,34 @@ describe('AuthorizationService', () => {
 
 ### 1. 権限マトリックスのキャッシュ
 
-頻繁な権限チェックによるパフォーマンス低下を防ぐため、権限マトリックスをインメモリでキャッシュします。
+頻繁な権限チェックによるパフォーマンス低下を防ぐため、権限マトリックスをキャッシュします。
 
-**PermissionMatrixService** で実装されたキャッシュ機構：
+**PermissionMatrixService** では **typescript-common/common/utils/CacheUtil** を使用してキャッシュを実装しています：
 
 ```typescript
+import CacheUtil from '@common/utils/CacheUtil';
+
 export default class PermissionMatrixService {
+  private static readonly CACHE_KEY = 'permission_matrix';
   private static readonly CACHE_TTL = 300000; // 5分（ミリ秒）
-  
-  // インメモリキャッシュ
-  private static cachedMatrix: PermissionMatrix | null = null;
-  private static cacheTimestamp: number = 0;
 
   /**
    * 権限マトリックスを取得
-   * キャッシュが有効な場合はキャッシュを返す
+   * CacheUtilを使用してキャッシュを管理
    */
   public static async getPermissionMatrix(): Promise<PermissionMatrix> {
-    const now = Date.now();
-    
-    // キャッシュが有効な場合はキャッシュを返す
-    if (this.cachedMatrix && (now - this.cacheTimestamp) < this.CACHE_TTL) {
-      return this.cachedMatrix;
+    // キャッシュから取得を試みる
+    const cachedMatrix = CacheUtil.get<PermissionMatrix>(this.CACHE_KEY);
+    if (cachedMatrix) {
+      return cachedMatrix;
     }
     
-    // DBから取得してキャッシュを更新
+    // DBから取得してキャッシュに保存
     const dataAccessor = new PermissionMatrixDataAccessor();
     const record = await dataAccessor.getById(this.PERMISSION_MATRIX_ID);
     const matrix = record?.Matrix || this.getDefaultMatrix();
     
-    this.cachedMatrix = matrix;
-    this.cacheTimestamp = now;
+    CacheUtil.set(this.CACHE_KEY, matrix, this.CACHE_TTL);
     
     return matrix;
   }
@@ -774,8 +771,7 @@ export default class PermissionMatrixService {
    * 権限マトリックスが更新された際に自動的に呼び出される
    */
   public static clearCache(): void {
-    this.cachedMatrix = null;
-    this.cacheTimestamp = 0;
+    CacheUtil.delete(this.CACHE_KEY);
   }
   
   /**
@@ -791,6 +787,7 @@ export default class PermissionMatrixService {
 **キャッシュの特徴**:
 - **TTL（Time-To-Live）**: 5分間キャッシュを保持
 - **自動無効化**: 権限マトリックス更新時に自動的にキャッシュをクリア
+- **CacheUtil使用**: typescript-common の統一的なキャッシュユーティリティを使用
 - **パフォーマンス**: DB読み取りを最小限に抑える
 - **整合性**: 更新後すぐに新しい権限が反映される
 
