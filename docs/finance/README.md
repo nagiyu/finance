@@ -82,8 +82,32 @@ Finance モジュールは以下の主要機能を提供します：
 #### ExchangeService
 取引所データの管理を行うサービスです。
 
-#### TickerService / MyTickerService
-ティッカーシンボル及び個人ティッカーリストの管理を行います。
+**主要メソッド:**
+- `get()`: 全Exchange取得（キャッシュ有効時はキャッシュから取得）
+- `create()`: Exchange作成
+- `update()`: Exchange更新
+- `delete()`: Exchange削除
+- `syncCache()`: キャッシュをデータベースと同期
+
+#### TickerService
+ティッカーシンボルの管理を行うサービスです。
+
+**主要メソッド:**
+- `get()`: 全Ticker取得（キャッシュ有効時はキャッシュから取得）
+- `create()`: Ticker作成
+- `update()`: Ticker更新
+- `delete()`: Ticker削除
+- `syncCache()`: キャッシュをデータベースと同期
+
+#### MyTickerService
+個人ティッカーリストの管理を行うサービスです。
+
+**主要メソッド:**
+- `get()`: 全MyTicker取得（キャッシュ有効時はキャッシュから取得）
+- `create()`: MyTicker作成
+- `update()`: MyTicker更新
+- `delete()`: MyTicker削除
+- `syncCache()`: キャッシュをデータベースと同期
 
 ### Data Access Layer
 
@@ -248,3 +272,4 @@ Finance Module
 - **[簡易通知設定 UI](./simplified-notification-ui.md)** - 簡易モードでパターン条件をまとめて設定するUI改善
 - **[TargetPrice算出ツール](./target-price-calculation.md)** - 保有株式からの目標価格算出機能
 - **[MyTicker](./MyTicker.md)** - 保有株式情報の管理機能
+- **[キャッシュ同期 API](./sync-cache-api.md)** - 各サービスのキャッシュを同期するAPI

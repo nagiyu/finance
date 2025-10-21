@@ -22,8 +22,8 @@ import CandleCountUtil from '@/utils/CandleCountUtil';
 import { ExchangeDataType } from '@/interfaces/data/ExchangeDataType';
 import { TickerDataType } from '@/interfaces/data/TickerDataType';
 
-import Auth from '@/app/components/Auth';
-import AuthAPIUtil from '@/app/utils/AuthAPIUtil';
+import FeatureGuard from '@/app/components/FeatureGuard';
+import { Feature, PermissionLevel } from '@/types/AuthorizationTypes';
 import AllConditionDisplay from '@/app/components/AllConditionDisplay';
 import ExchangeFetchService from '@/services/exchange/ExchangeFetchService.client';
 import Graph from '@/app/components/graph';
@@ -42,19 +42,30 @@ export default function Home() {
   const [candleCount, setCandleCount] = useState<string>(CandleCountUtil.getDefaultCandleCount());
   const [urlParamsProcessed, setUrlParamsProcessed] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState<number>(0);
+  const [conditionRefreshTrigger, setConditionRefreshTrigger] = useState<number>(0);
 
   const exchangeFetchService = new ExchangeFetchService();
   const tickerFetchService = new TickerFetchService();
 
   const handleRefresh = () => {
     setRefreshTrigger(prev => prev + 1);
+    setConditionRefreshTrigger(prev => prev + 1);
   };
 
-  // 10秒毎の自動更新
+  // 10秒毎のローソク足自動更新
   useEffect(() => {
     const interval = setInterval(() => {
       setRefreshTrigger(prev => prev + 1);
     }, 10000); // 10秒 = 10000ミリ秒
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // 1分毎の条件自動更新
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setConditionRefreshTrigger(prev => prev + 1);
+    }, 60000); // 60秒 = 60000ミリ秒
 
     return () => clearInterval(interval);
   }, []);
@@ -69,10 +80,8 @@ export default function Home() {
 
   useEffect(() => {
     (async () => {
-      if (await AuthAPIUtil.isAuthorized('user')) {
-        setExchanges(await exchangeFetchService.get());
-        setTickers(await tickerFetchService.get());
-      }
+      setExchanges(await exchangeFetchService.get());
+      setTickers(await tickerFetchService.get());
     })();
   }, []);
 
@@ -124,33 +133,34 @@ export default function Home() {
   }, [tickerOptions, searchParams, urlParamsProcessed]);
 
   return (
-    <Auth
-      userContent={
-        <BasicStack>
-          <DirectionStack>
-            <BasicSelect label='Exchange' options={exchangeOptions} value={exchange} onChange={(value) => setExchange(value)} />
-            <BasicSelect label='Ticker' options={tickerOptions} value={ticker} onChange={(value) => setTicker(value)} />
-          </DirectionStack>
-          <ContainedButton label='ローディング' onClick={handleRefresh} />
-          <Graph exchange={getExchangeKey(exchange)} ticker={getTickerKey(ticker)} timeframe={timeframe} session={session} candleCount={CandleCountUtil.toNumber(candleCount)} refreshTrigger={refreshTrigger} />
-          <DirectionStack>
-            <BasicSelect label='時間軸' options={TimeFrameUtil.toSelectOptions()} value={timeframe} onChange={(value) => {
-              if (TimeFrameUtil.isValidTimeFrame(value)) {
-                setTimeframe(value);
-              }
-            }} />
-            <BasicSelect label='取引時間' options={SessionUtil.toSelectOptions()} value={session} onChange={(value) => setSession(value)} />
-            <BasicSelect label='表示本数' options={CandleCountUtil.toSelectOptions()} value={candleCount} onChange={(value) => setCandleCount(value)} />
-          </DirectionStack>
-          <AllConditionDisplay 
-            exchangeId={exchange}
-            tickerId={ticker}
-            timeframe={timeframe}
-            session={session}
-            refreshTrigger={refreshTrigger}
-          />
-        </BasicStack>
-      }
-    />
+    <FeatureGuard 
+      feature={Feature.STOCK_CHART} 
+      level={PermissionLevel.VIEW}
+    >
+      <BasicStack>
+        <DirectionStack>
+          <BasicSelect label='Exchange' options={exchangeOptions} value={exchange} onChange={(value) => setExchange(value)} />
+          <BasicSelect label='Ticker' options={tickerOptions} value={ticker} onChange={(value) => setTicker(value)} />
+        </DirectionStack>
+        <ContainedButton label='ローディング' onClick={handleRefresh} />
+        <Graph exchange={getExchangeKey(exchange)} ticker={getTickerKey(ticker)} timeframe={timeframe} session={session} candleCount={CandleCountUtil.toNumber(candleCount)} refreshTrigger={refreshTrigger} />
+        <DirectionStack>
+          <BasicSelect label='時間軸' options={TimeFrameUtil.toSelectOptions()} value={timeframe} onChange={(value) => {
+            if (TimeFrameUtil.isValidTimeFrame(value)) {
+              setTimeframe(value);
+            }
+          }} />
+          <BasicSelect label='取引時間' options={SessionUtil.toSelectOptions()} value={session} onChange={(value) => setSession(value)} />
+          <BasicSelect label='表示本数' options={CandleCountUtil.toSelectOptions()} value={candleCount} onChange={(value) => setCandleCount(value)} />
+        </DirectionStack>
+        <AllConditionDisplay 
+          exchangeId={exchange}
+          tickerId={ticker}
+          timeframe={timeframe}
+          session={session}
+          refreshTrigger={conditionRefreshTrigger}
+        />
+      </BasicStack>
+    </FeatureGuard>
   );
 }

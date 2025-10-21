@@ -9,7 +9,7 @@
       "name": "client-common"
     },
     {
-      "path": "../../typescript-common",
+      "path": "../../typescript-common/common",
       "name": "common"
     },
     {

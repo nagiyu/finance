@@ -13,10 +13,13 @@ import NotificationUtil from '@client-common/utils/NotificationUtil.client';
 import TerminalUtil from '@client-common/utils/TerminalUtil.client';
 import { Column } from '@client-common/components/data/table/BasicTable';
 
+import LoadingContent from '@client-common/components/content/LoadingContent';
+
 import ExchangeFetchService from '@/services/exchange/ExchangeFetchService.client';
 import FinanceNotificationEditDialogContent from '@/app/components/financeNotification/FinanceNotificationEditDialogContent';
 import FinanceNotificationFetchService from '@/services/financeNotification/FinanceNotificationFetchService.client';
-import LoadingAuthPage from '@/app/components/pages/LoadingAuthPage';
+import { Feature, PermissionLevel } from '@/types/AuthorizationTypes';
+import FeatureGuard from '@/app/components/FeatureGuard';
 import TickerFetchService from '@/services/ticker/TickerFetchService.client';
 import { ExchangeDataType } from '@/interfaces/data/ExchangeDataType';
 import { TickerDataType } from '@/interfaces/data/TickerDataType';
@@ -126,6 +129,10 @@ export default function FinanceNotificationPage() {
         await financeNotificationFetchService.delete(id);
     };
 
+    const onRefresh = async (): Promise<void> => {
+        await financeNotificationFetchService.syncCache();
+    };
+
     const validateItem = (item: FinanceNotificationDataType): string | null => {
         if (!item.exchangeId.trim()) {
             return 'Exchange is required.';
@@ -150,36 +157,42 @@ export default function FinanceNotificationPage() {
     }, []);
 
     return (
-        <LoadingAuthPage
-            userContent={(loading, runWithLoading) => (
-                <AdminManagement<FinanceNotificationDataType, StateType>
-                    columns={columns}
-                    loading={loading}
-                    fetchData={() => runWithLoading(fetchData)}
-                    itemName='Finance Notification'
-                    defaultItem={defaultItem}
-                    defaultState={defaultState}
-                    generateState={generateState}
-                    validateItem={validateItem}
-                    onCreate={(item) => runWithLoading(() => onCreate(item))}
-                    onUpdate={(item) => runWithLoading(() => onUpdate(item))}
-                    onDelete={(id) => runWithLoading(() => onDelete(id))}
-                >
-                    {(item, state, onItemChange, onStateChange, loading) => {
-                        return (
-                            <FinanceNotificationEditDialogContent
-                                item={item}
-                                state={state}
-                                onItemChange={onItemChange}
-                                onStateChange={onStateChange}
-                                loading={loading}
-                                exchanges={exchanges}
-                                tickers={tickers}
-                            />
-                        );
-                    }}
-                </AdminManagement>
-            )}
-        />
+        <FeatureGuard 
+            feature={Feature.FINANCE_NOTIFICATION} 
+            level={PermissionLevel.EDIT}
+        >
+            <LoadingContent>
+                {(loading, runWithLoading) => (
+                    <AdminManagement<FinanceNotificationDataType, StateType>
+                        columns={columns}
+                        loading={loading}
+                        fetchData={() => runWithLoading(fetchData)}
+                        itemName='Finance Notification'
+                        defaultItem={defaultItem}
+                        defaultState={defaultState}
+                        generateState={generateState}
+                        validateItem={validateItem}
+                        onCreate={(item) => runWithLoading(() => onCreate(item))}
+                        onUpdate={(item) => runWithLoading(() => onUpdate(item))}
+                        onDelete={(id) => runWithLoading(() => onDelete(id))}
+                        onRefresh={() => runWithLoading(onRefresh)}
+                    >
+                        {(item, state, onItemChange, onStateChange, loading) => {
+                            return (
+                                <FinanceNotificationEditDialogContent
+                                    item={item}
+                                    state={state}
+                                    onItemChange={onItemChange}
+                                    onStateChange={onStateChange}
+                                    loading={loading}
+                                    exchanges={exchanges}
+                                    tickers={tickers}
+                                />
+                            );
+                        }}
+                    </AdminManagement>
+                )}
+            </LoadingContent>
+        </FeatureGuard>
     )
 }

@@ -1,4 +1,4 @@
-import DynamoDBServiceMock from '@common/tests/mock/services/aws/DynamoDBServiceMock';
+import DynamoDBServiceMock from '@common-mock/services/aws/DynamoDBServiceMock';
 
 import FinanceNotificationDataAccessor from '@finance/services/FinanceNotificationDataAccessor';
 import FinanceDataAccessorBase from '@finance/services/FinanceDataAccessorBase';

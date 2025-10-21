@@ -6,7 +6,7 @@ jest.mock('@finance/utils/FinanceUtil', () => {
 });
 
 import CommonUtil from '@common/utils/CommonUtil';
-import NotificationServiceMock from '@common/tests/mock/services/NotificationServiceMock';
+import NotificationServiceMock from '@common-mock/services/NotificationServiceMock';
 
 import ConditionService from '@finance/services/ConditionService';
 import ExchangeServiceMock from '@finance/tests/mocks/services/ExchangeServiceMock';
