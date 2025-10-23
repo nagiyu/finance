@@ -70,7 +70,7 @@ jobs:
 
     - name: Rewrite ads.txt content from secrets
       run: |
-        sed -i 's|{{ PublisherID }}|${{ env.GOOGLE_ADSENSE_PUBLISHER_ID }}|g' client/tools/public/ads.txt
+        sed -i 's|{{ PublisherID }}|${{ env.GOOGLE_ADSENSE_PUBLISHER_ID }}|g' client/finance/public/ads.txt
 
     - name: Deploy
       run: |
