@@ -59,6 +59,7 @@ export default async function RootLayout({
       menuItems={await getMenuItems()}
       enableAuthentication={true}
       enableNotification={true}
+      enableAdSense={true}
     >
       {children}
     </CommonLayout>
