@@ -11,7 +11,8 @@ import { FinanceNotificationDataType } from '@finance/interfaces/data/FinanceNot
 import APIUtil from '@client-common/utils/APIUtil';
 
 import AuthorizationService from '@/services/auth/AuthorizationService';
-import { Feature, PermissionLevel } from '@/types/AuthorizationTypes';
+import { PermissionLevel } from '@common/enums/PermissionLevel';
+import { FinanceFeature } from '@finance/consts/FinanceConst';
 
 const dataAccessor = new FinanceNotificationDataAccessor();
 const exchangeService = new ExchangeService();
@@ -28,7 +29,7 @@ const service = new FinanceNotificationService(
 );
 
 export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  if (!await AuthorizationService.authorize(Feature.FINANCE_NOTIFICATION, PermissionLevel.VIEW)) {
+  if (!await AuthorizationService.authorize(FinanceFeature.FINANCE_NOTIFICATION, PermissionLevel.VIEW)) {
     return APIUtil.ReturnUnauthorized();
   }
 
@@ -43,7 +44,7 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
 }
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  if (!await AuthorizationService.authorize(Feature.FINANCE_NOTIFICATION, PermissionLevel.EDIT)) {
+  if (!await AuthorizationService.authorize(FinanceFeature.FINANCE_NOTIFICATION, PermissionLevel.EDIT)) {
     return APIUtil.ReturnUnauthorized();
   }
 
@@ -56,7 +57,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 }
 
 export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  if (!await AuthorizationService.authorize(Feature.FINANCE_NOTIFICATION, PermissionLevel.DELETE)) {
+  if (!await AuthorizationService.authorize(FinanceFeature.FINANCE_NOTIFICATION, PermissionLevel.DELETE)) {
     return APIUtil.ReturnUnauthorized();
   }
 

@@ -3,12 +3,13 @@ import TickerService from '@finance/services/TickerService';
 import APIUtil from '@client-common/utils/APIUtil';
 
 import AuthorizationService from '@/services/auth/AuthorizationService';
-import { Feature, PermissionLevel } from '@/types/AuthorizationTypes';
+import { PermissionLevel } from '@common/enums/PermissionLevel';
+import { FinanceFeature } from '@finance/consts/FinanceConst';
 
 const service = new TickerService();
 
 export async function POST() {
-  if (!await AuthorizationService.authorize(Feature.TICKER, PermissionLevel.EDIT)) {
+  if (!await AuthorizationService.authorize(FinanceFeature.TICKER, PermissionLevel.EDIT)) {
     return APIUtil.ReturnUnauthorized();
   }
 

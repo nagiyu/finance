@@ -6,10 +6,11 @@ import { SIMPLIFIED_CONDITION_NAME } from '@finance/consts/FinanceNotificationCo
 import APIUtil from '@client-common/utils/APIUtil';
 
 import AuthorizationService from '@/services/auth/AuthorizationService';
-import { Feature, PermissionLevel } from '@/types/AuthorizationTypes';
+import { PermissionLevel } from '@common/enums/PermissionLevel';
+import { FinanceFeature } from '@finance/consts/FinanceConst';
 
 export async function GET(_: NextRequest, { params }: { params: Promise<{ condition: string }> }) {
-  if (!await AuthorizationService.authorize(Feature.FINANCE_NOTIFICATION, PermissionLevel.VIEW)) {
+  if (!await AuthorizationService.authorize(FinanceFeature.FINANCE_NOTIFICATION, PermissionLevel.VIEW)) {
     return APIUtil.ReturnUnauthorized();
   }
 

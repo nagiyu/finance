@@ -1,5 +1,8 @@
+import { PermissionMatrix } from '@common/interfaces/authorization/PermissionMatrix';
+
+import { FinanceFeature } from '@finance/consts/FinanceConst';
+
 import { FinanceRecordTypeBase } from '@/interfaces/records/FinanceRecordTypeBase';
-import { PermissionMatrix } from '@/types/AuthorizationTypes';
 
 /**
  * 権限マトリックスレコード型
@@ -7,5 +10,5 @@ import { PermissionMatrix } from '@/types/AuthorizationTypes';
  */
 export interface PermissionMatrixRecordType extends FinanceRecordTypeBase {
   DataType: 'PermissionMatrix';
-  Matrix: PermissionMatrix;
+  Matrix: PermissionMatrix<FinanceFeature>;
 }

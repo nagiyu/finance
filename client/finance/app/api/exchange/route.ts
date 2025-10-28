@@ -5,13 +5,14 @@ import CommonUtil from "@common/utils/CommonUtil";
 import APIUtil from '@client-common/utils/APIUtil';
 
 import AuthorizationService from '@/services/auth/AuthorizationService';
-import { Feature, PermissionLevel } from '@/types/AuthorizationTypes';
+import { PermissionLevel } from '@common/enums/PermissionLevel';
+import { FinanceFeature } from '@finance/consts/FinanceConst';
 import { ExchangeDataType } from "@/interfaces/data/ExchangeDataType";
 
 import ExchangeUtil from '@/utils/ExchangeUtil';
 
 export async function GET() {
-  if (!await AuthorizationService.authorize(Feature.EXCHANGE, PermissionLevel.VIEW)) {
+  if (!await AuthorizationService.authorize(FinanceFeature.EXCHANGE, PermissionLevel.VIEW)) {
     return APIUtil.ReturnUnauthorized();
   }
 
@@ -21,7 +22,7 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  if (!await AuthorizationService.authorize(Feature.EXCHANGE, PermissionLevel.EDIT)) {
+  if (!await AuthorizationService.authorize(FinanceFeature.EXCHANGE, PermissionLevel.EDIT)) {
     return APIUtil.ReturnUnauthorized();
   }
 

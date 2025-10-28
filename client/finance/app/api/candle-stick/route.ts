@@ -3,7 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 import APIUtil from '@client-common/utils/APIUtil';
 
 import AuthorizationService from '@/services/auth/AuthorizationService';
-import { Feature, PermissionLevel } from '@/types/AuthorizationTypes';
+import { PermissionLevel } from '@common/enums/PermissionLevel';
+import { FinanceFeature } from '@finance/consts/FinanceConst';
 import FinanceUtil, { GetStockPriceDataOptions } from '@finance/utils/FinanceUtil';
 
 interface CandleStickRequest {
@@ -13,7 +14,7 @@ interface CandleStickRequest {
 }
 
 export async function POST(req: NextRequest) {
-  if (!await AuthorizationService.authorize(Feature.STOCK_CHART, PermissionLevel.VIEW)) {
+  if (!await AuthorizationService.authorize(FinanceFeature.STOCK_CHART, PermissionLevel.VIEW)) {
     return APIUtil.ReturnUnauthorized();
   }
 

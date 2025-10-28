@@ -7,10 +7,11 @@ import MyTickerValidator from '@finance/utils/MyTickerValidator';
 import APIUtil from '@client-common/utils/APIUtil';
 
 import AuthorizationService from '@/services/auth/AuthorizationService';
-import { Feature, PermissionLevel } from '@/types/AuthorizationTypes';
+import { PermissionLevel } from '@common/enums/PermissionLevel';
+import { FinanceFeature } from '@finance/consts/FinanceConst';
 
 export async function GET() {
-  if (!await AuthorizationService.authorize(Feature.MY_TICKER, PermissionLevel.VIEW)) {
+  if (!await AuthorizationService.authorize(FinanceFeature.MY_TICKER, PermissionLevel.VIEW)) {
     return APIUtil.ReturnUnauthorized();
   }
 
@@ -21,7 +22,7 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  if (!await AuthorizationService.authorize(Feature.MY_TICKER, PermissionLevel.EDIT)) {
+  if (!await AuthorizationService.authorize(FinanceFeature.MY_TICKER, PermissionLevel.EDIT)) {
     return APIUtil.ReturnUnauthorized();
   }
 

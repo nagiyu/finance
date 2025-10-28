@@ -1,11 +1,14 @@
 import AuthService from '@common/services/auth/AuthService';
+import { PermissionLevel } from '@common/enums/PermissionLevel';
+import { UserType } from '@common/enums/UserType';
 
 import AuthUtil from '@client-common/auth/AuthUtil';
+
+import { FinanceFeature } from '@finance/consts/FinanceConst';
 
 import { FinanceAuthDataType } from '@/interfaces/data/FinanceAuthDataType';
 import { FinanceAuthRecordType } from '@/interfaces/records/FinanceAuthRecordType';
 import AuthorizationService from '@/services/auth/AuthorizationService';
-import { Feature, PermissionLevel, UserType } from '@/types/AuthorizationTypes';
 
 class FinanceAuthService extends AuthService<FinanceAuthDataType, FinanceAuthRecordType> {
   public constructor() {
@@ -40,7 +43,7 @@ export default class FinanceAuthorizer {
    */
   public static async isAdmin(): Promise<boolean> {
     // 新しいAuthorizationServiceを使用して管理者権限をチェック
-    return AuthorizationService.authorize(Feature.EXCHANGE, PermissionLevel.ADMIN);
+    return AuthorizationService.authorize(FinanceFeature.EXCHANGE, PermissionLevel.ADMIN);
   }
 
   /**

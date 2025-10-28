@@ -1,24 +1,21 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { PermissionLevel } from '@common/enums/PermissionLevel';
 
-import { Feature, PermissionLevel } from '@/types/AuthorizationTypes';
-import type {
-  CheckPermissionRequestType,
-  CheckPermissionResponseType,
-} from '@/app/api/auth/check-permission/route';
+import BaseFeatureGuard from '@client-common/components/authorization/FeatureGuard';
+
+import { FinanceFeature } from '@finance/consts/FinanceConst';
 
 interface FeatureGuardProps {
-  feature: Feature;
+  feature: FinanceFeature;
   level: PermissionLevel;
   children: React.ReactNode;
   fallback?: React.ReactNode;
 }
 
 /**
- * 機能ベースの認可コンポーネント
- * 指定された機能と権限レベルに対する権限をチェックし、
- * 権限がある場合のみ子コンポーネントを表示
+ * Finance用の機能ベースの認可コンポーネント
+ * nextjs-common の FeatureGuard をラップして型安全性を提供
  */
 export default function FeatureGuard({
   feature,
@@ -26,46 +23,13 @@ export default function FeatureGuard({
   children,
   fallback = <div>この機能へのアクセス権限がありません。</div>
 }: FeatureGuardProps) {
-  const [hasPermission, setHasPermission] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    checkPermission();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [feature, level]);
-
-  const checkPermission = async () => {
-    try {
-      const requestBody: CheckPermissionRequestType = { feature, level };
-      const response = await fetch('/api/auth/check-permission', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody),
-        cache: 'no-store', // Ensure fresh permission checks
-      });
-
-      if (!response.ok) {
-        setHasPermission(false);
-        return;
-      }
-
-      const result: CheckPermissionResponseType = await response.json();
-      setHasPermission(result.hasPermission);
-    } catch (error) {
-      console.error('Error checking permission:', error);
-      setHasPermission(false);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
-    return <div>読み込み中...</div>;
-  }
-
-  if (!hasPermission) {
-    return <>{fallback}</>;
-  }
-
-  return <>{children}</>;
+  return (
+    <BaseFeatureGuard
+      feature={feature}
+      level={level}
+      fallback={fallback}
+    >
+      {children}
+    </BaseFeatureGuard>
+  );
 }

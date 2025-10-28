@@ -18,7 +18,8 @@ import LoadingContent from '@client-common/components/content/LoadingContent';
 import ExchangeFetchService from '@/services/exchange/ExchangeFetchService.client';
 import FinanceNotificationEditDialogContent from '@/app/components/financeNotification/FinanceNotificationEditDialogContent';
 import FinanceNotificationFetchService from '@/services/financeNotification/FinanceNotificationFetchService.client';
-import { Feature, PermissionLevel } from '@/types/AuthorizationTypes';
+import { FinanceFeature } from '@finance/consts/FinanceConst';
+import { PermissionLevel } from '@common/enums/PermissionLevel';
 import FeatureGuard from '@/app/components/FeatureGuard';
 import TickerFetchService from '@/services/ticker/TickerFetchService.client';
 import { ExchangeDataType } from '@/interfaces/data/ExchangeDataType';
@@ -158,7 +159,7 @@ export default function FinanceNotificationPage() {
 
     return (
         <FeatureGuard 
-            feature={Feature.FINANCE_NOTIFICATION} 
+            feature={FinanceFeature.FINANCE_NOTIFICATION} 
             level={PermissionLevel.EDIT}
         >
             <LoadingContent>

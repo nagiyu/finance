@@ -5,7 +5,8 @@ import CommonLayout from '@client-common/components/layout/CommonLayout';
 import { MenuItemData } from '@client-common/components/navigations/Menus/LinkMenu';
 
 import AuthorizationService from '@/services/auth/AuthorizationService';
-import { Feature, PermissionLevel } from '@/types/AuthorizationTypes';
+import { PermissionLevel } from '@common/enums/PermissionLevel';
+import { FinanceFeature } from '@finance/consts/FinanceConst';
 
 export const metadata: Metadata = {
   title: 'Finance',
@@ -17,31 +18,31 @@ const getMenuItems = async (): Promise<MenuItemData[]> => {
 
   // ユーザー向けメニュー
   // Homeは株価チャート機能のVIEW権限で判定
-  if (await AuthorizationService.authorize(Feature.STOCK_CHART, PermissionLevel.VIEW)) {
+  if (await AuthorizationService.authorize(FinanceFeature.STOCK_CHART, PermissionLevel.VIEW)) {
     menuItems.push({ title: 'Home', url: '/' });
   }
 
   // My Tickerメニュー
-  if (await AuthorizationService.authorize(Feature.MY_TICKER, PermissionLevel.VIEW)) {
+  if (await AuthorizationService.authorize(FinanceFeature.MY_TICKER, PermissionLevel.VIEW)) {
     menuItems.push({ title: 'My Ticker', url: '/myticker' });
   }
 
   // Finance Notificationメニュー
-  if (await AuthorizationService.authorize(Feature.FINANCE_NOTIFICATION, PermissionLevel.VIEW)) {
+  if (await AuthorizationService.authorize(FinanceFeature.FINANCE_NOTIFICATION, PermissionLevel.VIEW)) {
     menuItems.push({ title: 'Finance Notification', url: '/finance-notification' });
   }
 
   // 管理者向けメニュー
-  if (await AuthorizationService.authorize(Feature.EXCHANGE, PermissionLevel.VIEW)) {
+  if (await AuthorizationService.authorize(FinanceFeature.EXCHANGE, PermissionLevel.VIEW)) {
     menuItems.push({ title: 'Exchange', url: '/exchanges' });
   }
 
-  if (await AuthorizationService.authorize(Feature.TICKER, PermissionLevel.VIEW)) {
+  if (await AuthorizationService.authorize(FinanceFeature.TICKER, PermissionLevel.VIEW)) {
     menuItems.push({ title: 'Ticker', url: '/tickers' });
   }
 
   // 認可設定メニュー
-  if (await AuthorizationService.authorize(Feature.PERMISSION_ADMIN, PermissionLevel.VIEW)) {
+  if (await AuthorizationService.authorize(FinanceFeature.PERMISSION_ADMIN, PermissionLevel.VIEW)) {
     menuItems.push({ title: 'Permission Admin', url: '/permission-admin' });
   }
 

@@ -1,23 +1,27 @@
 import { NextRequest } from 'next/server';
 
+import { PermissionLevel } from '@common/enums/PermissionLevel';
+import { PermissionMatrix } from '@common/interfaces/authorization/PermissionMatrix';
+
 import APIUtil from '@client-common/utils/APIUtil';
+
+import { FinanceFeature } from '@finance/consts/FinanceConst';
 
 import AuthorizationService from '@/services/auth/AuthorizationService';
 import PermissionMatrixService from '@/services/auth/PermissionMatrixService';
-import { Feature, PermissionLevel, PermissionMatrix } from '@/types/AuthorizationTypes';
 
 /**
  * 権限マトリックス更新APIのリクエスト型
  */
 export interface PermissionMatrixUpdateRequestType {
-  matrix: PermissionMatrix;
+  matrix: PermissionMatrix<FinanceFeature>;
 }
 
 /**
  * 権限マトリックス取得APIのレスポンス型
  */
 export interface PermissionMatrixGetResponseType {
-  matrix: PermissionMatrix;
+  matrix: PermissionMatrix<FinanceFeature>;
 }
 
 /**
@@ -38,7 +42,7 @@ export async function GET() {
   try {
     // 管理者権限チェック
     const isAdmin = await AuthorizationService.authorize(
-      Feature.PERMISSION_ADMIN,
+      FinanceFeature.PERMISSION_ADMIN,
       PermissionLevel.ADMIN
     );
 
@@ -64,7 +68,7 @@ export async function PUT(request: NextRequest) {
   try {
     // 管理者権限チェック
     const isAdmin = await AuthorizationService.authorize(
-      Feature.PERMISSION_ADMIN,
+      FinanceFeature.PERMISSION_ADMIN,
       PermissionLevel.ADMIN
     );
 

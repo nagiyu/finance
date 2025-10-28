@@ -8,11 +8,12 @@ import { TimeFrame } from '@finance/utils/FinanceUtil';
 import APIUtil from '@client-common/utils/APIUtil';
 
 import AuthorizationService from '@/services/auth/AuthorizationService';
-import { Feature, PermissionLevel } from '@/types/AuthorizationTypes';
+import { PermissionLevel } from '@common/enums/PermissionLevel';
+import { FinanceFeature } from '@finance/consts/FinanceConst';
 import TimeFrameUtil from '@/utils/TimeFrameUtil';
 
 export async function GET(request: NextRequest) {
-  if (!await AuthorizationService.authorize(Feature.FINANCE_NOTIFICATION, PermissionLevel.VIEW)) {
+  if (!await AuthorizationService.authorize(FinanceFeature.FINANCE_NOTIFICATION, PermissionLevel.VIEW)) {
     return APIUtil.ReturnUnauthorized();
   }
 

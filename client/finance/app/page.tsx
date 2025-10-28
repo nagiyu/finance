@@ -23,7 +23,8 @@ import { ExchangeDataType } from '@/interfaces/data/ExchangeDataType';
 import { TickerDataType } from '@/interfaces/data/TickerDataType';
 
 import FeatureGuard from '@/app/components/FeatureGuard';
-import { Feature, PermissionLevel } from '@/types/AuthorizationTypes';
+import { FinanceFeature } from '@finance/consts/FinanceConst';
+import { PermissionLevel } from '@common/enums/PermissionLevel';
 import AllConditionDisplay from '@/app/components/AllConditionDisplay';
 import ExchangeFetchService from '@/services/exchange/ExchangeFetchService.client';
 import Graph from '@/app/components/graph';
@@ -134,7 +135,7 @@ export default function Home() {
 
   return (
     <FeatureGuard 
-      feature={Feature.STOCK_CHART} 
+      feature={FinanceFeature.STOCK_CHART} 
       level={PermissionLevel.VIEW}
     >
       <BasicStack>
