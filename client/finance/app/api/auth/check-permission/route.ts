@@ -1,6 +1,10 @@
 import { NextRequest } from 'next/server';
 
-import APIUtil from '@client-common/utils/APIUtil';
+import { BadRequestError } from '@common/errors';
+
+import APIUtil, { APIResponseOptions } from '@client-common/utils/APIUtil';
+
+import { ROOT_FEATURE } from '@finance/consts/FinanceConst';
 
 import AuthorizationService from '@/services/auth/AuthorizationService';
 import { Feature, PermissionLevel } from '@/types/AuthorizationTypes';
@@ -24,22 +28,27 @@ export interface CheckPermissionResponseType {
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
+const options: APIResponseOptions = {
+  rootFeature: ROOT_FEATURE,
+  feature: 'CheckPermission'
+};
+
 /**
  * 権限チェックAPI
  * クライアントから指定された機能と権限レベルに対する権限を確認
  */
 export async function POST(request: NextRequest) {
-  try {
+  return APIUtil.apiHandler(async () => {
     const body: CheckPermissionRequestType = await request.json();
     const { feature, level } = body;
 
     // 入力検証
     if (!feature || !Object.values(Feature).includes(feature as Feature)) {
-      return APIUtil.ReturnBadRequest('Invalid feature');
+      throw new BadRequestError('Invalid feature');
     }
 
     if (!level || !Object.values(PermissionLevel).includes(level as PermissionLevel)) {
-      return APIUtil.ReturnBadRequest('Invalid permission level');
+      throw new BadRequestError('Invalid permission level');
     }
 
     // 権限チェック
@@ -49,9 +58,7 @@ export async function POST(request: NextRequest) {
     );
 
     const response: CheckPermissionResponseType = { hasPermission };
-    return APIUtil.ReturnSuccessWithObject(response);
-  } catch (error) {
-    console.error('Error in check-permission API:', error);
-    return APIUtil.ReturnInternalServerErrorWithError(error);
-  }
+
+    return response;
+  }, options);
 }
