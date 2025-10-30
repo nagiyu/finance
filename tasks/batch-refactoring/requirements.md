@@ -757,10 +757,10 @@ AWS Batch ジョブに渡すパラメータのフォーマット:
 
 ### 即時実施事項
 
-1. **技術調査**
-    - AWS Batch vs ECS の詳細比較
-    - 既存コードの ECS 移行難易度評価
-    - POC 実装 (小規模)
+1. **技術調査** ✅ 完了
+    - AWS Batch vs ECS の詳細比較 → [技術調査結果](./batch-refactoring-technical-investigation.md)
+    - 既存コードの移行難易度評価 → [技術調査結果](./batch-refactoring-technical-investigation.md)
+    - POC 実装アプローチ → [技術調査結果](./batch-refactoring-technical-investigation.md)
 
 2. **詳細設計**
     - インフラストラクチャ設計
@@ -796,6 +796,7 @@ AWS Batch ジョブに渡すパラメータのフォーマット:
 
 ### 関連ドキュメント
 
+- **[技術調査結果](./batch-refactoring-technical-investigation.md)** - AWS Batch vs ECS 詳細比較、移行難易度評価、POC アプローチ
 - [Finance Module Overview](./README.md)
 - [Finance Server Documentation](./server/README.md)
 - [条件システム](./conditions-system.md)
@@ -810,5 +811,6 @@ AWS Batch ジョブに渡すパラメータのフォーマット:
 ---
 
 **作成日**: 2024年10月29日  
-**バージョン**: 1.0  
-**ステータス**: 初版 - レビュー待ち
+**最終更新**: 2024年10月30日  
+**バージョン**: 1.1  
+**ステータス**: 技術調査完了 - 詳細設計フェーズへ
