@@ -52,27 +52,27 @@ cd scripts
 ### ステップバイステップのセットアップ
 
 1. **IAM ロールの作成**
-   ```bash
-   cd scripts
-   ./setup-iam-roles.sh
-   ```
+    ```bash
+    cd scripts
+    ./setup-iam-roles.sh
+    ```
 
 2. **ECR リポジトリの作成**
-   ```bash
-   ./setup-ecr.sh
-   ```
+    ```bash
+    ./setup-ecr.sh
+    ```
 
 3. **AWS Batch 環境の作成**
-   ```bash
-   ./setup-batch.sh
-   ```
+    ```bash
+    ./setup-batch.sh
+    ```
 
 4. **Worker コンテナのビルドとプッシュ**
-   ```bash
-   cd ../worker
-   npm install
-   ./build-and-push.sh
-   ```
+    ```bash
+    cd ../worker
+    npm install
+    ./build-and-push.sh
+    ```
 
 ### AWS コンソール (GUI) を使用したセットアップ
 
