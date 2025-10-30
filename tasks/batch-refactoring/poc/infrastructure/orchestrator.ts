@@ -5,7 +5,9 @@
  * AWS Batch にジョブを投入します
  */
 
-import { Batch, DynamoDB } from 'aws-sdk';
+import { BatchClient, SubmitJobCommand } from '@aws-sdk/client-batch';
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { DynamoDBDocumentClient, ScanCommand } from '@aws-sdk/lib-dynamodb';
 
 // 環境変数
 const PROCESS_ENV = process.env.PROCESS_ENV || 'development';
@@ -13,9 +15,10 @@ const AWS_REGION = process.env.AWS_REGION || 'ap-northeast-1';
 const JOB_QUEUE_NAME = 'finance-notification-poc-job-queue';
 const JOB_DEFINITION_NAME = 'finance-notification-poc-worker';
 
-// AWS SDK の設定
-const batch = new Batch({ region: AWS_REGION });
-const dynamodb = new DynamoDB.DocumentClient({ region: AWS_REGION });
+// AWS SDK v3 クライアントの設定
+const batchClient = new BatchClient({ region: AWS_REGION });
+const ddbClient = new DynamoDBClient({ region: AWS_REGION });
+const dynamodb = DynamoDBDocumentClient.from(ddbClient);
 
 // ログユーティリティ
 function log(level: string, message: string, data?: any) {
@@ -125,9 +128,9 @@ async function getNotificationSettings() {
   const tableName = PROCESS_ENV === 'production' ? 'Finance' : 'DevFinance';
 
   try {
-    const result = await dynamodb.scan({
+    const result = await dynamodb.send(new ScanCommand({
       TableName: `${tableName}FinanceNotification`
-    }).promise();
+    }));
 
     return result.Items || [];
   } catch (error) {
@@ -164,7 +167,7 @@ async function submitBatchJobs(notifications: any[]) {
   const jobPromises = notifications.map(notification => {
     const jobName = `notification-${notification.id}-${Date.now()}`;
 
-    return batch.submitJob({
+    return batchClient.send(new SubmitJobCommand({
       jobName,
       jobQueue: JOB_QUEUE_NAME,
       jobDefinition: JOB_DEFINITION_NAME,
@@ -180,7 +183,7 @@ async function submitBatchJobs(notifications: any[]) {
           }
         ]
       }
-    }).promise()
+    }))
       .then(result => {
         log('INFO', 'Job submitted', {
           jobName,

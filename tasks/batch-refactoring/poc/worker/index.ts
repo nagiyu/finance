@@ -5,16 +5,19 @@
  * 1つの通知設定を処理し、条件チェックと通知送信を実行します
  */
 
-import { DynamoDB, SecretsManager } from 'aws-sdk';
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { DynamoDBDocumentClient, GetCommand } from '@aws-sdk/lib-dynamodb';
+import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
 
 // 環境変数
 const PROCESS_ENV = process.env.PROCESS_ENV || 'development';
 const AWS_REGION = process.env.AWS_REGION || 'ap-northeast-1';
 const NOTIFICATION_ID = process.env.NOTIFICATION_ID;
 
-// AWS SDK の設定
-const dynamodb = new DynamoDB.DocumentClient({ region: AWS_REGION });
-const secretsManager = new SecretsManager({ region: AWS_REGION });
+// AWS SDK v3 クライアントの設定
+const ddbClient = new DynamoDBClient({ region: AWS_REGION });
+const dynamodb = DynamoDBDocumentClient.from(ddbClient);
+const secretsManager = new SecretsManagerClient({ region: AWS_REGION });
 
 // ログユーティリティ
 function log(level: string, message: string, data?: any) {
@@ -101,10 +104,10 @@ async function getNotificationSettings(notificationId: string) {
   const tableName = PROCESS_ENV === 'production' ? 'Finance' : 'DevFinance';
   
   try {
-    const result = await dynamodb.get({
+    const result = await dynamodb.send(new GetCommand({
       TableName: `${tableName}FinanceNotification`,
       Key: { id: notificationId }
-    }).promise();
+    }));
 
     return result.Item;
   } catch (error) {
@@ -117,19 +120,27 @@ async function getNotificationSettings(notificationId: string) {
 
 /**
  * Secrets Manager からシークレットを取得
- * 注: 現在は未使用だが、将来の実装で必要になる可能性がある
+ * 
+ * @param secretName - シークレット名
+ * @returns パースされたシークレット値
+ * 
+ * @example
+ * ```typescript
+ * // 将来の実装例:
+ * const secrets = await getSecrets(process.env.PROJECT_SECRET);
+ * ```
  */
-async function getSecrets() {
-  const secretName = process.env.PROJECT_SECRET;
+export async function getSecrets(secretName?: string) {
+  const name = secretName || process.env.PROJECT_SECRET;
   
-  if (!secretName) {
+  if (!name) {
     throw new Error('PROJECT_SECRET environment variable is required');
   }
 
   try {
-    const result = await secretsManager.getSecretValue({
-      SecretId: secretName
-    }).promise();
+    const result = await secretsManager.send(new GetSecretValueCommand({
+      SecretId: name
+    }));
 
     if (result.SecretString) {
       return JSON.parse(result.SecretString);
@@ -146,6 +157,3 @@ async function getSecrets() {
 
 // プロセスの開始
 main();
-
-// getSecrets は将来の実装で使用される予定
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
