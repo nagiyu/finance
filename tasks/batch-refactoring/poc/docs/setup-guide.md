@@ -86,7 +86,22 @@ cd tasks/batch-refactoring/poc/scripts
 
 個別にセットアップする場合は、以下の順序で実行してください:
 
-#### 1. IAM ロールのセットアップ
+#### 1. VPC ネットワークのセットアップ
+
+```bash
+./setup-vpc.sh
+```
+
+作成されるリソース:
+- VPC: `finance-notification-poc-vpc` (CIDR: 10.0.0.0/16)
+- インターネットゲートウェイ: VPC に接続
+- パブリックサブネット: 2つのアベイラビリティゾーンに配置
+- ルートテーブル: インターネットゲートウェイへのルート設定
+- セキュリティグループ: `finance-notification-poc-sg`
+
+**注意**: このスクリプトは新規に VPC とネットワークリソースを作成します。デフォルトの VPC は使用しません。
+
+#### 2. IAM ロールのセットアップ
 
 ```bash
 ./setup-iam-roles.sh
@@ -97,7 +112,7 @@ cd tasks/batch-refactoring/poc/scripts
 - `finance-notification-poc-batch-job-role`: Batch Job 用
 - `finance-notification-poc-batch-execution-role`: Batch Task 実行用
 
-#### 2. ECR リポジトリのセットアップ
+#### 3. ECR リポジトリのセットアップ
 
 ```bash
 ./setup-ecr.sh
@@ -106,7 +121,7 @@ cd tasks/batch-refactoring/poc/scripts
 作成されるリポジトリ:
 - `finance-notification-poc-worker`: Worker コンテナイメージ用
 
-#### 3. AWS Batch 環境のセットアップ
+#### 4. AWS Batch 環境のセットアップ
 
 ```bash
 ./setup-batch.sh
@@ -123,7 +138,20 @@ cd tasks/batch-refactoring/poc/scripts
 
 AWS マネジメントコンソールから手動でセットアップする場合の手順です。
 
-### 1. IAM ロールの作成
+### 1. VPC ネットワークの作成
+
+詳細は [docs/vpc-setup-guide.md](./vpc-setup-guide.md) を参照してください。
+
+要約:
+1. VPC コンソールを開く
+2. 以下のリソースを作成:
+   - VPC (10.0.0.0/16)
+   - インターネットゲートウェイ
+   - パブリックサブネット × 2
+   - ルートテーブル
+   - セキュリティグループ
+
+### 2. IAM ロールの作成
 
 詳細は [docs/iam-setup-guide.md](./iam-setup-guide.md) を参照してください。
 
@@ -135,7 +163,7 @@ AWS マネジメントコンソールから手動でセットアップする場�
    - Batch Task 実行ロール
 3. 各ロールに適切なポリシーをアタッチ
 
-### 2. ECR リポジトリの作成
+### 3. ECR リポジトリの作成
 
 詳細は [docs/ecr-setup-guide.md](./ecr-setup-guide.md) を参照してください。
 
@@ -145,7 +173,7 @@ AWS マネジメントコンソールから手動でセットアップする場�
 3. イメージスキャンを有効化
 4. ライフサイクルポリシーを設定
 
-### 3. AWS Batch リソースの作成
+### 4. AWS Batch リソースの作成
 
 詳細は [docs/batch-setup-guide.md](./batch-setup-guide.md) を参照してください。
 

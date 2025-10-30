@@ -8,12 +8,14 @@
 poc/
 ├── scripts/               # AWS CLI セットアップスクリプト
 │   ├── setup.sh          # メインセットアップスクリプト（全体）
+│   ├── setup-vpc.sh      # VPC とネットワーク作成
 │   ├── setup-iam-roles.sh    # IAM ロール作成
 │   ├── setup-ecr.sh          # ECR リポジトリ作成
 │   └── setup-batch.sh        # AWS Batch リソース作成
 │
 ├── docs/                  # GUI セットアップドキュメント
 │   ├── setup-guide.md        # 総合セットアップガイド
+│   ├── vpc-setup-guide.md    # VPC セットアップガイド (GUI)
 │   ├── iam-setup-guide.md    # IAM ロール設定ガイド (GUI)
 │   ├── ecr-setup-guide.md    # ECR セットアップガイド (GUI)
 │   └── batch-setup-guide.md  # AWS Batch セットアップガイド (GUI)
@@ -51,23 +53,28 @@ cd scripts
 
 ### ステップバイステップのセットアップ
 
-1. **IAM ロールの作成**
+1. **VPC ネットワークの作成**
     ```bash
     cd scripts
+    ./setup-vpc.sh
+    ```
+
+2. **IAM ロールの作成**
+    ```bash
     ./setup-iam-roles.sh
     ```
 
-2. **ECR リポジトリの作成**
+3. **ECR リポジトリの作成**
     ```bash
     ./setup-ecr.sh
     ```
 
-3. **AWS Batch 環境の作成**
+4. **AWS Batch 環境の作成**
     ```bash
     ./setup-batch.sh
     ```
 
-4. **Worker コンテナのビルドとプッシュ**
+5. **Worker コンテナのビルドとプッシュ**
     ```bash
     cd ../worker
     npm install
@@ -79,11 +86,20 @@ cd scripts
 GUI から手動でセットアップする場合は、以下のドキュメントを参照してください:
 
 1. [セットアップガイド](./docs/setup-guide.md) - 全体の流れ
-2. [IAM ロール設定ガイド](./docs/iam-setup-guide.md)
-3. [ECR セットアップガイド](./docs/ecr-setup-guide.md)
-4. [AWS Batch セットアップガイド](./docs/batch-setup-guide.md)
+2. [VPC セットアップガイド](./docs/vpc-setup-guide.md)
+3. [IAM ロール設定ガイド](./docs/iam-setup-guide.md)
+4. [ECR セットアップガイド](./docs/ecr-setup-guide.md)
+5. [AWS Batch セットアップガイド](./docs/batch-setup-guide.md)
 
 ## 📋 作成されるリソース
+
+### VPC とネットワーク
+
+- VPC: `finance-notification-poc-vpc` (10.0.0.0/16)
+- インターネットゲートウェイ: `finance-notification-poc-igw`
+- パブリックサブネット × 2 (異なるアベイラビリティゾーン)
+- ルートテーブル: `finance-notification-poc-public-rt`
+- セキュリティグループ: `finance-notification-poc-sg`
 
 ### IAM ロール
 

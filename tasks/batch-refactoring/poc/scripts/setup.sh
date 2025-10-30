@@ -72,15 +72,19 @@ fi
 echo ""
 
 # セットアップの実行
-echo -e "${BLUE}=== ステップ 1/3: IAM ロールのセットアップ ===${NC}"
+echo -e "${BLUE}=== ステップ 1/4: VPC ネットワークのセットアップ ===${NC}"
+bash "$SCRIPT_DIR/setup-vpc.sh"
+echo ""
+
+echo -e "${BLUE}=== ステップ 2/4: IAM ロールのセットアップ ===${NC}"
 bash "$SCRIPT_DIR/setup-iam-roles.sh"
 echo ""
 
-echo -e "${BLUE}=== ステップ 2/3: ECR リポジトリのセットアップ ===${NC}"
+echo -e "${BLUE}=== ステップ 3/4: ECR リポジトリのセットアップ ===${NC}"
 bash "$SCRIPT_DIR/setup-ecr.sh"
 echo ""
 
-echo -e "${BLUE}=== ステップ 3/3: AWS Batch 環境のセットアップ ===${NC}"
+echo -e "${BLUE}=== ステップ 4/4: AWS Batch 環境のセットアップ ===${NC}"
 bash "$SCRIPT_DIR/setup-batch.sh"
 echo ""
 

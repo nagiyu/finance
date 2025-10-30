@@ -34,49 +34,33 @@ AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 echo "AWS アカウント ID: $AWS_ACCOUNT_ID"
 echo ""
 
-# VPC とサブネットの確認
-echo -e "${YELLOW}VPC とサブネットの設定を確認中...${NC}"
-echo "注意: Fargate を使用するため、パブリックまたはプライベートサブネット (NAT Gateway 経由) が必要です"
+# VPC 設定の読み込み
+echo -e "${YELLOW}VPC 設定を読み込み中...${NC}"
 echo ""
 
-# デフォルト VPC を取得
-DEFAULT_VPC=$(aws ec2 describe-vpcs --filters "Name=isDefault,Values=true" --query 'Vpcs[0].VpcId' --output text --region "$AWS_REGION")
+VPC_CONFIG_FILE="/tmp/${PROJECT_NAME}-vpc-config.env"
 
-if [ "$DEFAULT_VPC" = "None" ] || [ -z "$DEFAULT_VPC" ]; then
-    echo -e "${RED}Error: デフォルト VPC が見つかりません${NC}"
-    echo "VPC ID を手動で指定してください: export VPC_ID=vpc-xxxxxxxx"
+# VPC 設定ファイルが存在する場合は読み込む
+if [ -f "$VPC_CONFIG_FILE" ]; then
+    echo "  VPC 設定ファイルから読み込み: $VPC_CONFIG_FILE"
+    source "$VPC_CONFIG_FILE"
+fi
+
+# 環境変数または設定ファイルから VPC 設定を取得
+if [ -z "$VPC_ID" ] || [ -z "$SUBNETS" ] || [ -z "$SECURITY_GROUP" ]; then
+    echo -e "${RED}Error: VPC 設定が見つかりません${NC}"
+    echo ""
+    echo "以下のいずれかを実行してください:"
+    echo "  1. ./setup-vpc.sh を実行して VPC を新規作成"
+    echo "  2. 環境変数を手動で設定:"
+    echo "     export VPC_ID=vpc-xxxxxxxx"
+    echo "     export SUBNETS=subnet-xxxxxx,subnet-yyyyyy"
+    echo "     export SECURITY_GROUP=sg-xxxxxxxx"
     exit 1
 fi
 
-VPC_ID="${VPC_ID:-$DEFAULT_VPC}"
 echo "使用する VPC: $VPC_ID"
-
-# サブネットを取得 (デフォルト VPC のパブリックサブネット)
-SUBNETS=$(aws ec2 describe-subnets \
-    --filters "Name=vpc-id,Values=$VPC_ID" \
-    --query 'Subnets[*].SubnetId' \
-    --output text \
-    --region "$AWS_REGION" | tr '\t' ',')
-
-if [ -z "$SUBNETS" ]; then
-    echo -e "${RED}Error: サブネットが見つかりません${NC}"
-    exit 1
-fi
-
 echo "使用するサブネット: $SUBNETS"
-
-# セキュリティグループの確認 (デフォルト VPC のデフォルトセキュリティグループ)
-SECURITY_GROUP=$(aws ec2 describe-security-groups \
-    --filters "Name=vpc-id,Values=$VPC_ID" "Name=group-name,Values=default" \
-    --query 'SecurityGroups[0].GroupId' \
-    --output text \
-    --region "$AWS_REGION")
-
-if [ "$SECURITY_GROUP" = "None" ] || [ -z "$SECURITY_GROUP" ]; then
-    echo -e "${RED}Error: セキュリティグループが見つかりません${NC}"
-    exit 1
-fi
-
 echo "使用するセキュリティグループ: $SECURITY_GROUP"
 echo ""
 

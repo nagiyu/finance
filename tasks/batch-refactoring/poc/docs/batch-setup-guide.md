@@ -18,11 +18,20 @@ AWS Batch の環境構築には、以下の 3 つのリソースを順番に作�
 
 以下のリソースが作成済みであることを確認してください:
 
-- IAM ロール:
+- **VPC ネットワーク**:
+  - VPC: `finance-notification-poc-vpc`
+  - パブリックサブネット × 2
+  - セキュリティグループ: `finance-notification-poc-sg`
+  - → [VPC セットアップガイド](./vpc-setup-guide.md)
+
+- **IAM ロール**:
   - `finance-notification-poc-batch-job-role`
   - `finance-notification-poc-batch-execution-role`
-- ECR リポジトリ:
+  - → [IAM セットアップガイド](./iam-setup-guide.md)
+
+- **ECR リポジトリ**:
   - `finance-notification-poc-worker` (イメージがプッシュ済み)
+  - → [ECR セットアップガイド](./ecr-setup-guide.md)
 
 ---
 
@@ -51,12 +60,11 @@ AWS Batch の環境構築には、以下の 3 つのリソースを順番に作�
    - 最大 vCPU: `4`
 
 6. **ネットワーク設定**
-   - VPC: デフォルト VPC または適切な VPC を選択
+   - VPC: `finance-notification-poc-vpc` を選択
    - サブネット: 
-     - パブリックサブネットを選択（インターネットゲートウェイ経由）
-     - または、プライベートサブネット（NAT Gateway 経由）
-   - セキュリティグループ: デフォルトセキュリティグループまたは適切なセキュリティグループ
-     - アウトバウンドルールで HTTPS (443) が許可されていることを確認
+     - `finance-notification-poc-public-subnet-0` を選択
+     - `finance-notification-poc-public-subnet-1` を選択
+   - セキュリティグループ: `finance-notification-poc-sg` を選択
 
 7. **タグ（オプション）**
    - キー: `Environment`, 値: `POC`
