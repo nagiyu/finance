@@ -266,6 +266,7 @@ Finance Module
 - [Server Documentation](./server/README.md) - Lambda functions and API endpoints
 - [Client Documentation](./client/README.md) - Next.js application and UI components
 - [Common Module](../common/README.md) - Shared utilities and services
+- **[バッチ処理リファクタリング要件定義](./batch-refactoring-requirements.md)** - AWS Batch/SQS/ECS を活用したスケーラブルなバッチ処理への移行計画
 - **[条件システム](./conditions-system.md)** - 利用可能な条件の詳細説明
 - **[条件ごとの通知頻度設定機能](./per-condition-frequency.md)** - 条件別通知頻度設定・時間枠設定機能
 - **[簡易通知設定 API](./simplified-notification-api.md)** - 買い/売りモードとターゲット価格のみで設定できる新しいAPI
