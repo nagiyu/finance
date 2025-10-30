@@ -126,12 +126,43 @@ else
         --cli-input-json file:///tmp/compute-env.json \
         --region "$AWS_REGION" > /dev/null
     echo -e "  ${GREEN}✓${NC} Compute Environment 作成完了: $COMPUTE_ENV_NAME"
-    
-    # Compute Environment が VALID 状態になるまで待機
-    echo "  Compute Environment が有効になるまで待機中..."
-    aws batch wait compute-environment-ready \
+fi
+
+# Compute Environment が VALID 状態になるまで待機
+echo "  Compute Environment が有効になるまで待機中..."
+MAX_WAIT=300  # 最大5分待機
+WAIT_INTERVAL=10
+ELAPSED=0
+
+while [ $ELAPSED -lt $MAX_WAIT ]; do
+    STATUS=$(aws batch describe-compute-environments \
         --compute-environments "$COMPUTE_ENV_NAME" \
-        --region "$AWS_REGION" 2>/dev/null || sleep 10
+        --region "$AWS_REGION" \
+        --query 'computeEnvironments[0].status' \
+        --output text 2>/dev/null)
+    
+    if [ "$STATUS" = "VALID" ]; then
+        echo -e "  ${GREEN}✓${NC} Compute Environment が有効になりました"
+        break
+    elif [ "$STATUS" = "INVALID" ]; then
+        echo -e "  ${RED}Error: Compute Environment が無効な状態です${NC}"
+        # エラー詳細を表示
+        aws batch describe-compute-environments \
+            --compute-environments "$COMPUTE_ENV_NAME" \
+            --region "$AWS_REGION" \
+            --query 'computeEnvironments[0].statusReason' \
+            --output text
+        exit 1
+    fi
+    
+    echo "  待機中... (${ELAPSED}秒経過, ステータス: $STATUS)"
+    sleep $WAIT_INTERVAL
+    ELAPSED=$((ELAPSED + WAIT_INTERVAL))
+done
+
+if [ $ELAPSED -ge $MAX_WAIT ]; then
+    echo -e "  ${RED}Error: Compute Environment が時間内に有効になりませんでした${NC}"
+    exit 1
 fi
 
 COMPUTE_ENV_ARN=$(aws batch describe-compute-environments \
