@@ -119,10 +119,6 @@ graph TB
     BatchQueue --> ComputeEnv
     ComputeEnv --> BatchJob
     BatchJob --> Storage
-    
-    style BatchQueue fill:#e1f5ff
-    style ComputeEnv fill:#fff4e1
-    style BatchJob fill:#e8f5e9
 ```
 
 #### アーキテクチャの特徴
@@ -177,8 +173,6 @@ graph TB
     SQS --> ECS
     ECS --> ECSTask
     ECSTask --> Storage2
-    
-    style SQS fill:#e1f5ff
 ```
 
 **ECS + SQS を選択する場合:**
