@@ -117,6 +117,7 @@ async function getNotificationSettings(notificationId: string) {
 
 /**
  * Secrets Manager からシークレットを取得
+ * 注: 現在は未使用だが、将来の実装で必要になる可能性がある
  */
 async function getSecrets() {
   const secretName = process.env.PROJECT_SECRET;
@@ -145,3 +146,6 @@ async function getSecrets() {
 
 // プロセスの開始
 main();
+
+// getSecrets は将来の実装で使用される予定
+// eslint-disable-next-line @typescript-eslint/no-unused-vars

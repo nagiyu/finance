@@ -94,6 +94,15 @@ echo -e "${YELLOW}[1/3] Compute Environment を作成中...${NC}"
 
 COMPUTE_ENV_NAME="${PROJECT_NAME}-compute-env"
 
+# サブネット配列を JSON 形式に変換
+if command -v jq &> /dev/null; then
+    # jq が利用可能な場合
+    SUBNETS_JSON=$(echo "$SUBNETS" | tr ',' '\n' | jq -R . | jq -s .)
+else
+    # jq が利用できない場合はフォールバック
+    SUBNETS_JSON="[$(echo $SUBNETS | sed 's/,/","/g' | sed 's/^/"/' | sed 's/$/"/')]"
+fi
+
 cat > /tmp/compute-env.json <<EOF
 {
   "computeEnvironmentName": "$COMPUTE_ENV_NAME",
@@ -102,7 +111,7 @@ cat > /tmp/compute-env.json <<EOF
   "computeResources": {
     "type": "FARGATE_SPOT",
     "maxvCpus": 4,
-    "subnets": [$(echo $SUBNETS | sed 's/,/","/g' | sed 's/^/"/' | sed 's/$/"/')],
+    "subnets": $SUBNETS_JSON,
     "securityGroupIds": ["$SECURITY_GROUP"]
   }
 }

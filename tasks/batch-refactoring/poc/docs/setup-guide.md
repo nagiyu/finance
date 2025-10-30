@@ -62,10 +62,10 @@ DynamoDB / TradingView API
 
 ### 環境変数
 
-以下の環境変数を設定してください:
+以下の環境変数を設定してください（オプション）:
 
 ```bash
-export AWS_REGION=ap-northeast-1  # 使用するリージョン
+export AWS_REGION=ap-northeast-1  # 使用するリージョン (オプション: AWS Configure で設定済みの場合は不要)
 export AWS_PROFILE=default        # AWS CLI プロファイル (オプション)
 ```
 

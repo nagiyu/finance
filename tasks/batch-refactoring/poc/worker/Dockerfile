@@ -8,7 +8,7 @@ FROM base AS builder
 
 # 依存関係のコピーとインストール
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm ci
 
 # ソースコードのコピー
 COPY . .

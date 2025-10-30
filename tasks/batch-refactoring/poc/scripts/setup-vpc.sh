@@ -108,10 +108,10 @@ echo ""
 echo -e "${YELLOW}[3/5] パブリックサブネットを作成中...${NC}"
 
 # アベイラビリティゾーンの取得
-AZS=($(aws ec2 describe-availability-zones \
+mapfile -t AZS < <(aws ec2 describe-availability-zones \
     --region "$AWS_REGION" \
     --query 'AvailabilityZones[0:2].ZoneName' \
-    --output text))
+    --output text | tr '\t' '\n')
 
 SUBNET_IDS=()
 for i in {0..1}; do
