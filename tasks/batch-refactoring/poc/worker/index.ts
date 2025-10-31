@@ -105,8 +105,8 @@ async function getNotificationSettings(notificationId: string) {
   
   try {
     const result = await dynamodb.send(new GetCommand({
-      TableName: `${tableName}FinanceNotification`,
-      Key: { id: notificationId }
+      TableName: tableName,
+      Key: { ID: notificationId, DataType: 'FinanceNotification' }
     }));
 
     return result.Item;
