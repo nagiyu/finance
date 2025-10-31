@@ -8,46 +8,73 @@
 
 ### Week 1: インフラ構築
 
-- [ ] AWS Batch 環境の構築
-    - [ ] Compute Environment の作成（Fargate Spot）
-    - [ ] Job Queue の作成（優先度設定）
-    - [ ] Job Definition の作成（vCPU: 0.25, Memory: 512MB）
-    - [ ] リトライ戦略の設定（最大3回、exponential backoff）
+- [x] AWS Batch 環境の構築 (POC)
+    - [x] Compute Environment の作成（Fargate Spot）
+    - [x] Job Queue の作成（優先度設定）
+    - [x] Job Definition の作成（vCPU: 0.25, Memory: 512MB）
+    - [x] リトライ戦略の設定（最大3回、exponential backoff）
 
-- [ ] ECR リポジトリの作成
-    - [ ] finance-worker リポジトリの作成
-    - [ ] リポジトリポリシーの設定
+- [x] ECR リポジトリの作成 (POC)
+    - [x] finance-worker リポジトリの作成
+    - [x] リポジトリポリシーの設定（ライフサイクルポリシー）
 
-- [ ] IAM ロール・ポリシーの設定
-    - [ ] Orchestrator Lambda 実行ロール作成
-        - [ ] DynamoDB アクセス権限（GetItem, Scan, Query, UpdateItem）
-        - [ ] AWS Batch ジョブ投入権限（SubmitJob）
-        - [ ] Secrets Manager アクセス権限（GetSecretValue）
-    - [ ] Batch Job 実行ロール作成
-        - [ ] DynamoDB アクセス権限
-        - [ ] Secrets Manager アクセス権限
-        - [ ] CloudWatch Logs 書き込み権限
-    - [ ] Batch Task 実行ロール作成（ECR、CloudWatch Logs）
+- [x] IAM ロール・ポリシーの設定 (POC)
+    - [x] Orchestrator Lambda 実行ロール作成
+        - [x] DynamoDB アクセス権限（GetItem, Scan, Query, UpdateItem）
+        - [x] AWS Batch ジョブ投入権限（SubmitJob, DescribeJobs）
+        - [x] Secrets Manager アクセス権限（GetSecretValue）
+    - [x] Batch Job 実行ロール作成
+        - [x] DynamoDB アクセス権限
+        - [x] Secrets Manager アクセス権限
+        - [x] CloudWatch Logs 書き込み権限
+    - [x] Batch Task 実行ロール作成（ECR、CloudWatch Logs）
 
-- [ ] Infrastructure as Code（Terraform/CloudFormation）
-    - [ ] Compute Environment のコード化
-    - [ ] Job Queue のコード化
-    - [ ] Job Definition のコード化
-    - [ ] IAM ロール・ポリシーのコード化
-    - [ ] VPC・セキュリティグループの設定
+- [x] Infrastructure as Code（AWS CLI スクリプト）(POC)
+    - [x] Compute Environment のコード化
+    - [x] Job Queue のコード化
+    - [x] Job Definition のコード化
+    - [x] IAM ロール・ポリシーのコード化
+    - [x] VPC・セキュリティグループの設定（デフォルト VPC 利用）
+    - [x] セットアップスクリプトの作成（setup.sh, setup-iam-roles.sh, setup-ecr.sh, setup-batch.sh）
+    - [x] GUI セットアップドキュメントの作成（iam-setup-guide.md, ecr-setup-guide.md, batch-setup-guide.md）
 
 ### Week 2: Worker 実装
 
-- [ ] Worker コンテナの実装
-    - [ ] 既存コードの分析と抽出
-        - [ ] FinanceNotificationService の処理ロジック抽出
-        - [ ] 1通知設定処理への分離
-        - [ ] 環境変数からのパラメータ取得実装
-    - [ ] Worker エントリーポイント作成（index.ts）
-        - [ ] AWS Batch ジョブパラメータの受け取り
-        - [ ] サービス初期化
-        - [ ] 条件チェックと通知送信
-        - [ ] エラーハンドリング実装
+- [x] Worker コンテナの実装 (POC スケルトン)
+    - [x] 既存コードの分析と抽出
+        - [x] FinanceNotificationService の処理ロジック抽出（スケルトン）
+        - [x] 1通知設定処理への分離（スケルトン）
+        - [x] 環境変数からのパラメータ取得実装
+    - [x] Worker エントリーポイント作成（index.ts）
+        - [x] AWS Batch ジョブパラメータの受け取り
+        - [x] サービス初期化（スケルトン）
+        - [ ] 条件チェックと通知送信（TODO: 実装が必要）
+        - [x] エラーハンドリング実装
+    - [x] ログ出力の実装
+        - [x] 構造化ログフォーマット
+        - [x] 処理開始・完了ログ
+        - [x] エラーログ
+
+- [x] Docker 化 (POC)
+    - [x] Dockerfile 作成
+        - [x] Node.js 18 Alpine ベースイメージ
+        - [x] 依存関係インストール
+        - [x] TypeScript ビルド（esbuild）
+        - [x] マルチステージビルドの実装
+    - [x] .dockerignore 作成
+    - [x] ビルドスクリプト作成（build-and-push.sh）
+    - [ ] ローカルビルドテスト（TODO: 実際の環境でテストが必要）
+    - [ ] イメージサイズ最適化（TODO: 本番環境で検討）
+
+- [ ] ECR へのプッシュ
+    - [x] ビルドスクリプト作成
+    - [x] ECR 認証とプッシュスクリプト作成
+    - [ ] 初回イメージプッシュ（TODO: 実際の AWS 環境で実施）
+
+- [ ] ローカルテスト環境構築
+    - [ ] Docker Compose 設定（DynamoDB Local、LocalStack）
+    - [ ] テストデータ作成
+    - [ ] 動作確認
     - [ ] ログ出力の実装
         - [ ] 構造化ログフォーマット
         - [ ] 処理開始・完了ログ
@@ -259,6 +286,7 @@
 
 - [要件定義書](./requirements.md)
 - [技術調査結果](./technical-investigation.md)
+- [POC セットアップガイド](./poc/README.md)
 - [AWS Batch User Guide](https://docs.aws.amazon.com/batch/latest/userguide/)
 - [AWS Fargate Pricing](https://aws.amazon.com/fargate/pricing/)
 
@@ -266,4 +294,4 @@
 
 **作成日**: 2025年10月30日    
 **最終更新**: 2025年10月30日    
-**バージョン**: 1.0
+**バージョン**: 1.1 - POC 環境構築完了
