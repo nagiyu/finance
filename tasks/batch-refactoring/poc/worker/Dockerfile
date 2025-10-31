@@ -8,7 +8,8 @@ FROM base AS builder
 
 # 依存関係のコピーとインストール
 COPY package*.json ./
-RUN npm ci
+# RUN npm ci
+RUN npm install
 
 # ソースコードのコピー
 COPY . .
