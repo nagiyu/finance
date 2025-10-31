@@ -228,6 +228,9 @@ cat > /tmp/job-definition.json <<EOF
     "fargatePlatformConfiguration": {
       "platformVersion": "LATEST"
     },
+    "networkConfiguration": {
+      "assignPublicIp": "ENABLED"
+    },
     "resourceRequirements": [
       {
         "type": "VCPU",

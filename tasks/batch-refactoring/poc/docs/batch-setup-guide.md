@@ -134,6 +134,10 @@ AWS Batch の環境構築には、以下の 3 つのリソースを順番に作�
    - 実行ロール: `finance-notification-poc-batch-execution-role` を選択
    - ジョブロール: `finance-notification-poc-batch-job-role` を選択
 
+   - **ネットワーク設定**:
+     - パブリック IP の割り当て: **ENABLED**
+     - 注: パブリックサブネットで ECR にアクセスするために必要
+
 5. **環境変数**
    - 以下の環境変数を追加:
      - 名前: `PROCESS_ENV`, 値: `development`
