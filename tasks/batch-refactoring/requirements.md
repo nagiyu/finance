@@ -2,7 +2,7 @@
 
 ## 概要
 
-現行のバッチ処理システムをより堅牢でスケーラブルなアーキテクチャに移行するための要件定義書です。AWS Lambda の制約を克服し、AWS Batch、SQS、ECS を活用した処理負荷に強い構成を実現します。
+現行のバッチ処理システムをより堅牢でスケーラブルなアーキテクチャに移行するための要件定義書です。AWS Lambda の制約（実行時間制限）を克服し、EventBridge と ECS を活用したシンプルで運用しやすい構成を実現します。
 
 ## 現状分析
 
@@ -26,48 +26,24 @@ graph TB
 
 - **問題**: Lambda の最大実行時間は15分
 - **影響**: 
-    - ユーザー数や通知設定数が増加すると処理が完了しない
-    - 現在は10分間で処理を完了させる設計だが、スケールしにくい
-    - 処理途中で打ち切られるリスク
+    - ユーザー数や通知設定数が増加すると処理が完了しない可能性がある
+    - 現在は10分間で処理を完了させる設計だが、将来的にスケールしにくい
+    - 処理途中で打ち切られるリスクがある
 
-#### 2. メモリとコンピューティング制限
-
-- **問題**: Lambda のメモリは最大10GB、CPU はメモリに比例
-- **影響**:
-    - 大量の株価データを同時処理できない
-    - TradingView API 呼び出しが多い場合、並列処理が制限される
-    - メモリ不足でクラッシュのリスク
-
-#### 3. スケーラビリティの問題
+#### 2. スケーラビリティの制約
 
 - **問題**: モノリシックな処理フロー
 - **影響**:
     - 全ユーザーの通知設定を1つの Lambda で順次処理
-    - 特定ユーザーの処理が遅延すると全体に影響
-    - 並列化が困難
+    - 特定の処理が遅延すると全体に影響
+    - 処理の並列化が困難
 
-#### 4. エラーハンドリングとリトライ
+#### 3. 運用性の課題
 
-- **問題**: エラー時の再試行メカニズムが限定的
+- **問題**: 処理の可視化とエラーハンドリングが限定的
 - **影響**:
-    - 一時的な API エラーで通知が失敗
-    - 部分的な失敗でも全体を再実行する必要
-    - エラー追跡が困難
-
-#### 5. コスト効率
-
-- **問題**: 常に同じリソースを割り当て
-- **影響**:
-    - 軽い処理でも高スペック Lambda を使用
-    - アイドル時間のコストが無駄
-    - ピーク時の同時実行制限
-
-#### 6. 監視と運用
-
-- **問題**: 処理の可視化が限定的
-- **影響**:
-    - どのユーザーの処理で時間がかかっているか不明
-    - ボトルネックの特定が困難
+    - どの処理で時間がかかっているか把握しにくい
+    - 一時的なエラーに対する再試行が不十分
     - デバッグに時間がかかる
 
 ### 現在のバッチ処理フロー
@@ -103,130 +79,142 @@ export const handler = async () => {
 
 ## 目標アーキテクチャ
 
-### 推奨アーキテクチャ: AWS Batch 中心の設計
+### 推奨アーキテクチャ: EventBridge + ECS
+
+現在の要件を再評価した結果、**EventBridge による定期実行 + ECS タスク**の構成が最適であると判断しました。
+
+#### 要件の再評価
+
+1. **処理の重さ**: 
+   - 実際の処理は TradingView API 呼び出しと条件チェックが主体
+   - 1通知あたり数秒程度で完了する軽量な処理
+   - 大量のデータ処理やバッチ計算は不要
+
+2. **実行時間の制約**:
+   - Lambda の15分制限は厳しいが、ECS タスクなら制限なし
+   - 通知設定が増えても、十分な時間で処理可能
+
+3. **システムの複雑性**:
+   - AWS Batch は大規模バッチ処理向けの機能が豊富
+   - しかし本要件にはオーバースペックで、システムが複雑化
+   - EventBridge + ECS の方がシンプルで理解しやすい
+
+#### 推奨アーキテクチャ図
 
 ```mermaid
 graph TB
-    EventBridge["EventBridge / CloudWatch Events<br/>定期実行トリガー<br/>(1分/10分/1時間/取引開始時)"]
-    Orchestrator["Lambda (Orchestrator)<br/>- DynamoDB から通知設定を取得<br/>- 頻度フィルタリング<br/>- AWS Batch へジョブ投入"]
-    BatchQueue["AWS Batch Job Queue<br/>- ジョブの優先度管理<br/>- リトライ戦略設定<br/>- ジョブ依存関係管理"]
-    ComputeEnv["Compute Environment<br/>(Fargate / EC2 Spot)<br/>- 自動スケーリング<br/>- コスト最適化"]
-    BatchJob["Batch Job (Container)<br/>1. 通知設定の条件チェック<br/>2. TradingView API 呼び出し<br/>3. 条件評価<br/>4. 通知送信<br/>5. DynamoDB 更新"]
-    Storage["Storage & Services<br/>- DynamoDB: データ永続化<br/>- CloudWatch Logs: ログ集約<br/>- CloudWatch Metrics: メトリクス監視<br/>- X-Ray: 分散トレーシング"]
+    EventBridge["EventBridge (CloudWatch Events)<br/>定期実行トリガー<br/>(1分/10分/1時間/取引開始時)"]
+    ECSService["ECS Service (Fargate)<br/>- バッチ処理タスク実行<br/>- 通知設定の取得と処理<br/>- Auto Scaling 設定"]
+    DynamoDB["DynamoDB<br/>- FinanceNotification テーブル<br/>- Exchange, Ticker テーブル"]
+    ExternalAPI["External APIs<br/>- TradingView API<br/>- Web Push Notification"]
+    CloudWatch["CloudWatch<br/>- Logs: ログ集約<br/>- Metrics: メトリクス監視<br/>- Alarms: アラート通知"]
     
-    EventBridge --> Orchestrator
-    Orchestrator --> BatchQueue
-    BatchQueue --> ComputeEnv
-    ComputeEnv --> BatchJob
-    BatchJob --> Storage
+    EventBridge --> ECSService
+    ECSService --> DynamoDB
+    ECSService --> ExternalAPI
+    ECSService --> CloudWatch
 ```
 
 #### アーキテクチャの特徴
 
-**AWS Batch を選択する理由:**
+**EventBridge + ECS を選択する理由:**
 
-1. **ジョブ管理機能が豊富**
-    - 優先度ベースのジョブスケジューリング
-    - ジョブ依存関係の定義が可能
-    - リトライ戦略をジョブ定義で設定
-    - ジョブステータスの追跡が容易
+1. **シンプルな構成**
+    - EventBridge で定期実行を設定
+    - ECS タスクで処理を実行
+    - 追加のジョブ管理レイヤーが不要
 
-2. **コスト最適化**
-    - EC2 Spot インスタンスの活用で最大90%コスト削減
-    - Fargate Spot で約70%コスト削減
-    - 使用したリソース分のみ課金
-    - アイドル時のコストゼロ
+2. **十分なスケーラビリティ**
+    - 通知設定数の増加に対応可能
+    - ECS タスクの Auto Scaling で処理能力を調整
+    - 将来的な拡張も容易
 
-3. **スケーラビリティ**
-    - ジョブ数に応じた自動スケーリング
-    - 最大vCPU数の設定による制御
-    - 大量ジョブの効率的な処理
+3. **実行時間制限なし**
+    - Lambda の15分制限から解放
+    - 処理が長引いても問題なし
+    - 安定した処理実行
 
-4. **バッチ処理に最適化**
-    - バッチワークロード専用の設計
-    - ジョブの優先度管理
-    - 長時間実行ジョブのサポート
+4. **コスト効率**
+    - Fargate Spot 利用で約70%コスト削減
+    - 必要な時だけリソース起動
+    - Lambda と同等かそれ以下のコスト
 
-**SQS の利用は任意:**
+5. **運用性の向上**
+    - 既存の Lambda コードを流用しやすい
+    - CloudWatch による統一的な監視
+    - トラブルシューティングが容易
 
-- AWS Batch は独自のジョブキューを持つため、SQS は必須ではない
-- ただし、以下の場合に SQS の追加を検討:
-    - より細かいメッセージング制御が必要な場合
-    - 既存の SQS ベースシステムとの統合が必要な場合
-    - メッセージの永続化や遅延配信が必要な場合
+### 処理フロー
 
-### 代替アーキテクチャ: ECS + SQS (オプション)
+#### 定期実行の仕組み
 
-SQS を利用したより細かい制御が必要な場合のアーキテクチャです。
+EventBridge (CloudWatch Events) が、以下の頻度で ECS タスクをトリガーします:
 
-```mermaid
-graph TB
-    EventBridge2["EventBridge"]
-    Orchestrator2["Lambda (Orchestrator)"]
-    SQS["Amazon SQS<br/>- Standard Queue<br/>- Dead Letter Queue"]
-    ECS["ECS Service (Fargate)<br/>- Auto Scaling<br/>- SQS ポーリング"]
-    ECSTask["ECS Task<br/>通知処理"]
-    Storage2["Storage & Services"]
+- **1分毎**: 頻繁な監視が必要な通知設定を処理
+- **10分毎**: 中頻度の通知設定を処理  
+- **1時間毎**: 低頻度の通知設定を処理
+- **取引開始時**: 取引所の開場時に処理
+
+#### ECS タスクの処理内容
+
+```typescript
+// ECS タスクの主要処理フロー
+export const handler = async () => {
+  // 1. 初期化
+  const financeNotificationService = new FinanceNotificationService(...);
+  const notificationEndpoint = await getEndpoint();
+  
+  // 2. 通知設定を取得
+  const notifications = await financeNotificationService.get();
+  
+  // 3. 頻度に基づくフィルタリング
+  const filteredNotifications = filterByFrequency(notifications, getCurrentFrequency());
+  
+  // 4. 各通知設定を処理（既存ロジックを流用）
+  for (const notification of filteredNotifications) {
+    // 条件チェック
+    const shouldNotify = await checkConditions(notification);
     
-    EventBridge2 --> Orchestrator2
-    Orchestrator2 --> SQS
-    SQS --> ECS
-    ECS --> ECSTask
-    ECSTask --> Storage2
+    // 通知送信
+    if (shouldNotify) {
+      await sendNotification(notification, notificationEndpoint);
+    }
+  }
+};
 ```
 
-**ECS + SQS を選択する場合:**
-
-- より細かいメッセージング制御が必要
-- リアルタイム性を重視
-- SQS の高度な機能 (遅延配信、メッセージグループ化) が必要
-
-**デメリット:**
-
-- ジョブ管理機能が AWS Batch より少ない
-- リトライ戦略を自前で実装
-- ジョブの優先度管理が難しい
+**処理の特徴:**
+- 既存の Lambda コードをほぼそのまま流用可能
+- 実行時間制限がないため、処理量が増えても安定動作
+- CloudWatch Logs で処理状況を追跡可能
 
 ## 詳細要件
 
 ### 機能要件
 
-#### FR-1: ジョブ分散処理
+#### FR-1: 定期実行とスケジューリング
 
-- **要件**: 通知設定単位でジョブを分割し、並列処理を実現する
+- **要件**: EventBridge により定期的にバッチ処理を実行する
 - **詳細**:
-    - 各通知設定 (FinanceNotification レコード) を独立したジョブとして処理
-    - AWS Batch Job Queue にジョブを投入
-    - 各ジョブが並列実行される
+    - 1分毎、10分毎、1時間毎、取引開始時の4つのスケジュール
+    - 各スケジュールで ECS タスクを起動
+    - 頻度に応じた通知設定のフィルタリング
 - **受入基準**:
-    - 100件の通知設定を複数ジョブで並列処理できる
-    - 1つの通知設定の障害が他に波及しない
+    - 各頻度で正確にタスクが起動される
+    - スケジュール設定の変更が容易
 
-#### FR-2: 頻度ベースのフィルタリング
+#### FR-2: 実行時間制限の解消
 
-- **要件**: 通知頻度設定に基づいて処理対象をフィルタリングする
+- **要件**: Lambda の15分制限を超えて処理を実行できる
 - **詳細**:
-    - Orchestrator Lambda で頻度チェックを実施
-    - 条件を満たす通知設定のみ AWS Batch へジョブ投入
-    - 頻度タイプ: 1分毎、10分毎、1時間毎、取引開始時
+    - ECS タスクは実行時間制限なし
+    - 通知設定数が増加しても安定した処理
+    - タイムアウトによる処理中断の回避
 - **受入基準**:
-    - 各頻度設定で正しくフィルタリングされる
-    - 不要な処理が実行されない
+    - 1,000件の通知設定を問題なく処理完了
+    - 将来的に10,000件以上にも対応可能
 
-#### FR-3: エラーハンドリングとリトライ
-
-- **要件**: 一時的なエラーに対して自動リトライを行う
-- **詳細**:
-    - AWS Batch のリトライ戦略を活用
-    - 最大リトライ回数: 3回
-    - リトライ間隔: exponential backoff (初回30秒、以降2倍)
-    - 失敗したジョブは CloudWatch Logs に記録
-- **受入基準**:
-    - TradingView API の一時的エラーで3回リトライされる
-    - 3回失敗後、失敗としてマークされる
-    - 失敗ジョブがアラート通知される
-
-#### FR-4: 条件チェックと通知送信
+#### FR-3: 条件チェックと通知送信
 
 - **要件**: 既存の条件チェックロジックを維持する
 - **詳細**:
@@ -238,54 +226,62 @@ graph TB
     - 既存機能と同等の条件チェックが動作
     - 通知送信成功率 > 99%
 
-#### FR-5: ログとトレーシング
+#### FR-4: エラーハンドリング
+
+- **要件**: 一時的なエラーに対して適切に対処する
+- **詳細**:
+    - TradingView API エラー時のリトライ処理
+    - エラー発生時のログ記録
+    - CloudWatch Alarms によるエラー通知
+- **受入基準**:
+    - API の一時的エラーで処理が継続される
+    - エラー発生時に適切なアラートが通知される
+
+#### FR-5: ログとモニタリング
 
 - **要件**: 処理の可視化とデバッグを容易にする
 - **詳細**:
     - CloudWatch Logs への構造化ログ出力
-    - X-Ray による分散トレーシング
     - 各処理のレイテンシ計測
     - エラー発生時の詳細なコンテキスト記録
+    - CloudWatch Metrics によるメトリクス収集
 - **受入基準**:
-    - CloudWatch Insights でジョブ検索可能
-    - X-Ray でエンドツーエンドのトレース確認可能
+    - CloudWatch Insights でログ検索可能
+    - メトリクスダッシュボードで処理状況を確認可能
 
 ### 非機能要件
 
 #### NFR-1: スケーラビリティ
 
-- **目標**: 通知設定数の増加に線形スケール
+- **目標**: 通知設定数の増加に対応できる
 - **指標**:
-    - 1,000件の通知設定を5分以内に処理完了
-    - 10,000件の通知設定を15分以内に処理完了
-    - 並列ジョブ数の増加で処理時間が短縮
+    - 1,000件の通知設定を15分以内に処理完了
+    - 10,000件の通知設定にも対応可能な設計
 - **スケーリング戦略**:
-    - AWS Batch の Job Queue 深さに基づく Auto Scaling
-    - CPU 使用率 70% でスケールアウト
-    - 最小インスタンス数: 0、最大インスタンス数: 20
+    - ECS タスクの CPU・メモリ設定で処理能力を調整
+    - 必要に応じて複数タスクの並列実行も検討可能
 
 #### NFR-2: 可用性
 
 - **目標**: 99.9% のアップタイム
 - **指標**:
     - サービス停止時間 < 43分/月
-    - 通知処理の成功率 > 99.5%
+    - 通知処理の成功率 > 99%
 - **戦略**:
-    - マルチ AZ 配置
-    - AWS Batch ジョブのヘルスチェック
-    - 自動復旧メカニズム
+    - Fargate によるマルチ AZ 配置
+    - ECS タスクのヘルスチェック
+    - CloudWatch Alarms による異常検知
 
 #### NFR-3: パフォーマンス
 
-- **目標**: 低レイテンシでの通知処理
+- **目標**: 効率的な通知処理
 - **指標**:
-    - 1通知設定の処理時間 < 5秒 (P95)
-    - TradingView API 呼び出し時間 < 2秒 (P95)
+    - 1,000件の通知設定を15分以内に処理
+    - TradingView API 呼び出し時間 < 3秒 (P95)
     - 通知送信時間 < 1秒 (P95)
 - **最適化**:
-    - API レスポンスのキャッシング検討
-    - 並列 API 呼び出し
-    - コネクションプーリング
+    - 既存の処理ロジックを流用
+    - 必要に応じて API 呼び出しの並列化
 
 #### NFR-4: コスト効率
 
@@ -294,17 +290,17 @@ graph TB
     - 月額コスト < Lambda の 1.2倍
     - アイドル時のコスト最小化
 - **戦略**:
-    - Fargate Spot の活用 (70% コスト削減)
-    - 適切な CPU/メモリ割り当て
-    - 不要な処理の排除
+    - Fargate Spot の活用 (約70% コスト削減)
+    - 適切な CPU/メモリ割り当て (0.25 vCPU, 512MB から開始)
+    - 処理時間の最小化
 
-#### NFR-5: 監視と運用性
+#### NFR-5: 運用性
 
 - **目標**: 問題の早期検知と迅速な対応
 - **指標**:
     - 障害検知 < 5分
-    - DLQ メッセージのアラート通知
-    - ダッシュボードでのリアルタイム可視化
+    - エラー発生時のアラート通知
+    - CloudWatch ダッシュボードでの可視化
 - **ツール**:
     - CloudWatch Alarms
     - CloudWatch Dashboards
@@ -338,24 +334,21 @@ graph TB
 
 ## データモデル
 
-### AWS Batch ジョブパラメータ
+### 環境変数
 
-AWS Batch ジョブに渡すパラメータのフォーマット:
+ECS タスクに渡す環境変数:
 
 ```json
 {
-    "notificationId": "user123#AAPL-NYSE#SansenAkenomyojo",
-    "userId": "user123",
-    "exchangeId": "NYSE",
-    "tickerId": "AAPL-NYSE",
-    "conditionType": "SansenAkenomyojo",
-    "frequency": "MINUTE_LEVEL",
-    "timeframe": "5",
-    "session": "extended",
-    "targetPrice": null,
-    "timestamp": "2024-10-29T23:00:00Z"
+  "PROCESS_ENV": "production",
+  "PROJECT_SECRET": "finance-app-secrets",
+  "EXECUTION_FREQUENCY": "MINUTE"
 }
 ```
+
+- `PROCESS_ENV`: 実行環境 (`local`, `development`, `production`)
+- `PROJECT_SECRET`: AWS Secrets Manager のシークレット名
+- `EXECUTION_FREQUENCY`: 実行頻度 (`MINUTE`, `TEN_MINUTES`, `HOUR`, `MARKET_OPEN`)
 
 ### DynamoDB スキーマ (既存維持)
 
@@ -369,99 +362,72 @@ AWS Batch ジョブに渡すパラメータのフォーマット:
     - `lastNotifiedAt`: 最終通知日時
     - `createdAt`, `updatedAt`
 
-**処理状態の追跡 (新規追加検討):**
-- テーブル: `FinanceJobStatus`
-- PK: `jobId` (通知ID + タイムスタンプ)
-- Attributes:
-    - `status`: PENDING / PROCESSING / COMPLETED / FAILED
-    - `startedAt`, `completedAt`
-    - `errorMessage`
-    - `retryCount`
+**既存スキーマをそのまま使用:**
+- スキーマ変更は不要
+- 既存の Lambda と同じデータモデルを利用
+- 移行が容易
 
 ## 実装計画
 
-### フェーズ1: 基盤構築 (2-3週間)
+### フェーズ1: 基盤構築 (1-2週間)
 
-#### Week 1: インフラ構築
-
-**タスク:**
-1. AWS Batch 環境の構築
-    - Job Queue の作成
-    - Compute Environment の作成 (EC2 Spot)
-    - Job Definition の作成
-2. Orchestrator Lambda の実装
-    - 既存 Lambda を改修
-    - DynamoDB スキャン + 頻度フィルタリング
-    - AWS Batch へジョブ投入
-3. IAM ロール・ポリシー設定
-    - Lambda 実行ロール
-    - Batch Job ロール
-    - 必要な権限の付与
-
-**成果物:**
-- Terraform/CloudFormation テンプレート
-- インフラストラクチャ構成図
-
-#### Week 2: Worker 実装
+#### Week 1: インフラ構築と ECS タスク実装
 
 **タスク:**
-1. Worker コンテナの実装
-    - AWS Batch ジョブ定義の作成
-    - 既存 FinanceNotificationService の流用
-    - エラーハンドリング
-2. Docker イメージ作成
+1. ECS 環境の構築
+    - ECS クラスターの作成 (Fargate)
+    - タスク定義の作成 (CPU: 0.25 vCPU, Memory: 512MB)
+    - Fargate Spot の設定
+2. Docker コンテナの作成
+    - 既存 Lambda コードのコンテナ化
     - Dockerfile 作成
-    - ECR へのプッシュ
-3. Compute Environment 設定
-    - EC2 Spot インスタンスの設定
-    - Auto Scaling 設定
-    - CPU/メモリ設定
-4. ローカルテスト環境構築
+    - ECR リポジトリの作成とプッシュ
+3. EventBridge 設定
+    - スケジュールルールの作成 (1分/10分/1時間/取引開始時)
+    - ECS タスク起動の設定
+4. IAM ロール・ポリシー設定
+    - ECS タスク実行ロール
+    - ECS タスクロール (DynamoDB, Secrets Manager アクセス)
 
 **成果物:**
-- Worker ソースコード
+- ECS インフラストラクチャ (Terraform/CloudFormation)
 - Docker イメージ
-- ローカルテスト結果
+- EventBridge スケジュール設定
 
-#### Week 3: 統合テストと監視
+#### Week 2: 統合テストと監視
 
 **タスク:**
 1. 統合テスト
     - エンドツーエンドテスト
+    - 各頻度での動作確認
     - エラーシナリオテスト
-    - スケーリングテスト
 2. 監視設定
+    - CloudWatch Logs グループ作成
     - CloudWatch Alarms 設定
-    - ダッシュボード作成
-    - アラート通知設定 (SNS)
+    - CloudWatch Dashboards 作成
 3. ドキュメント作成
     - 運用手順書
     - トラブルシューティングガイド
 
 **成果物:**
 - テスト結果レポート
+- 監視・アラート設定
 - 運用ドキュメント
 
-### フェーズ2: 段階的移行 (2-3週間)
+### フェーズ2: 段階的移行 (1-2週間)
 
-#### Week 1: カナリアリリース
-
-**タスク:**
-1. 少数ユーザーでの試験運用 (5-10%)
-2. メトリクス収集と分析
-3. 問題の修正
-
-#### Week 2: 徐々に拡大
+#### Week 1: 並行運用開始
 
 **タスク:**
-1. 段階的にユーザー比率を増加 (25% → 50% → 75%)
-2. パフォーマンス監視
-3. コスト分析
+1. 新旧システムの並行運用開始
+2. 少数の通知設定で動作確認
+3. メトリクス収集と分析
+4. 問題の修正
 
-#### Week 3: 完全移行
+#### Week 2: 完全移行
 
 **タスク:**
-1. 全ユーザーを新システムに移行
+1. 全通知設定を新システムに移行
 2. 旧 Lambda の停止
 3. 移行完了の確認
 
@@ -470,64 +436,49 @@ AWS Batch ジョブに渡すパラメータのフォーマット:
 **タスク:**
 1. パフォーマンスチューニング
 2. コスト最適化
-    - EC2 Spot インスタンスの調整
-    - より小さいインスタンスタイプの検証
-    - ジョブのバッチ処理
-3. 機能追加
-    - より詳細な監視
-    - 高度なエラーハンドリング
+    - Fargate Spot の安定性確認
+    - CPU/メモリ設定の最適化
+3. 監視の強化
+    - より詳細なメトリクス追加
+    - アラート条件の調整
 
 ## モニタリング計画
 
 ### Key Performance Indicators (KPI)
 
-#### 処理効率
-- **メトリクス**: ジョブ処理時間
-- **目標**: P95 < 5秒
-- **アラート**: P95 > 10秒
+#### 処理時間
+- **メトリクス**: ECS タスク実行時間
+- **目標**: < 15分 (1,000件の通知設定)
+- **アラート**: > 20分
 
 #### スループット
-- **メトリクス**: 分あたり処理ジョブ数
-- **目標**: > 200 jobs/min (1,000通知設定を5分で処理)
-- **アラート**: < 100 jobs/min
+- **メトリクス**: 処理された通知設定数
+- **目標**: > 1,000件/実行
+- **アラート**: < 500件/実行
 
 #### エラー率
-- **メトリクス**: 失敗ジョブ / 総ジョブ数
-- **目標**: < 0.5%
-- **アラート**: > 1%
+- **メトリクス**: 失敗した処理 / 総処理数
+- **目標**: < 1%
+- **アラート**: > 5%
 
-#### AWS Batch ジョブキュー深さ
-- **メトリクス**: JobQueueLength
-- **目標**: < 100 (定常時)
-- **アラート**: > 500
-
-#### 失敗ジョブ数
-- **メトリクス**: FailedJobs
-- **目標**: 0
-- **アラート**: > 0 (即座に通知)
-
-#### Compute Environment 使用率
-- **メトリクス**: ComputeEnvironmentUtilization
-- **目標**: 60-80% (効率的な利用)
-- **アラート**: > 90% (スケール不足) または < 20% (過剰リソース)
+#### ECS タスク起動成功率
+- **メトリクス**: 成功したタスク起動 / 総タスク起動試行
+- **目標**: > 99%
+- **アラート**: < 95%
 
 ### CloudWatch ダッシュボード
 
 **メトリクス:**
-1. AWS Batch
-    - ジョブ投入数
-    - 実行中ジョブ数
-    - 完了ジョブ数
-    - 失敗ジョブ数
-    - ジョブキュー深さ
-2. Compute Environment
-    - アクティブインスタンス数
-    - vCPU 使用率
-    - メモリ使用率
-3. カスタムメトリクス
-    - ジョブ処理時間 (P50, P95, P99)
-    - 通知送信成功率
+1. ECS タスク
+    - タスク起動回数
+    - タスク実行時間
+    - タスク失敗回数
+    - CPU/メモリ使用率
+2. カスタムメトリクス
+    - 処理された通知設定数
+    - 通知送信成功数
     - API 呼び出し時間
+    - エラー発生数
 
 ### ログ戦略
 
@@ -536,34 +487,30 @@ AWS Batch ジョブに渡すパラメータのフォーマット:
 {
   "timestamp": "2024-10-29T23:00:00.000Z",
   "level": "INFO",
-  "component": "worker",
-  "jobId": "user123#AAPL-NYSE#20241029",
-  "action": "process_notification",
-  "duration_ms": 1234,
-  "status": "success",
-  "details": {
-    "exchangeId": "NYSE",
-    "tickerId": "AAPL-NYSE",
-    "conditionMet": true,
-    "notificationSent": true
-  }
+  "component": "finance-batch",
+  "action": "process_notifications",
+  "frequency": "MINUTE",
+  "processed_count": 150,
+  "success_count": 148,
+  "error_count": 2,
+  "duration_ms": 45000
 }
 ```
 
 **ログレベル:**
 - **ERROR**: 処理失敗、例外発生
 - **WARN**: リトライ、異常値検出
-- **INFO**: ジョブ開始/完了、通知送信
+- **INFO**: タスク開始/完了、通知送信
 - **DEBUG**: 詳細な処理フロー (開発時のみ)
 
 ## コスト見積もり
 
 ### 前提条件
 - 通知設定数: 1,000件
-- 1分毎の処理: 200件
-- 10分毎の処理: 300件
-- 1時間毎の処理: 500件
-- 処理時間: 平均5秒/ジョブ
+- 1分毎の実行: 60回/時間 × 24時間 = 1,440回/日
+- 10分毎の実行: 6回/時間 × 24時間 = 144回/日
+- 1時間毎の実行: 24回/日
+- タスク実行時間: 平均10分/回
 
 ### 現行コスト (Lambda)
 
@@ -577,71 +524,46 @@ AWS Batch ジョブに渡すパラメータのフォーマット:
 
 ### 新アーキテクチャコスト (ECS Fargate)
 
-#### Orchestrator Lambda
-- 実行時間: 10秒/回 × 60回/時間 = 600秒/時間 = 14,400秒/日
-- メモリ: 256MB
-- 月額: 14,400秒 × 30日 × 0.25GB × $0.0000133334 ≈ $1.44
+#### ECS Fargate Spot (推奨)
 
-#### AWS Batch (推奨)
+**タスク実行コスト:**
+- タスク数/日: 約1,608回 (1分毎 + 10分毎 + 1時間毎)
+- タスク実行時間: 平均10分/回
+- 総実行時間/日: 1,608回 × 10分 = 16,080分 ≈ 268時間/日
+- 総実行時間/月: 268時間 × 30日 = 8,040時間/月
 
-**Compute Environment: EC2 Spot インスタンス**
+**Fargate Spot 料金 (東京リージョン):**
+- vCPU: 0.25 vCPU × $0.01373/時間 (Spot) = $0.00343/時間
+- Memory: 0.5GB × $0.00151/時間 (Spot) = $0.000755/時間
+- 合計: $0.004185/時間
 
-- インスタンスタイプ: c5.large (2 vCPU, 4GB RAM)
-- Spot 価格: 約 $0.017/時間 (オンデマンド $0.085 の約80% OFF)
-- 平均並列ジョブ数: 5ジョブ
-- ジョブ処理時間: 平均30秒/ジョブ
+**月額コスト:**
+- 8,040時間 × $0.004185 ≈ **$33.65**
 
-**コスト計算:**
+#### コスト最適化の余地
 
-- ジョブ数/日: 343,200 (前提条件と同じ)
-- 総処理時間/日: 343,200ジョブ × 30秒 = 10,296,000秒 ≈ 2,860時間
-- 並列実行を考慮した実稼働時間: 2,860時間 / 5並列 = 572時間/日
-- インスタンス稼働時間/月: 572時間/日 × 30日 = 17,160時間/月
-- ただし、Auto Scaling によりアイドル時はインスタンス数削減
-- 実質稼働率: 約30% (頻度フィルタリングと条件不一致による早期終了)
-- 実質稼働時間/月: 17,160時間 × 30% = 5,148時間/月
-- **月額コスト (EC2 Spot)**: 5,148時間 × $0.017 ≈ **$87.50**
+**処理時間の短縮:**
+- 実際の処理は数分で完了する可能性が高い
+- 平均5分で完了した場合: **$16.82/月**
 
-**さらなる最適化:**
-
-- より小さいインスタンス (c5.medium) 利用で約50%削減可能
-- オートスケーリングポリシーの最適化
-- ジョブのバッチ処理 (複数設定を1ジョブで処理) で30-50%削減
-- **最適化後の見込みコスト: $20-40/月**
-
-#### 代替案: Fargate Spot (SQS 経由)
-
-- タスク数: 平均3タスク
-- vCPU: 0.25 vCPU/タスク
-- メモリ: 0.5GB/タスク
-- 実質稼働時間/月 (30%稼働率): 約1,500時間/月/タスク = 4,500時間/月 (全タスク)
-- vCPU コスト: 4,500時間 × 0.25 vCPU × $0.01373 (Spot) ≈ $15.45
-- メモリコスト: 4,500時間 × 0.5GB × $0.00151 (Spot) ≈ $3.40
-- **月額コスト (Fargate Spot)**: **$18.85**
+**Fargate 通常料金 (比較参考):**
+- vCPU: 0.25 vCPU × $0.04656/時間 = $0.01164/時間
+- Memory: 0.5GB × $0.00512/時間 = $0.00256/時間
+- 合計: $0.0142/時間
+- 月額: 8,040時間 × $0.0142 ≈ $114.17
 
 ### コスト比較
 
-| 項目 | 現行 (Lambda) | AWS Batch (Spot) 最適化 | Fargate Spot + SQS |
-|------|--------------|----------------------|-------------------|
-| Orchestrator | - | $1.44 | $1.44 |
-| Queue/Job管理 | - | $0 (Batch組込) | $0.14 (SQS) |
-| Compute | $34.56 | $30 | $18.85 |
-| **合計** | **$35** | **$31** | **$20** |
+| 項目 | 現行 (Lambda) | ECS Fargate Spot | ECS Fargate (通常) |
+|------|--------------|-----------------|-------------------|
+| 基本料金 | $34.56 | $33.65 | $114.17 |
+| **最適化後** | - | **$16-20** | - |
 
 **結論:**
 
-- **AWS Batch + EC2 Spot**: $31/月 (最適化済み)
-    - 現行とほぼ同等のコスト
-    - スケーラビリティが大幅に向上
-    - ジョブ管理機能が充実
-    - 大規模化に強い
-
-- **Fargate Spot + SQS**: $20/月
-    - 最も低コスト
-    - シンプルな構成
-    - 小〜中規模向け
-
-- **主な価値**: コストを維持しつつ、スケーラビリティと可用性を大幅に向上
+- **ECS Fargate Spot**: $33.65/月 (Lambda とほぼ同等)
+- **最適化後**: $16-20/月 (Lambda より安価)
+- **主な価値**: コストを維持しつつ、実行時間制限を解消し、シンプルな構成を実現
 
 **注意点:**
 - 上記は概算であり、実際のコストは使用量によって変動
@@ -652,15 +574,14 @@ AWS Batch ジョブに渡すパラメータのフォーマット:
 
 ### リスク1: 移行時のダウンタイム
 
-**リスクレベル**: 中
+**リスクレベル**: 低
 
 **影響:**
-- 通知が一時的に停止
-- ユーザー体験の低下
+- 通知が一時的に停止する可能性
 
 **対策:**
-- カナリアリリースによる段階的移行
-- 旧システムと新システムの並行運用期間を設ける
+- 旧 Lambda と新 ECS タスクの並行運用
+- 段階的な移行
 - ロールバック手順の事前準備
 
 ### リスク2: コスト超過
@@ -669,38 +590,36 @@ AWS Batch ジョブに渡すパラメータのフォーマット:
 
 **影響:**
 - 予算オーバー
-- 運用継続の困難
 
 **対策:**
 - CloudWatch Billing Alerts の設定
-- 定期的なコストレビュー
 - Fargate Spot の活用
+- タスク実行時間の監視と最適化
 
-### リスク3: パフォーマンス劣化
+### リスク3: Fargate Spot の中断
+
+**リスクレベル**: 低
+
+**影響:**
+- タスク実行中の中断
+- 処理の一時的な遅延
+
+**対策:**
+- 処理のべき等性を確保
+- 中断時の自動再実行
+- 必要に応じて通常 Fargate への切り替え
+
+### リスク4: 処理時間の増加
 
 **リスクレベル**: 中
 
 **影響:**
 - 通知の遅延
-- ユーザー満足度の低下
 
 **対策:**
-- 移行前の負荷テスト実施
-- 継続的なパフォーマンス監視
-- Auto Scaling の適切な設定
-
-### リスク4: 予期せぬエラー
-
-**リスクレベル**: 中
-
-**影響:**
-- 通知の失敗
-- データの不整合
-
-**対策:**
-- 包括的なエラーハンドリング
-- Dead Letter Queue での失敗ジョブ補足
-- 定期的な DLQ モニタリング
+- パフォーマンス監視
+- タスクリソース (CPU/メモリ) の調整
+- 処理ロジックの最適化
 
 ### リスク5: 外部 API の制限
 
@@ -711,106 +630,100 @@ AWS Batch ジョブに渡すパラメータのフォーマット:
 - データ取得失敗
 
 **対策:**
-- レート制限を考慮した並列度調整
-- Exponential Backoff によるリトライ
+- レート制限を考慮した処理間隔
+- エラー時のリトライロジック
 - API レスポンスのキャッシング検討
 
 ## 成功基準
 
 ### 技術的成功基準
 
-1. **スケーラビリティ達成**
-    - 1,000件の通知設定を5分以内に処理完了
-    - 10,000件にスケール時も線形的な処理時間増加
+1. **実行時間制限の解消**
+    - Lambda の15分制限に制約されない
+    - 1,000件の通知設定を安定して処理完了
 
-2. **可用性の向上**
-    - 通知成功率 > 99.5%
+2. **可用性の維持**
+    - 通知成功率 > 99%
     - システムアップタイム > 99.9%
 
-3. **パフォーマンス維持**
-    - ジョブ処理時間 P95 < 5秒
-    - Lambda 時代と同等以上のレイテンシ
+3. **コスト最適化**
+    - 月額コスト ≤ 現行の Lambda コスト
+    - Fargate Spot 活用で更なるコスト削減
 
-4. **コスト最適化**
-    - 月額コスト < 現行の 1.2倍
-    - Fargate Spot 利用でさらに削減
+4. **シンプルな構成**
+    - AWS Batch を使わずシンプルな構成を実現
+    - 運用・保守が容易
 
 ### ビジネス的成功基準
 
-1. **ユーザー体験の向上**
-    - 通知遅延の減少
-    - 通知の信頼性向上
+1. **システムの信頼性向上**
+    - 処理の安定性向上
+    - エラーハンドリングの改善
 
-2. **システムの信頼性向上**
-    - 障害発生時の影響範囲縮小
-    - 迅速な復旧
-
-3. **運用効率の向上**
+2. **運用効率の向上**
     - デバッグ時間の短縮
     - 障害対応時間の削減
 
-4. **将来への拡張性**
-    - ユーザー数増加に対応可能
+3. **将来への拡張性**
+    - 通知設定数の増加に対応可能
     - 新機能追加が容易
 
 ## 次のステップ
 
 ### 即時実施事項
 
-1. **技術調査** ✅ 完了
-    - AWS Batch vs ECS の詳細比較 → [技術調査結果](./batch-refactoring-technical-investigation.md)
-    - 既存コードの移行難易度評価 → [技術調査結果](./batch-refactoring-technical-investigation.md)
-    - POC 実装アプローチ → [技術調査結果](./batch-refactoring-technical-investigation.md)
+1. **要件定義の承認**
+    - ステークホルダーへの報告
+    - EventBridge + ECS アーキテクチャの承認
 
 2. **詳細設計**
-    - インフラストラクチャ設計
-    - データフロー設計
+    - ECS タスク定義の詳細設計
+    - EventBridge スケジュール設計
     - エラーハンドリング設計
 
-3. **見積もりの精緻化**
-    - 実際の負荷でのコスト計算
-    - リソース最適化の検討
+3. **実装準備**
+    - 開発環境のセットアップ
+    - Docker コンテナの準備
+    - IaC (Infrastructure as Code) の作成
 
 ### 承認事項
 
 1. **アーキテクチャ選択の承認**
-    - ECS + SQS での実装承認
-    - 段階的移行計画の承認
+    - EventBridge + ECS での実装承認
+    - AWS Batch を使用しない方針の承認
 
 2. **予算承認**
-    - 初期開発コスト
-    - 運用コスト
+    - 開発コスト
+    - 運用コスト (月額 $20-35)
 
 3. **スケジュール承認**
-    - 実装スケジュール
-    - 移行スケジュール
+    - 実装期間: 1-2週間
+    - 移行期間: 1-2週間
 
 ## 参考資料
 
 ### AWS ドキュメント
 
 - [Amazon ECS Developer Guide](https://docs.aws.amazon.com/ecs/)
-- [Amazon SQS Developer Guide](https://docs.aws.amazon.com/sqs/)
-- [AWS Batch User Guide](https://docs.aws.amazon.com/batch/)
+- [EventBridge Scheduled Rules](https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-create-rule-schedule.html)
 - [AWS Fargate Pricing](https://aws.amazon.com/fargate/pricing/)
+- [ECS Task Definitions](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definitions.html)
 
 ### 関連ドキュメント
 
-- **[技術調査結果](./batch-refactoring-technical-investigation.md)** - AWS Batch vs ECS 詳細比較、移行難易度評価、POC アプローチ
+- **[TODO リスト](./todo.md)** - 実装タスク一覧
 - [Finance Module Overview](./README.md)
 - [Finance Server Documentation](./server/README.md)
-- [条件システム](./conditions-system.md)
-- [Common Server Documentation](../common/server/README.md)
 
 ### ベストプラクティス
 
 - [AWS Well-Architected Framework](https://aws.amazon.com/architecture/well-architected/)
-- [Microservices on AWS](https://aws.amazon.com/microservices/)
 - [Container Best Practices](https://aws.amazon.com/blogs/containers/)
+- [EventBridge Best Practices](https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-best-practices.html)
 
 ---
 
 **作成日**: 2024年10月29日  
-**最終更新**: 2024年10月30日  
-**バージョン**: 1.1  
-**ステータス**: 技術調査完了 - 詳細設計フェーズへ
+**最終更新**: 2025年11月2日  
+**バージョン**: 2.0  
+**ステータス**: 要件見直し完了 - EventBridge + ECS アーキテクチャへ変更
