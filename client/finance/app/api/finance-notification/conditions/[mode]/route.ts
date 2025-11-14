@@ -1,15 +1,17 @@
 import { NextRequest } from 'next/server';
 
-import ConditionService from '@finance/services/ConditionService';
-import { FinanceNotificationConditionModeType } from '@finance/types/FinanceNotificationType';
+import ErrorUtil from '@common/utils/ErrorUtil';
+import { PermissionLevel } from '@common/enums/PermissionLevel';
 
-import APIUtil from '@client-common/utils/APIUtil';
+import APIUtil, { APIResponseOptions } from '@client-common/utils/APIUtil';
 import { SelectOptionType } from '@client-common/interfaces/SelectOptionType';
 
-import AuthorizationService from '@/services/auth/AuthorizationService';
-import { Feature, PermissionLevel } from '@/types/AuthorizationTypes';
+import ConditionService from '@finance/services/ConditionService';
+import { FinanceFeature, ROOT_FEATURE } from '@finance/consts/FinanceConst';
+import { FinanceNotificationConditionModeType } from '@finance/types/FinanceNotificationType';
 import { FINANCE_NOTIFICATION_CONDITION_MODE, SIMPLIFIED_CONDITION_NAME } from '@finance/consts/FinanceNotificationConst';
-import ErrorUtil from '@common/utils/ErrorUtil';
+
+import { FinanceAuthorizationService } from '@/services/auth/FinanceAuthorizationService';
 
 const getConditionList = (mode: FinanceNotificationConditionModeType): string[] => {
   const service = new ConditionService();
@@ -26,14 +28,29 @@ const getConditionList = (mode: FinanceNotificationConditionModeType): string[] 
   }
 }
 
+/**
+ * 認可サービスのインスタンス
+ */
+const authorizationService = new FinanceAuthorizationService();
+
+/**
+ * APIレスポンスオプションを取得
+ * @param level 必要な権限レベル
+ * @returns APIレスポンスオプション
+ */
+const getOptions = (level: PermissionLevel): APIResponseOptions => ({
+  rootFeature: ROOT_FEATURE,
+  feature: FinanceFeature.FINANCE_NOTIFICATION,
+  authorization: {
+    authorizationService: authorizationService,
+    requiredLevel: level,
+  },
+});
+
 export async function GET(_: NextRequest, { params }: { params: Promise<{ mode: FinanceNotificationConditionModeType }> }) {
-  if (!await AuthorizationService.authorize(Feature.FINANCE_NOTIFICATION, PermissionLevel.VIEW)) {
-    return APIUtil.ReturnUnauthorized();
-  }
+  return await APIUtil.apiHandler(async () => {
+    const mode: FinanceNotificationConditionModeType = (await params).mode;
 
-  const mode: FinanceNotificationConditionModeType = (await params).mode;
-
-  try {
     const conditionList = getConditionList(mode);
     const service = new ConditionService();
 
@@ -69,8 +86,6 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ mode: 
       });
     });
 
-    return APIUtil.ReturnSuccess(conditionOptionList);
-  } catch (error) {
-    return APIUtil.ReturnInternalServerErrorWithError(error);
-  }
+    return conditionOptionList;
+  }, getOptions(PermissionLevel.VIEW));
 }

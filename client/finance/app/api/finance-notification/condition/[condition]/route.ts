@@ -1,23 +1,40 @@
 import { NextRequest } from 'next/server';
 
+import { PermissionLevel } from '@common/enums/PermissionLevel';
+
+import APIUtil, { APIResponseOptions } from '@client-common/utils/APIUtil';
+
 import ConditionService from '@finance/services/ConditionService';
+import { FinanceFeature, ROOT_FEATURE } from '@finance/consts/FinanceConst';
 import { SIMPLIFIED_CONDITION_NAME } from '@finance/consts/FinanceNotificationConst';
 
-import APIUtil from '@client-common/utils/APIUtil';
+import { FinanceAuthorizationService } from '@/services/auth/FinanceAuthorizationService';
 
-import AuthorizationService from '@/services/auth/AuthorizationService';
-import { Feature, PermissionLevel } from '@/types/AuthorizationTypes';
+/**
+ * 認可サービスのインスタンス
+ */
+const authorizationService = new FinanceAuthorizationService();
+
+/**
+ * APIレスポンスオプションを取得
+ * @param level 必要な権限レベル
+ * @returns APIレスポンスオプション
+ */
+const getOptions = (level: PermissionLevel): APIResponseOptions => ({
+  rootFeature: ROOT_FEATURE,
+  feature: FinanceFeature.FINANCE_NOTIFICATION,
+  authorization: {
+    authorizationService: authorizationService,
+    requiredLevel: level,
+  },
+});
 
 export async function GET(_: NextRequest, { params }: { params: Promise<{ condition: string }> }) {
-  if (!await AuthorizationService.authorize(Feature.FINANCE_NOTIFICATION, PermissionLevel.VIEW)) {
-    return APIUtil.ReturnUnauthorized();
-  }
+  return await APIUtil.apiHandler(async () => {
+    const condition: string = (await params).condition;
 
-  const condition: string = (await params).condition;
+    const service = new ConditionService();
 
-  const service = new ConditionService();
-
-  try {
     // Handle simplified mode specially
     if (condition === SIMPLIFIED_CONDITION_NAME) {
       const simplifiedConditionInfo = {
@@ -29,13 +46,11 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ condit
         enableTimeFrame: true,
         enableSimplifiedMode: true,
       };
-      return APIUtil.ReturnSuccess(simplifiedConditionInfo);
+      return simplifiedConditionInfo;
     }
 
     const conditionInfo = service.getConditionInfo(condition);
 
-    return APIUtil.ReturnSuccess(conditionInfo);
-  } catch (error) {
-    return APIUtil.ReturnInternalServerErrorWithError(error);
-  }
+    return conditionInfo;
+  }, getOptions(PermissionLevel.VIEW));
 }

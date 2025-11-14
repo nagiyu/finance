@@ -1,18 +1,38 @@
+import { PermissionLevel } from '@common/enums/PermissionLevel';
+
+import APIUtil, { APIResponseOptions } from '@client-common/utils/APIUtil';
+
 import ExchangeService from '@finance/services/ExchangeService';
+import { FinanceFeature, ROOT_FEATURE } from '@finance/consts/FinanceConst';
 
-import APIUtil from '@client-common/utils/APIUtil';
+import { FinanceAuthorizationService } from '@/services/auth/FinanceAuthorizationService';
 
-import AuthorizationService from '@/services/auth/AuthorizationService';
-import { Feature, PermissionLevel } from '@/types/AuthorizationTypes';
+/**
+ * 認可サービスのインスタンス
+ */
+const authorizationService = new FinanceAuthorizationService();
 
+/**
+ * APIレスポンスオプションを取得
+ * @param level 必要な権限レベル
+ * @returns APIレスポンスオプション
+ */
+const getOptions = (level: PermissionLevel): APIResponseOptions => ({
+  rootFeature: ROOT_FEATURE,
+  feature: FinanceFeature.EXCHANGE,
+  authorization: {
+    authorizationService: authorizationService,
+    requiredLevel: level,
+  },
+});
+
+/**
+ * Exchange サービスのインスタンス
+ */
 const service = new ExchangeService();
 
 export async function POST() {
-  if (!await AuthorizationService.authorize(Feature.EXCHANGE, PermissionLevel.EDIT)) {
-    return APIUtil.ReturnUnauthorized();
-  }
-
-  await service.syncCache();
-
-  return APIUtil.ReturnSuccess();
+  return await APIUtil.apiHandler(async () => {
+    await service.syncCache();
+  }, getOptions(PermissionLevel.VIEW));
 }

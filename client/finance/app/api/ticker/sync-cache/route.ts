@@ -1,18 +1,35 @@
+import { PermissionLevel } from '@common/enums/PermissionLevel';
+
+import APIUtil, { APIResponseOptions } from '@client-common/utils/APIUtil';
+
 import TickerService from '@finance/services/TickerService';
+import { FinanceFeature, ROOT_FEATURE } from '@finance/consts/FinanceConst';
 
-import APIUtil from '@client-common/utils/APIUtil';
-
-import AuthorizationService from '@/services/auth/AuthorizationService';
-import { Feature, PermissionLevel } from '@/types/AuthorizationTypes';
+import { FinanceAuthorizationService } from '@/services/auth/FinanceAuthorizationService';
 
 const service = new TickerService();
 
+/**
+ * 認可サービスのインスタンス
+ */
+const authorizationService = new FinanceAuthorizationService();
+
+/**
+ * APIレスポンスオプションを取得
+ * @param level 必要な権限レベル
+ * @returns APIレスポンスオプション
+ */
+const getOptions = (level: PermissionLevel): APIResponseOptions => ({
+  rootFeature: ROOT_FEATURE,
+  feature: FinanceFeature.TICKER,
+  authorization: {
+    authorizationService: authorizationService,
+    requiredLevel: level,
+  },
+});
+
 export async function POST() {
-  if (!await AuthorizationService.authorize(Feature.TICKER, PermissionLevel.EDIT)) {
-    return APIUtil.ReturnUnauthorized();
-  }
-
-  await service.syncCache();
-
-  return APIUtil.ReturnSuccess();
+  return await APIUtil.apiHandler(async () => {
+    await service.syncCache();
+  }, getOptions(PermissionLevel.VIEW));
 }

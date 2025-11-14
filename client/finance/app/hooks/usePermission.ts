@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from 'react';
 
-import { Feature, PermissionLevel } from '@/types/AuthorizationTypes';
-import type {
-  CheckPermissionRequestType,
-  CheckPermissionResponseType,
-} from '@/app/api/auth/check-permission/route';
+import { PermissionLevel } from '@common/enums/PermissionLevel';
+
+import { CheckPermissionRequestType, CheckPermissionResponseType, } from '@client-common/routes/auth/check-permission/route';
+
+import { FinanceFeature } from '@finance/consts/FinanceConst';
 
 /**
  * 権限チェックカスタムフック
@@ -16,7 +16,7 @@ import type {
  * @param level 必要な権限レベル
  * @returns { hasPermission: boolean, loading: boolean }
  */
-export function usePermission(feature: Feature, level: PermissionLevel) {
+export function usePermission(feature: FinanceFeature, level: PermissionLevel) {
   const [hasPermission, setHasPermission] = useState(false);
   const [loading, setLoading] = useState(true);
 

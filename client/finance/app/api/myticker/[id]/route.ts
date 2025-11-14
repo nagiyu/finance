@@ -1,60 +1,74 @@
 import { NextRequest } from 'next/server';
 
+import { BadRequestError, NotFoundError } from '@common/errors';
+import { PermissionLevel } from '@common/enums/PermissionLevel';
+
+import APIUtil, { APIResponseOptions } from '@client-common/utils/APIUtil';
+
 import MyTickerService from '@finance/services/MyTickerService';
-import { MyTickerDataType } from '@finance/interfaces/data/MyTickerDataType';
 import MyTickerValidator from '@finance/utils/MyTickerValidator';
+import { FinanceFeature, ROOT_FEATURE } from '@finance/consts/FinanceConst';
+import { MyTickerDataType } from '@finance/interfaces/data/MyTickerDataType';
 
-import APIUtil from '@client-common/utils/APIUtil';
+import { FinanceAuthorizationService } from '@/services/auth/FinanceAuthorizationService';
 
-import AuthorizationService from '@/services/auth/AuthorizationService';
-import { Feature, PermissionLevel } from '@/types/AuthorizationTypes';
+/**
+ * 認可サービスのインスタンス
+ */
+const authorizationService = new FinanceAuthorizationService();
+
+/**
+ * APIレスポンスオプションを取得
+ * @param level 必要な権限レベル
+ * @returns APIレスポンスオプション
+ */
+const getOptions = (level: PermissionLevel): APIResponseOptions => ({
+  rootFeature: ROOT_FEATURE,
+  feature: FinanceFeature.MY_TICKER,
+  authorization: {
+    authorizationService: authorizationService,
+    requiredLevel: level,
+  },
+});
 
 export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  if (!await AuthorizationService.authorize(Feature.MY_TICKER, PermissionLevel.VIEW)) {
-    return APIUtil.ReturnUnauthorized();
-  }
+  return await APIUtil.apiHandler(async () => {
+    const id = (await params).id;
 
-  const id = (await params).id;
+    const service = new MyTickerService();
+    const myTicker = await service.getById(id);
 
-  const service = new MyTickerService();
-  const myTicker = await service.getById(id);
+    if (!myTicker) {
+      throw new NotFoundError('MyTicker not found');
+    }
 
-  if (!myTicker) {
-    return APIUtil.ReturnNotFound('MyTicker not found');
-  }
-
-  return APIUtil.ReturnSuccess(myTicker);
+    return myTicker;
+  }, getOptions(PermissionLevel.VIEW));
 }
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  if (!await AuthorizationService.authorize(Feature.MY_TICKER, PermissionLevel.EDIT)) {
-    return APIUtil.ReturnUnauthorized();
-  }
+  return await APIUtil.apiHandler(async () => {
+    const id = (await params).id;
+    const body: MyTickerDataType = await request.json();
 
-  const id = (await params).id;
-  const body: MyTickerDataType = await request.json();
+    try {
+      MyTickerValidator.validate(body);
+    } catch (error) {
+      throw new BadRequestError(error instanceof Error ? error.message : 'Validation failed');
+    }
 
-  try {
-    MyTickerValidator.validate(body);
-  } catch (error) {
-    return APIUtil.ReturnBadRequest(error instanceof Error ? error.message : 'Validation failed');
-  }
+    const service = new MyTickerService();
+    const result = await service.update(id, body);
 
-  const service = new MyTickerService();
-  const result = await service.update(id, body);
-
-  return APIUtil.ReturnSuccess(result);
+    return result;
+  }, getOptions(PermissionLevel.EDIT));
 }
 
 export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  if (!await AuthorizationService.authorize(Feature.MY_TICKER, PermissionLevel.EDIT)) {
-    return APIUtil.ReturnUnauthorized();
-  }
+  return await APIUtil.apiHandler(async () => {
+    const id = (await params).id;
 
-  const id = (await params).id;
-
-  const service = new MyTickerService();
-  await service.delete(id);
-
-  return APIUtil.ReturnSuccess();
+    const service = new MyTickerService();
+    await service.delete(id);
+  }, getOptions(PermissionLevel.DELETE));
 }

@@ -1,4 +1,6 @@
-import { PermissionMatrix } from '@/types/AuthorizationTypes';
+import { PermissionMatrix } from '@common/interfaces/authorization/PermissionMatrix';
+
+import { FinanceFeature } from '@finance/consts/FinanceConst';
 
 /**
  * 権限マトリックスデータ型
@@ -6,7 +8,7 @@ import { PermissionMatrix } from '@/types/AuthorizationTypes';
  */
 export interface PermissionMatrixDataType {
   id: string;
-  matrix: PermissionMatrix;
+  matrix: PermissionMatrix<FinanceFeature>;
   create: number;
   update: number;
 }

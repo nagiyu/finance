@@ -1,11 +1,9 @@
-import PermissionMatrixDataAccessor from '@finance/services/PermissionMatrixDataAccessor';
+import { PermissionLevel } from '@common/enums/PermissionLevel';
+import { PermissionMatrix } from '@common/interfaces/authorization/PermissionMatrix';
+import { UserType } from '@common/enums/UserType';
 
-import {
-  Feature,
-  PermissionLevel,
-  PermissionMatrix,
-  UserType,
-} from '@/types/AuthorizationTypes';
+import PermissionMatrixDataAccessor from '@finance/services/PermissionMatrixDataAccessor';
+import { FinanceFeature } from '@finance/consts/FinanceConst';
 
 /**
  * 権限マトリックス管理サービス
@@ -16,7 +14,7 @@ export default class PermissionMatrixService {
    * 権限マトリックスを取得
    * DBに存在しない場合はデフォルトマトリックスを返す
    */
-  public static async getPermissionMatrix(): Promise<PermissionMatrix> {
+  public static async getPermissionMatrix(): Promise<PermissionMatrix<FinanceFeature>> {
     const dataAccessor = new PermissionMatrixDataAccessor();
     const records = await dataAccessor.get();
 
@@ -34,7 +32,7 @@ export default class PermissionMatrixService {
    * @param matrix 新しい権限マトリックス
    */
   public static async updatePermissionMatrix(
-    matrix: PermissionMatrix
+    matrix: PermissionMatrix<FinanceFeature>
   ): Promise<void> {
     const dataAccessor = new PermissionMatrixDataAccessor();
 
@@ -58,45 +56,45 @@ export default class PermissionMatrixService {
    * デフォルトの権限マトリックス
    * 既存の権限設定との互換性を保つ
    */
-  private static getDefaultMatrix(): PermissionMatrix {
+  private static getDefaultMatrix(): PermissionMatrix<FinanceFeature> {
     return {
-      [Feature.EXCHANGE]: {
+      [FinanceFeature.EXCHANGE]: {
         [UserType.GUEST]: PermissionLevel.NONE,
         [UserType.AUTHENTICATED]: PermissionLevel.VIEW,
         [UserType.PREMIUM]: PermissionLevel.VIEW,
         [UserType.ADMIN]: PermissionLevel.ADMIN,
       },
-      [Feature.TICKER]: {
+      [FinanceFeature.TICKER]: {
         [UserType.GUEST]: PermissionLevel.NONE,
         [UserType.AUTHENTICATED]: PermissionLevel.VIEW,
         [UserType.PREMIUM]: PermissionLevel.VIEW,
         [UserType.ADMIN]: PermissionLevel.ADMIN,
       },
-      [Feature.MY_TICKER]: {
+      [FinanceFeature.MY_TICKER]: {
         [UserType.GUEST]: PermissionLevel.NONE,
         [UserType.AUTHENTICATED]: PermissionLevel.EDIT,
         [UserType.PREMIUM]: PermissionLevel.EDIT,
         [UserType.ADMIN]: PermissionLevel.ADMIN,
       },
-      [Feature.FINANCE_NOTIFICATION]: {
+      [FinanceFeature.FINANCE_NOTIFICATION]: {
         [UserType.GUEST]: PermissionLevel.NONE,
         [UserType.AUTHENTICATED]: PermissionLevel.EDIT,
         [UserType.PREMIUM]: PermissionLevel.EDIT,
         [UserType.ADMIN]: PermissionLevel.ADMIN,
       },
-      [Feature.STOCK_CHART]: {
+      [FinanceFeature.STOCK_CHART]: {
         [UserType.GUEST]: PermissionLevel.NONE,
         [UserType.AUTHENTICATED]: PermissionLevel.VIEW,
         [UserType.PREMIUM]: PermissionLevel.VIEW,
         [UserType.ADMIN]: PermissionLevel.ADMIN,
       },
-      [Feature.TARGET_PRICE]: {
+      [FinanceFeature.TARGET_PRICE]: {
         [UserType.GUEST]: PermissionLevel.NONE,
         [UserType.AUTHENTICATED]: PermissionLevel.VIEW,
         [UserType.PREMIUM]: PermissionLevel.VIEW,
         [UserType.ADMIN]: PermissionLevel.ADMIN,
       },
-      [Feature.PERMISSION_ADMIN]: {
+      [FinanceFeature.PERMISSION_ADMIN]: {
         [UserType.GUEST]: PermissionLevel.NONE,
         [UserType.AUTHENTICATED]: PermissionLevel.NONE,
         [UserType.PREMIUM]: PermissionLevel.NONE,

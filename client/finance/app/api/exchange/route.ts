@@ -1,41 +1,55 @@
-import { NextRequest } from "next/server";
+import { NextRequest } from 'next/server';
 
-import CommonUtil from "@common/utils/CommonUtil";
+import CommonUtil from '@common/utils/CommonUtil';
+import { PermissionLevel } from '@common/enums/PermissionLevel';
 
-import APIUtil from '@client-common/utils/APIUtil';
+import APIUtil, { APIResponseOptions } from '@client-common/utils/APIUtil';
 
-import AuthorizationService from '@/services/auth/AuthorizationService';
-import { Feature, PermissionLevel } from '@/types/AuthorizationTypes';
-import { ExchangeDataType } from "@/interfaces/data/ExchangeDataType";
+import { FinanceFeature, ROOT_FEATURE } from '@finance/consts/FinanceConst';
 
 import ExchangeUtil from '@/utils/ExchangeUtil';
+import { ExchangeDataType } from "@/interfaces/data/ExchangeDataType";
+import { FinanceAuthorizationService } from '@/services/auth/FinanceAuthorizationService';
+
+/**
+ * 認可サービスのインスタンス
+ */
+const authorizationService = new FinanceAuthorizationService();
+
+/**
+ * APIレスポンスオプションを取得
+ * @param level 必要な権限レベル
+ * @returns APIレスポンスオプション
+ */
+const getOptions = (level: PermissionLevel): APIResponseOptions => ({
+  rootFeature: ROOT_FEATURE,
+  feature: FinanceFeature.EXCHANGE,
+  authorization: {
+    authorizationService: authorizationService,
+    requiredLevel: level,
+  },
+});
 
 export async function GET() {
-  if (!await AuthorizationService.authorize(Feature.EXCHANGE, PermissionLevel.VIEW)) {
-    return APIUtil.ReturnUnauthorized();
-  }
-
-  const exchanges = await ExchangeUtil.GetAll();
-
-  return APIUtil.ReturnSuccessWithObject(exchanges);
+  return await APIUtil.apiHandler(async () => {
+    return await ExchangeUtil.GetAll();
+  }, getOptions(PermissionLevel.VIEW));
 }
 
 export async function POST(request: NextRequest) {
-  if (!await AuthorizationService.authorize(Feature.EXCHANGE, PermissionLevel.EDIT)) {
-    return APIUtil.ReturnUnauthorized();
-  }
+  return await APIUtil.apiHandler(async () => {
+    const body: ExchangeDataType = await request.json();
+    const now = Date.now();
 
-  const body: ExchangeDataType = await request.json();
-  const now = Date.now();
+    const exchange: ExchangeDataType = {
+      ...body,
+      id: CommonUtil.generateUUID(),
+      create: now,
+      update: now,
+    };
 
-  const exchange: ExchangeDataType = {
-    ...body,
-    id: CommonUtil.generateUUID(),
-    create: now,
-    update: now,
-  };
+    await ExchangeUtil.Create(exchange);
 
-  await ExchangeUtil.Create(exchange);
-
-  return APIUtil.ReturnSuccessWithObject(exchange);
+    return exchange;
+  }, getOptions(PermissionLevel.EDIT));
 }

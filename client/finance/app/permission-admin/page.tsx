@@ -2,11 +2,13 @@
 
 import React, { useState, useEffect } from 'react';
 
-import { Feature, PermissionLevel, PermissionMatrix } from '@/types/AuthorizationTypes';
-import type {
-  CheckPermissionRequestType,
-  CheckPermissionResponseType,
-} from '@/app/api/auth/check-permission/route';
+import { PermissionLevel } from '@common/enums/PermissionLevel';
+import { PermissionMatrix } from '@common/interfaces/authorization/PermissionMatrix';
+
+import { CheckPermissionRequestType, CheckPermissionResponseType, } from '@client-common/routes/auth/check-permission/route';
+
+import { FinanceFeature } from '@finance/consts/FinanceConst';
+
 import type {
   PermissionMatrixGetResponseType,
   PermissionMatrixUpdateRequestType,
@@ -30,7 +32,7 @@ export default function PermissionAdminPage() {
     try {
       // 権限チェック
       const requestBody: CheckPermissionRequestType = {
-        feature: Feature.PERMISSION_ADMIN,
+        feature: FinanceFeature.PERMISSION_ADMIN,
         level: PermissionLevel.ADMIN,
       };
       const response = await fetch('/api/auth/check-permission', {

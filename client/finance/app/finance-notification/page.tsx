@@ -9,6 +9,7 @@ import ErrorUtil from '@common/utils/ErrorUtil';
 import { FinanceNotificationDataType } from '@finance/interfaces/data/FinanceNotificationDataType';
 
 import AdminManagement from '@client-common/components/admin/AdminManagement';
+import FeatureGuard from '@client-common/components/authorization/FeatureGuard';
 import NotificationUtil from '@client-common/utils/NotificationUtil.client';
 import TerminalUtil from '@client-common/utils/TerminalUtil.client';
 import { Column } from '@client-common/components/data/table/BasicTable';
@@ -18,8 +19,8 @@ import LoadingContent from '@client-common/components/content/LoadingContent';
 import ExchangeFetchService from '@/services/exchange/ExchangeFetchService.client';
 import FinanceNotificationEditDialogContent from '@/app/components/financeNotification/FinanceNotificationEditDialogContent';
 import FinanceNotificationFetchService from '@/services/financeNotification/FinanceNotificationFetchService.client';
-import { Feature, PermissionLevel } from '@/types/AuthorizationTypes';
-import FeatureGuard from '@/app/components/FeatureGuard';
+import { FinanceFeature } from '@finance/consts/FinanceConst';
+import { PermissionLevel } from '@common/enums/PermissionLevel';
 import TickerFetchService from '@/services/ticker/TickerFetchService.client';
 import { ExchangeDataType } from '@/interfaces/data/ExchangeDataType';
 import { TickerDataType } from '@/interfaces/data/TickerDataType';
@@ -157,8 +158,8 @@ export default function FinanceNotificationPage() {
     }, []);
 
     return (
-        <FeatureGuard 
-            feature={Feature.FINANCE_NOTIFICATION} 
+        <FeatureGuard
+            feature={FinanceFeature.FINANCE_NOTIFICATION}
             level={PermissionLevel.EDIT}
         >
             <LoadingContent>

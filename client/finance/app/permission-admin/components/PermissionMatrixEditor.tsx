@@ -2,16 +2,15 @@
 
 import React, { useState, useEffect } from 'react';
 
-import {
-  Feature,
-  PermissionLevel,
-  PermissionMatrix,
-  UserType,
-} from '@/types/AuthorizationTypes';
+import { PermissionLevel } from '@common/enums/PermissionLevel';
+import { PermissionMatrix } from '@common/interfaces/authorization/PermissionMatrix';
+import { UserType } from '@common/enums/UserType';
+
+import { FinanceFeature } from '@finance/consts/FinanceConst';
 
 interface PermissionMatrixEditorProps {
-  matrix: PermissionMatrix;
-  onSave: (matrix: PermissionMatrix) => Promise<void>;
+  matrix: PermissionMatrix<FinanceFeature>;
+  onSave: (matrix: PermissionMatrix<FinanceFeature>) => Promise<void>;
 }
 
 /**
@@ -21,7 +20,7 @@ export default function PermissionMatrixEditor({
   matrix: initialMatrix,
   onSave,
 }: PermissionMatrixEditorProps) {
-  const [matrix, setMatrix] = useState<PermissionMatrix>(initialMatrix);
+  const [matrix, setMatrix] = useState<PermissionMatrix<FinanceFeature>>(initialMatrix);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -29,7 +28,7 @@ export default function PermissionMatrixEditor({
   }, [initialMatrix]);
 
   const handlePermissionChange = (
-    feature: Feature,
+    feature: FinanceFeature,
     userType: UserType,
     level: PermissionLevel
   ) => {
@@ -55,15 +54,15 @@ export default function PermissionMatrixEditor({
     }
   };
 
-  const getFeatureLabel = (feature: Feature): string => {
-    const labels: Record<Feature, string> = {
-      [Feature.EXCHANGE]: '取引所管理',
-      [Feature.TICKER]: 'ティッカー管理',
-      [Feature.MY_TICKER]: '個人ティッカーリスト',
-      [Feature.FINANCE_NOTIFICATION]: '通知設定',
-      [Feature.STOCK_CHART]: '株価チャート',
-      [Feature.TARGET_PRICE]: '目標価格計算',
-      [Feature.PERMISSION_ADMIN]: '権限管理',
+  const getFeatureLabel = (feature: FinanceFeature): string => {
+    const labels: Record<FinanceFeature, string> = {
+      [FinanceFeature.EXCHANGE]: '取引所管理',
+      [FinanceFeature.TICKER]: 'ティッカー管理',
+      [FinanceFeature.MY_TICKER]: '個人ティッカーリスト',
+      [FinanceFeature.FINANCE_NOTIFICATION]: '通知設定',
+      [FinanceFeature.STOCK_CHART]: '株価チャート',
+      [FinanceFeature.TARGET_PRICE]: '目標価格計算',
+      [FinanceFeature.PERMISSION_ADMIN]: '権限管理',
     };
     return labels[feature] || feature;
   };
@@ -110,7 +109,7 @@ export default function PermissionMatrixEditor({
             </tr>
           </thead>
           <tbody>
-            {Object.values(Feature).map((feature) => (
+            {Object.values(FinanceFeature).map((feature) => (
               <tr key={feature}>
                 <td style={{ border: '1px solid #ddd', padding: '12px', fontWeight: 'bold' }}>
                   {getFeatureLabel(feature)}
