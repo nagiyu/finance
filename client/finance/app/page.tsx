@@ -12,6 +12,7 @@ import BasicStack from '@client-common/components/Layout/Stacks/BasicStack';
 import DirectionStack from '@client-common/components/Layout/Stacks/DirectionStack';
 import ContainedButton from '@client-common/components/inputs/Buttons/ContainedButton';
 
+import FeatureGuard from '@client-common/components/authorization/FeatureGuard';
 import { SelectOptionType } from '@client-common/interfaces/SelectOptionType';
 
 import ExchangeUtil from '@/utils/ExchangeUtil';
@@ -22,7 +23,6 @@ import CandleCountUtil from '@/utils/CandleCountUtil';
 import { ExchangeDataType } from '@/interfaces/data/ExchangeDataType';
 import { TickerDataType } from '@/interfaces/data/TickerDataType';
 
-import FeatureGuard from '@/app/components/FeatureGuard';
 import { FinanceFeature } from '@finance/consts/FinanceConst';
 import { PermissionLevel } from '@common/enums/PermissionLevel';
 import AllConditionDisplay from '@/app/components/AllConditionDisplay';
@@ -99,13 +99,13 @@ export default function Home() {
     if (exchangeOptions.length > 0 && !urlParamsProcessed) {
       // Check for Exchange URL parameter
       const exchangeIdFromUrl = searchParams.get('exchangeId');
-      
+
       if (exchangeIdFromUrl && exchangeOptions.some(opt => opt.value === exchangeIdFromUrl)) {
         setExchange(exchangeIdFromUrl);
       } else {
         setExchange(exchangeOptions[0].value);
       }
-      
+
       setUrlParamsProcessed(true);
     }
   }, [exchangeOptions, searchParams, urlParamsProcessed]);
@@ -114,7 +114,7 @@ export default function Home() {
     if (urlParamsProcessed) {
       // Check for TimeFrame URL parameter
       const timeframeFromUrl = searchParams.get('timeframe');
-      
+
       if (timeframeFromUrl && TimeFrameUtil.isValidTimeFrame(timeframeFromUrl)) {
         setTimeframe(timeframeFromUrl);
       }
@@ -134,8 +134,8 @@ export default function Home() {
   }, [tickerOptions, searchParams, urlParamsProcessed]);
 
   return (
-    <FeatureGuard 
-      feature={FinanceFeature.STOCK_CHART} 
+    <FeatureGuard
+      feature={FinanceFeature.STOCK_CHART}
       level={PermissionLevel.VIEW}
     >
       <BasicStack>
@@ -154,7 +154,7 @@ export default function Home() {
           <BasicSelect label='取引時間' options={SessionUtil.toSelectOptions()} value={session} onChange={(value) => setSession(value)} />
           <BasicSelect label='表示本数' options={CandleCountUtil.toSelectOptions()} value={candleCount} onChange={(value) => setCandleCount(value)} />
         </DirectionStack>
-        <AllConditionDisplay 
+        <AllConditionDisplay
           exchangeId={exchange}
           tickerId={ticker}
           timeframe={timeframe}

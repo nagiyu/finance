@@ -1,30 +1,59 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from 'next/server';
 
-import APIUtil from '@client-common/utils/APIUtil';
-
-import AuthorizationService from '@/services/auth/AuthorizationService';
 import { PermissionLevel } from '@common/enums/PermissionLevel';
-import { FinanceFeature } from '@finance/consts/FinanceConst';
-import FinanceUtil, { GetStockPriceDataOptions } from '@finance/utils/FinanceUtil';
 
+import APIUtil, { APIResponseOptions } from '@client-common/utils/APIUtil';
+
+import FinanceUtil, { GetStockPriceDataOptions } from '@finance/utils/FinanceUtil';
+import { FinanceFeature, ROOT_FEATURE } from '@finance/consts/FinanceConst';
+
+import { FinanceAuthorizationService } from '@/services/auth/FinanceAuthorizationService';
+
+/**
+ * ローソク足データ取得APIのリクエストインターフェース
+ */
 interface CandleStickRequest {
+  /**
+   * Exchange
+   */
   exchange: string;
+
+  /**
+   * Ticker
+   */
   ticker: string;
+
+  /**
+   * オプション
+   */
   options?: GetStockPriceDataOptions;
 }
 
-export async function POST(req: NextRequest) {
-  if (!await AuthorizationService.authorize(FinanceFeature.STOCK_CHART, PermissionLevel.VIEW)) {
-    return APIUtil.ReturnUnauthorized();
-  }
+/**
+ * 認可サービスのインスタンス
+ */
+const authorizationService = new FinanceAuthorizationService();
 
-  try {
+/**
+ * APIレスポンスオプションを取得
+ * @param level 必要な権限レベル
+ * @returns APIレスポンスオプション
+ */
+const getOptions = (level: PermissionLevel): APIResponseOptions => ({
+  rootFeature: ROOT_FEATURE,
+  feature: FinanceFeature.STOCK_CHART,
+  authorization: {
+    authorizationService: authorizationService,
+    requiredLevel: level,
+  },
+});
+
+export async function POST(req: NextRequest) {
+  return await APIUtil.apiHandler(async () => {
     const { exchange, ticker, options }: CandleStickRequest = await req.json();
-    
+
     const result = await FinanceUtil.getStockPriceData(exchange, ticker, options);
 
-    return NextResponse.json(result);
-  } catch (err) {
-    return NextResponse.json({ error: err }, { status: 500 });
-  }
+    return result;
+  }, getOptions(PermissionLevel.VIEW));
 }

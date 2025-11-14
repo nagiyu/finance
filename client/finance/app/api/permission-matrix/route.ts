@@ -1,14 +1,15 @@
 import { NextRequest } from 'next/server';
 
+import { BadRequestError, UnauthorizedError } from '@common/errors';
 import { PermissionLevel } from '@common/enums/PermissionLevel';
 import { PermissionMatrix } from '@common/interfaces/authorization/PermissionMatrix';
 
-import APIUtil from '@client-common/utils/APIUtil';
+import APIUtil, { APIResponseOptions } from '@client-common/utils/APIUtil';
 
-import { FinanceFeature } from '@finance/consts/FinanceConst';
+import { FinanceFeature, ROOT_FEATURE } from '@finance/consts/FinanceConst';
 
-import AuthorizationService from '@/services/auth/AuthorizationService';
 import PermissionMatrixService from '@/services/auth/PermissionMatrixService';
+import { FinanceAuthorizationService } from '@/services/auth/FinanceAuthorizationService';
 
 /**
  * 権限マトリックス更新APIのリクエスト型
@@ -36,44 +37,55 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 /**
+ * 認可サービスのインスタンス
+ */
+const authorizationService = new FinanceAuthorizationService();
+
+/**
+ * APIレスポンスオプション
+ */
+const options: APIResponseOptions = ({
+  rootFeature: ROOT_FEATURE,
+  feature: FinanceFeature.PERMISSION_ADMIN,
+});
+
+/**
  * 権限マトリックス取得API
  */
 export async function GET() {
-  try {
+  return await APIUtil.apiHandler(async () => {
     // 管理者権限チェック
-    const isAdmin = await AuthorizationService.authorize(
+    const isAdmin = await authorizationService.authorize(
       FinanceFeature.PERMISSION_ADMIN,
       PermissionLevel.ADMIN
     );
 
     if (!isAdmin) {
-      return APIUtil.ReturnUnauthorized();
+      throw new UnauthorizedError('Unauthorized');
     }
 
     // 権限マトリックスを取得
     const matrix = await PermissionMatrixService.getPermissionMatrix();
 
     const response: PermissionMatrixGetResponseType = { matrix };
-    return APIUtil.ReturnSuccessWithObject(response);
-  } catch (error) {
-    console.error('Error getting permission matrix:', error);
-    return APIUtil.ReturnInternalServerErrorWithError(error);
-  }
+
+    return response;
+  }, options);
 }
 
 /**
  * 権限マトリックス更新API
  */
 export async function PUT(request: NextRequest) {
-  try {
+  return await APIUtil.apiHandler(async () => {
     // 管理者権限チェック
-    const isAdmin = await AuthorizationService.authorize(
+    const isAdmin = await authorizationService.authorize(
       FinanceFeature.PERMISSION_ADMIN,
       PermissionLevel.ADMIN
     );
 
     if (!isAdmin) {
-      return APIUtil.ReturnUnauthorized();
+      throw new UnauthorizedError('Unauthorized');
     }
 
     const body: PermissionMatrixUpdateRequestType = await request.json();
@@ -81,7 +93,7 @@ export async function PUT(request: NextRequest) {
 
     // 入力検証
     if (!matrix) {
-      return APIUtil.ReturnBadRequest('Matrix is required');
+      throw new BadRequestError('Matrix is required');
     }
 
     // 権限マトリックスを更新
@@ -90,9 +102,7 @@ export async function PUT(request: NextRequest) {
     const response: PermissionMatrixUpdateResponseType = {
       message: 'Permission matrix updated successfully',
     };
-    return APIUtil.ReturnSuccessWithObject(response);
-  } catch (error) {
-    console.error('Error updating permission matrix:', error);
-    return APIUtil.ReturnInternalServerErrorWithError(error);
-  }
+
+    return response;
+  }, options);
 }

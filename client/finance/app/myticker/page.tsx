@@ -10,9 +10,9 @@ import { MyTickerDataType } from '@finance/interfaces/data/MyTickerDataType';
 
 import AuthFetchService from '@client-common/services/auth/AuthFetchService.client';
 import AdminManagement from '@client-common/components/admin/AdminManagement';
+import FeatureGuard from '@client-common/components/authorization/FeatureGuard';
 import { Column } from '@client-common/components/data/table/BasicTable';
 
-import FeatureGuard from '@/app/components/FeatureGuard';
 import { FinanceFeature } from '@finance/consts/FinanceConst';
 import { PermissionLevel } from '@common/enums/PermissionLevel';
 import ExchangeFetchService from '@/services/exchange/ExchangeFetchService.client';
@@ -177,8 +177,8 @@ export default function MyTickerPage() {
     }, []);
 
     return (
-        <FeatureGuard 
-            feature={FinanceFeature.MY_TICKER} 
+        <FeatureGuard
+            feature={FinanceFeature.MY_TICKER}
             level={PermissionLevel.VIEW}
         >
             <div>

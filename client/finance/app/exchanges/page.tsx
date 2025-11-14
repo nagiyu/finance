@@ -5,9 +5,9 @@ import React from 'react';
 import TimeUtil from '@common/utils/TimeUtil';
 
 import AdminManagement from '@client-common/components/admin/AdminManagement';
+import FeatureGuard from '@client-common/components/authorization/FeatureGuard';
 import { Column } from '@client-common/components/data/table/BasicTable';
 
-import FeatureGuard from '@/app/components/FeatureGuard';
 import { FinanceFeature } from '@finance/consts/FinanceConst';
 import { PermissionLevel } from '@common/enums/PermissionLevel';
 import ExchangeEditDialogContent from '@/app/components/exchange/ExchangeEditDialogContent';
@@ -84,8 +84,8 @@ export default function ExchangesPage() {
     };
 
     return (
-        <FeatureGuard 
-            feature={FinanceFeature.EXCHANGE} 
+        <FeatureGuard
+            feature={FinanceFeature.EXCHANGE}
             level={PermissionLevel.ADMIN}
             fallback={<div>権限がありません。</div>}
         >

@@ -4,11 +4,18 @@ import { PermissionLevel } from '@common/enums/PermissionLevel';
 import { PermissionMatrix } from '@common/interfaces/authorization/PermissionMatrix';
 import { UserType } from '@common/enums/UserType';
 
+import SessionUtil from '@client-common/utils/SessionUtil.server';
+
+import FinanceAuthService from '@finance/services/FinanceAuthService';
+import { FinanceAuthDataType } from '@finance/interfaces/data/FinanceAuthDataType';
 import { FinanceFeature } from '@finance/consts/FinanceConst';
+
+import PermissionMatrixService from '@/services/auth/PermissionMatrixService';
+
+const financeAuthService = new FinanceAuthService();
 
 /**
  * Finance用の認可サービス
- * typescript-common の AuthorizationServiceBase を継承して実装
  */
 export class FinanceAuthorizationService extends AuthorizationServiceBase<FinanceFeature> {
   /**
@@ -25,28 +32,54 @@ export class FinanceAuthorizationService extends AuthorizationServiceBase<Financ
 
   /**
    * 権限マトリックスを取得
-   * 派生クラスで実装が必要
-   * このメソッドは実際の実装クラス（クライアント側またはサーバー側）でオーバーライドされる
    */
   protected async getPermissionMatrix(): Promise<PermissionMatrix<FinanceFeature>> {
-    throw new Error('getPermissionMatrix must be implemented by derived class');
+    return await PermissionMatrixService.getPermissionMatrix();
   }
 
   /**
    * ユーザータイプを取得
-   * 派生クラスで実装が必要
-   * このメソッドは実際の実装クラス（クライアント側またはサーバー側）でオーバーライドされる
    */
   protected async getUserType(): Promise<UserType> {
-    throw new Error('getUserType must be implemented by derived class');
+    const user = await this.getUser();
+
+    if (!user) {
+      return UserType.GUEST;
+    }
+
+    return user.finance;
   }
 
   /**
    * ユーザーIDを取得
-   * 派生クラスで実装が必要
-   * このメソッドは実際の実装クラス（クライアント側またはサーバー側）でオーバーライドされる
    */
   protected async getUserId(): Promise<string | undefined> {
-    throw new Error('getUserId must be implemented by derived class');
+    const user = await this.getUser();
+
+    if (!user) {
+      return undefined;
+    }
+
+    return user.id;
+  }
+
+  /**
+   * ユーザー情報を取得
+   * @returns ユーザー情報、存在しない場合は null
+   */
+  protected async getUser(): Promise<FinanceAuthDataType | null> {
+    const session = await SessionUtil.getSession();
+
+    if (!session) {
+      return null;
+    }
+
+    const googleUserId = await SessionUtil.getGoogleUserIdFromSession(session);
+
+    if (!googleUserId) {
+      return null;
+    }
+
+    return await financeAuthService.getByGoogleUserId(googleUserId);
   }
 }

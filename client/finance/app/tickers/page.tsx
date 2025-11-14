@@ -6,9 +6,9 @@
 import React, { useEffect, useState } from 'react';
 
 import AdminManagement from '@client-common/components/admin/AdminManagement';
+import FeatureGuard from '@client-common/components/authorization/FeatureGuard';
 import { Column } from '@client-common/components/data/table/BasicTable';
 
-import FeatureGuard from '@/app/components/FeatureGuard';
 import { FinanceFeature } from '@finance/consts/FinanceConst';
 import { PermissionLevel } from '@common/enums/PermissionLevel';
 import ExchangeFetchService from '@/services/exchange/ExchangeFetchService.client';
@@ -82,8 +82,8 @@ export default function TickersPage() {
     }, []);
 
     return (
-        <FeatureGuard 
-            feature={FinanceFeature.TICKER} 
+        <FeatureGuard
+            feature={FinanceFeature.TICKER}
             level={PermissionLevel.ADMIN}
             fallback={<div>権限がありません。</div>}
         >

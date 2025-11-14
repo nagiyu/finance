@@ -1,6 +1,6 @@
 {
   "name": "finance",
-  "image": "node:20",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:1-20-bullseye",
   "remoteUser": "node",
   "containerEnv": {
     "PROCESS_ENV": "local",

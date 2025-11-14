@@ -3,11 +3,10 @@
 import { useEffect, useState } from 'react';
 
 import { PermissionLevel } from '@common/enums/PermissionLevel';
+
+import { CheckPermissionRequestType, CheckPermissionResponseType, } from '@client-common/routes/auth/check-permission/route';
+
 import { FinanceFeature } from '@finance/consts/FinanceConst';
-import type {
-  CheckPermissionRequestType,
-  CheckPermissionResponseType,
-} from '@/app/api/auth/check-permission/route';
 
 /**
  * 権限チェックカスタムフック
