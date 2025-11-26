@@ -1,50 +1,74 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+# finance Constitution
+<!-- Sync Impact Report (auto-generated) -->
+<!--
+Version change: none -> 1.0.0
+Modified principles: (new) Code Quality & Maintainability; Test Standards; User Experience Consistency; Performance & Resource Budgets; Common Submodules & Framework Usage
+Added sections: Technology Constraints & Submodule Policy; Development Workflow (quality gates)
+Removed sections: none
+Templates updated: ✅ .specify/templates/plan-template.md
+				  ✅ .specify/templates/spec-template.md
+				  ✅ .specify/templates/tasks-template.md
+				  ⚠ pending: .specify/templates/agent-file-template.md, .specify/templates/checklist-template.md
+Follow-up TODOs: TODO(RATIFICATION_DATE): original ratification date unknown — please set when known
+-->
 
-## Core Principles
+## 基本原則
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### コード品質と保守性（必須）
+納品されるすべてのコードは強い型付けが施され、リンティングとフォーマットが行われている必要があります。プロジェクトは共有のスタイル設定（ESLint/Prettier 等）を採用し、該当する場合はコンパイラの厳格オプション（TypeScript の `strict` など）を有効にする必要があります。コードはモジュール化され、インターフェースが小さく保たれ、焦点を絞ったドキュメントと公開 API 契約を伴うべきです。依存関係の更新は明示的に行い、レビューされ、重要な変更にはアップグレード計画を用意する必要があります。
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+理由: 高品質で一貫したコードはオンボーディング時間を短縮し、回帰を防ぎ、長期的な保守性を確保します。
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### テスト基準（非交渉）
+テストは必須です。すべての変更にはテストが含まれていなければなりません：ロジックに対するユニットテスト、境界を跨ぐ振る舞いに対する統合/契約テスト、該当する場合はユーザーに影響するフローに対するエンドツーエンドまたはシステムテスト。プロジェクトは、文書化された例外が承認されていない限り、デフォルトでコードカバレッジの最小目標（行ベースで 80% など）を目指すべきです。テストは決定論的であり、すべての PR で CI 上で実行されなければなりません。
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+理由: 自動化されたテストは、安全な変更とリファクタリングの主要な防護手段です。
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### ユーザーエクスペリエンスの一貫性（必須/推奨）
+ユーザー向けの変更は、確立された UX パターンやコンポーネント契約に従う必要があります。アクセシビリティ（該当する場合は WCAG AA）、国際化、エラーや空状態の一貫した扱いは受け入れ基準に考慮されなければなりません。UX に関する決定は仕様書に記録され、受け入れテストやデザインの承認によって検証されるべきです。
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+理由: 一貫した UX はユーザーの混乱やサポート負荷、および手戻りを減らします。
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+### パフォーマンスとリソース予算（必須/推奨）
+パフォーマンス目標とリソース予算（遅延の P95/P99 目標、メモリ、コスト予算など）は、新しいサービスや機能の計画内で定義され、リリース前に検証されなければなりません。パフォーマンステストとプロファイリングは、遅延、スループット、リソース使用に影響を与える機能のパイプラインに含める必要があります。合意された予算を超える回帰が発生した場合は、メインブランチにマージする前にリバートまたは修正する必要があります。
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+理由: 予測可能なパフォーマンスはユーザーの信頼とプラットフォームのコスト管理に不可欠です。
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+### 共通サブモジュールとフレームワークの利用（必須）
+TypeScript コードについては、チームは共有ユーティリティ、型、ビルド/ランタイムヘルパーのために `typescript-common` サブモジュール（またはその公式リポジトリ）を最大限再利用する必要があります。Next.js アプリケーションについては、共有コンポーネント、設定、慣例のために `nextjs-common` サブモジュール（またはその公式リポジトリ）を最大限再利用する必要があります。例外を設ける場合は、文書化された正当な理由と移行/保守計画が必要です。
 
-## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
+理由: 共有サブモジュールは重複を減らし、一貫性を強制し、横断的関心事の保守を集中させます。
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+## 技術制約とサブモジュール方針
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+1. TypeScript: TypeScript を使用するプロジェクトは、共有の型、ユーティリティ、ビルドスクリプトのために `typescript-common` を統合して優先的に使用する必要があります。サブモジュールで要件を満たせない場合にのみローカルオーバーライドを許可し、その場合は移行計画を添付する必要があります。
+2. Next.js: Next.js アプリケーションは、共有 UI コンポーネント、ページ/レイアウトの慣例、画像処理、ランタイム構成のために `nextjs-common` を統合して優先的に使用する必要があります。
+3. 可観測性: サービスは `docs/` の可観測性ガイドラインに従った構造化ログ、メトリクス、トレースを出力し、プラットフォームの集約ツールと互換性がある必要があります。
+4. セキュリティとライセンス: すべての依存関係は脆弱性とライセンス互換性のスキャンを受ける必要があります。重大な脆弱性はセキュリティプレイブックで定められた期間内に修正されなければなりません。
+
+理由: これらの制約は実装者を共通でレビュー済みのソリューションへ導き、リポジトリ間の乖離を減らします。
+
+## 開発ワークフロー、レビュー手順、品質ゲート
+
+- PR は明確な説明、リンクされた仕様/計画、およびテスト要約を含める必要があります。公開 API や共有サブモジュールを変更する PR は移行ノートを含める必要があります。
+- CI ゲート: 型チェック、リンティング、テスト、契約/統合テスト、パフォーマンススモーク、セキュリティスキャンはマージ前に通過する必要があります。ゲートに失敗した場合は PR 内で修正するか、リスク緩和を文書化した上でメンテナーの明示的承認が必要です。
+- コードレビュー: 少なくとも1名（望ましくは2名）の領域のオーナーによる承認が必要です。レビュアーは憲章の原則への準拠を確認し、逸脱があれば指摘する必要があります。
+- UX 承認: ユーザー向けの変更は PR 内で UX またはプロダクトの承認を文書化する必要があります（デザインのスクリーンショットや受け入れテストの参照など）。
+- パフォーマンスチェック: パフォーマンス目標を宣言した機能はベースラインベンチマークと CI における簡易パフォーマンステストを含める必要があります。
+
+理由: 規律あるワークフローは憲章の原則を強化し、回帰を減らします。
+
+## ガバナンス
+
+改訂: 憲章を改訂する提案は、提案文、理由、影響分析、影響を受けるリポジトリの移行手順を含む文書化された PR として提出する必要があります。重大でない変更でも、横断チームのメンテナーからレビューを求め、承認まで 7 日間のコメント期間を設けることが推奨されます。
+
+バージョニング方針:
+- MAJOR: ガバナンス上の破壊的変更（原則の削除/名称変更や、移行なしに従前の準拠を無効化する変更）。
+- MINOR: 原則の追加、新たな必須セクション、または指針の実質的拡張。
+- PATCH: 文言の明確化、誤字修正、非意味的な修正。
+
+コンプライアンスレビュー: アクティブなリポジトリ全体での適合性を検証するために定期的なレビュー（6 か月毎）が推奨されます。リポジトリは CI の一部として自動化された憲章チェック（必要なチェック：lint/typecheck/tests、憲章関連タスクの存在を確認）を実行する必要があります。
+
+紛争/解決: メンテナー間で解釈に関する合意が得られない場合は、プラットフォーム運営委員会にエスカレーションして裁定を求めます。
+
+**Version**: 1.0.0 | **Ratified**: TODO(RATIFICATION_DATE) | **Last Amended**: 2025-11-27

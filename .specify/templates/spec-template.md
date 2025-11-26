@@ -90,6 +90,15 @@
 - **FR-004**: System MUST [data requirement, e.g., "persist user preferences"]
 - **FR-005**: System MUST [behavior, e.g., "log all security events"]
 
+### Quality & Constitution Requirements (mandatory)
+
+- **Q-001**: Type checking and linting configuration MUST be specified and run in CI.
+- **Q-002**: Testing strategy MUST be declared (unit, integration/contract, e2e) with target coverage and test locations.
+- **Q-003**: If the feature is TypeScript-based, the plan MUST declare usage of `typescript-common` or document justification for not using it.
+- **Q-004**: If the feature is a Next.js application/component, the plan MUST declare usage of `nextjs-common` or document justification for not using it.
+- **Q-005**: Performance budgets and success criteria for latency, throughput, and resource usage MUST be provided when relevant.
+
+
 *Example of marking unclear requirements:*
 
 - **FR-006**: System MUST authenticate users via [NEEDS CLARIFICATION: auth method not specified - email/password, SSO, OAuth?]
