@@ -1,7 +1,14 @@
 #!/usr/bin/env node
 
-const Ajv = require('ajv');
 const path = require('path');
+
+let Ajv;
+try {
+  Ajv = require('ajv');
+} catch (err) {
+  console.error('Failed to load ajv module. Run "npm install" first.');
+  process.exit(1);
+}
 
 const schemaPath = path.join(__dirname, '..', 'specs', '001-restructure-docs', 'contracts', 'doc-metadata.schema.json');
 
