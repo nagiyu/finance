@@ -3,6 +3,10 @@
   "version": "2.0.0",
   "private": true,
   "description": "Finance monorepo",
+  "scripts": {
+    "docs:lint": "remark docs --use remark-preset-lint-recommended --quiet",
+    "docs:validate": "node -e \"const Ajv = require('ajv'); const schema = require('./specs/001-restructure-docs/contracts/doc-metadata.schema.json'); const ajv = new Ajv({allErrors: true}); const valid = ajv.validateSchema(schema); if (!valid) { console.error('Invalid schema:', ajv.errors); process.exit(1); } console.log('Schema validation passed');\""
+  },
   "devDependencies": {
     "ajv": "^8.17.1",
     "prettier": "^3.6.2",
