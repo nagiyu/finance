@@ -1,0 +1,12 @@
+{
+  "name": "finance",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Finance monorepo",
+  "devDependencies": {
+    "ajv": "^8.17.1",
+    "prettier": "^3.6.2",
+    "remark-cli": "^12.0.1",
+    "remark-preset-lint-recommended": "^7.0.1"
+  }
+}
