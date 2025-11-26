@@ -31,7 +31,15 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+All plans MUST include a short Constitution Check that demonstrates how the feature complies with the constitution at a minimum for:
+
+- Type safety and linting (TypeScript `strict`, ESLint/formatting configured)
+- Testing strategy (unit, integration/contract, e2e where applicable) and coverage expectations
+- UX acceptance and accessibility considerations (if user-facing)
+- Performance goals / resource budgets (if applicable)
+- Use of shared submodules: confirm whether `typescript-common` or `nextjs-common` will be used and justify any deviation
+
+Reference: `.specify/memory/constitution.md` — include links or excerpts as needed.
 
 ## Project Structure
 

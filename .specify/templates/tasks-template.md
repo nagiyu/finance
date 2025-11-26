@@ -8,6 +8,8 @@ description: "Task list template for feature implementation"
 **Input**: Design documents from `/specs/[###-feature-name]/`
 **Prerequisites**: plan.md (required), spec.md (required for user stories), research.md, data-model.md, contracts/
 
+**Constitution Prerequisite**: Every tasks.md generated for a feature MUST include a short Constitution Check (see `.specify/memory/constitution.md`) that documents lint/typecheck, test strategy, UX acceptance, performance budgets, and the use (or justified non-use) of `typescript-common` / `nextjs-common` when applicable.
+
 **Tests**: The examples below include test tasks. Tests are OPTIONAL - only include them if explicitly requested in the feature specification.
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.

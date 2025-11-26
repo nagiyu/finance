@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Document metadata",
+  "type": "object",
+  "required": ["title","area","owner","last-updated"],
+  "properties": {
+    "title": {"type":"string"},
+    "area": {"type":"string"},
+    "topic": {"type":"string"},
+    "owner": {"type":"string"},
+    "last-updated": {"type":"string","format":"date"},
+    "related-code-paths": {"type":"array","items":{"type":"string"}},
+    "status": {"type":"string","enum":["active","archived","migrated"]}
+  }
+}
