@@ -1,0 +1,33 @@
+openapi: 3.0.3
+info:
+  title: Finance Repository - Simplified Notification API (skeleton)
+  version: 0.1.0
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+  /api/example:
+    get:
+      summary: Example endpoint (placeholder)
+      responses:
+        '200':
+          description: Example response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: hello
