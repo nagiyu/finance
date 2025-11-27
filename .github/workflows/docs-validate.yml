@@ -4,9 +4,9 @@ on:
   pull_request:
     branches:
       - develop
+      - release/**
     paths:
       - 'docs/**'
-      - 'specs/**'
       - 'scripts/validate-docs.js'
       - 'package.json'
       - 'package-lock.json'
