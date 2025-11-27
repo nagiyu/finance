@@ -1,3 +1,16 @@
+---
+title: "TargetPrice 算出ツール"
+area: finance
+topic: feature
+owner: "@nagiyu"
+last-updated: 2025-11-27
+related-code-paths:
+    - "finance/services/TargetPriceService.ts"
+    - "finance/interfaces/data/TargetPriceDataType.ts"
+    - "client/finance/app/components/financeNotification/TargetPriceCalculationDialog.tsx"
+status: active
+---
+
 # TargetPrice 算出ツール
 
 ## 概要

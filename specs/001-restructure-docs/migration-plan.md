@@ -23,6 +23,11 @@
 | ID | 現在のパス | 移行先パス | アクション | 優先度 | 担当者 | ステータス | 備考 |
 |----|-----------|-----------|-----------|--------|--------|-----------|------|
 | M001 | `docs/finance/MyTicker.md` | `docs/finance/MyTicker.md` | 更新 | High | @copilot | 完了 | パイロット移行: frontmatter 追加 |
+| M002 | `docs/finance/README.md` | `docs/finance/README.md` | 更新 | High | @copilot | 完了 | Finance Module 基盤ドキュメント: frontmatter 追加 |
+| M003 | `docs/finance/conditions-system.md` | `docs/finance/conditions-system.md` | 更新 | High | @copilot | 完了 | 条件システム: frontmatter 追加 |
+| M004 | `docs/finance/target-price-calculation.md` | `docs/finance/target-price-calculation.md` | 更新 | High | @copilot | 完了 | TargetPrice 算出ツール: frontmatter 追加 |
+| M005 | `docs/finance/sync-cache-api.md` | `docs/finance/sync-cache-api.md` | 更新 | Medium | @copilot | 完了 | キャッシュ同期 API: frontmatter 追加 |
+| M006 | `docs/finance/per-condition-frequency.md` | `docs/finance/per-condition-frequency.md` | 更新 | Medium | @copilot | 完了 | 条件ごとの通知頻度設定: frontmatter 追加 |
 
 ### ステータス凡例
 
@@ -47,6 +52,11 @@
 | 日付 | ID | 変更内容 | PR リンク | 理由 |
 |------|-----|---------|----------|------|
 | 2025-11-27 | M001 | `docs/finance/MyTicker.md` に frontmatter を追加 | (本 PR) | パイロット移行: ドキュメントメタデータスキーマに準拠 |
+| 2025-11-27 | M002 | `docs/finance/README.md` に frontmatter を追加 | (本 PR) | Finance Module 基盤ドキュメント: メタデータスキーマに準拠 |
+| 2025-11-27 | M003 | `docs/finance/conditions-system.md` に frontmatter を追加 | (本 PR) | 条件システム: メタデータスキーマに準拠 |
+| 2025-11-27 | M004 | `docs/finance/target-price-calculation.md` に frontmatter を追加 | (本 PR) | TargetPrice 算出ツール: メタデータスキーマに準拠 |
+| 2025-11-27 | M005 | `docs/finance/sync-cache-api.md` に frontmatter を追加 | (本 PR) | キャッシュ同期 API: メタデータスキーマに準拠 |
+| 2025-11-27 | M006 | `docs/finance/per-condition-frequency.md` に frontmatter を追加 | (本 PR) | 条件ごとの通知頻度設定: メタデータスキーマに準拠 |
 
 ## 優先度の基準
 
