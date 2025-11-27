@@ -1,3 +1,18 @@
+---
+title: "キャッシュ同期 API"
+area: finance
+topic: api
+owner: "@nagiyu"
+last-updated: 2025-11-27
+related-code-paths:
+    - "typescript-common/common/services/CRUDServiceBase.ts"
+    - "client/finance/app/api/exchange/sync-cache/route.ts"
+    - "client/finance/app/api/ticker/sync-cache/route.ts"
+    - "client/finance/app/api/myticker/sync-cache/route.ts"
+    - "client/finance/app/api/finance-notification/sync-cache/route.ts"
+status: active
+---
+
 # キャッシュ同期 API (Sync Cache API)
 
 ## 概要 (Overview)

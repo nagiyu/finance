@@ -1,3 +1,16 @@
+---
+title: "条件システム"
+area: finance
+topic: feature
+owner: "@nagiyu"
+last-updated: 2025-11-27
+related-code-paths:
+    - "finance/conditions/ConditionBase.ts"
+    - "finance/utils/ConditionUtil.ts"
+    - "finance/services/ConditionService.ts"
+status: active
+---
+
 # 条件システム
 
 ## 概要

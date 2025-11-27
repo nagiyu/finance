@@ -1,3 +1,19 @@
+---
+title: "Finance Module"
+area: finance
+topic: overview
+owner: "@nagiyu"
+last-updated: 2025-11-27
+related-code-paths:
+    - "finance/utils/FinanceUtil.ts"
+    - "finance/services/FinanceNotificationService.ts"
+    - "finance/services/TargetPriceService.ts"
+    - "finance/services/ExchangeService.ts"
+    - "finance/services/TickerService.ts"
+    - "finance/services/MyTickerService.ts"
+status: active
+---
+
 # Finance Module
 
 金融データ処理とStock Price Tracking機能を提供するコアモジュールです。

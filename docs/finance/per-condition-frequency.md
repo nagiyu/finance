@@ -1,3 +1,15 @@
+---
+title: "条件ごとの通知頻度・時間枠設定機能"
+area: finance
+topic: feature
+owner: "@nagiyu"
+last-updated: 2025-11-27
+related-code-paths:
+    - "finance/services/FinanceNotificationService.ts"
+    - "finance/interfaces/data/FinanceNotificationDataType.ts"
+status: active
+---
+
 # 条件ごとの通知頻度・時間枠設定機能
 
 ## 概要
