@@ -5,6 +5,10 @@
   "description": "JSON Schema for validating document frontmatter metadata in the finance project",
   "type": "object",
   "properties": {
+    "title": {
+      "type": "string",
+      "description": "The title of the document"
+    },
     "owner": {
       "type": "string",
       "description": "The owner or maintainer of the document"
@@ -28,8 +32,13 @@
         "type": "string"
       },
       "description": "List of related code paths or file references"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["active", "archived", "migrated"],
+      "description": "The status of the document"
     }
   },
-  "required": ["owner", "area", "topic", "last-updated"],
+  "required": ["title", "owner", "area", "last-updated"],
   "additionalProperties": true
 }

@@ -10,7 +10,7 @@ try {
   process.exit(1);
 }
 
-const schemaPath = path.join(__dirname, '..', 'specs', '001-restructure-docs', 'contracts', 'doc-metadata.schema.json');
+const schemaPath = path.join(__dirname, '..', 'docs', 'contracts', 'doc-metadata.schema.json');
 
 // Validate the schema itself first
 let schema;
