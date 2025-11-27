@@ -22,9 +22,7 @@
 
 | ID | 現在のパス | 移行先パス | アクション | 優先度 | 担当者 | ステータス | 備考 |
 |----|-----------|-----------|-----------|--------|--------|-----------|------|
-| M001 | (例) `finance/README.md` | `docs/finance/README.md` | 移動 | High | @owner | 未着手 | ハブページとして整備 |
-| M002 | (例) `client/finance/docs/setup.md` | `docs/client/setup.md` | 統合 | Medium | @owner | 未着手 | 既存ドキュメントと統合 |
-| M003 | (例) `server/docs/api.md` | `docs/server/api.md` | 移動 | Low | @owner | 未着手 | - |
+| M001 | `docs/finance/MyTicker.md` | `docs/finance/MyTicker.md` | 更新 | High | @copilot | 完了 | パイロット移行: frontmatter 追加 |
 
 ### ステータス凡例
 
@@ -48,7 +46,7 @@
 
 | 日付 | ID | 変更内容 | PR リンク | 理由 |
 |------|-----|---------|----------|------|
-| YYYY-MM-DD | M001 | (例) `finance/README.md` を `docs/finance/README.md` へ移動 | #123 | ハブページとして統合 |
+| 2025-11-27 | M001 | `docs/finance/MyTicker.md` に frontmatter を追加 | (本 PR) | パイロット移行: ドキュメントメタデータスキーマに準拠 |
 
 ## 優先度の基準
 
