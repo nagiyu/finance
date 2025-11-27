@@ -130,47 +130,47 @@ Next.js を使用したモダンなWebアプリケーションです。
 ### ローカル開発環境セットアップ
 
 1. **リポジトリクローン**
-   ```bash
-   git clone <repository-url>
-   cd finance
-   ```
+    ```bash
+    git clone <repository-url>
+    cd finance
+    ```
 
 2. **依存関係インストール**
-   ```bash
-   # 各モジュールで依存関係をインストール
-   cd common && npm install
-   cd ../finance && npm install
-   cd ../client/finance && npm install
-   cd ../server/finance && npm install
-   ```
+    ```bash
+    # 各モジュールで依存関係をインストール
+    cd common && npm install
+    cd ../finance && npm install
+    cd ../client/finance && npm install
+    cd ../server/finance && npm install
+    ```
 
 3. **環境変数設定**
-   ```bash
-   # .env.local ファイルを作成
-   cp .env.example .env.local
-   # 必要な環境変数を設定
-   ```
+    ```bash
+    # .env.local ファイルを作成
+    cp .env.example .env.local
+    # 必要な環境変数を設定
+    ```
 
 4. **開発サーバー起動**
-   ```bash
-   cd client/finance
-   npm run dev
-   # http://localhost:3000 でアクセス
-   ```
+    ```bash
+    cd client/finance
+    npm run dev
+    # http://localhost:3000 でアクセス
+    ```
 
 ### ビルドとデプロイ
 
 1. **クライアントビルド**
-   ```bash
-   cd client/finance
-   npm run build
-   ```
+    ```bash
+    cd client/finance
+    npm run build
+    ```
 
 2. **サーバービルド**
-   ```bash
-   cd server/finance
-   npm run build
-   ```
+    ```bash
+    cd server/finance
+    npm run build
+    ```
 
 ## 環境設定
 
@@ -252,19 +252,19 @@ Lambda実行ロールには以下の権限が必要：
 ### よくある問題
 
 1. **TradingView API エラー**
-   - レート制限の確認
-   - ネットワーク接続の確認
-   - 市場の開場時間の確認
+    - レート制限の確認
+    - ネットワーク接続の確認
+    - 市場の開場時間の確認
 
 2. **DynamoDB エラー**
-   - IAM権限の確認
-   - テーブル名の設定確認
-   - キャパシティ不足の確認
+    - IAM権限の確認
+    - テーブル名の設定確認
+    - キャパシティ不足の確認
 
 3. **認証エラー**
-   - NextAuth設定の確認
-   - 環境変数の確認
-   - セッション期限の確認
+    - NextAuth設定の確認
+    - 環境変数の確認
+    - セッション期限の確認
 
 ### サポート情報
 - ログの確認場所
@@ -278,6 +278,66 @@ Lambda実行ロールには以下の権限が必要：
 - 🔧 [設定ガイド](./docs/settings/baseSetting.md) - 環境設定手順
 - 📝 [開発ガイド](./docs/guides/index.md) - 開発時の参考情報
 
+### ドキュメント編集手順
+
+ドキュメントの作成・編集は以下の手順で行います。
+
+#### テンプレートの使用
+
+1. **テンプレートを確認**  
+    新しいドキュメントを作成する場合は、[ドキュメントテンプレート](./docs/templates/doc-template.md)を参照してください。
+
+2. **テンプレートをコピー**  
+    ```bash
+    cp docs/templates/doc-template.md docs/<対象ディレクトリ>/<新しいファイル名>.md
+    ```
+
+3. **メタデータを更新**  
+    ファイル先頭のフロントマターを適切に更新します：
+    ```yaml
+    ---
+    title: "<ドキュメントタイトル>"
+    area: <エリア>  # finance, common, guides など
+    topic: <トピック>
+    owner: @your-handle
+    last-updated: YYYY-MM-DD
+    related-code-paths:
+        - "<関連するコードパス>"
+    status: active
+    ---
+    ```
+
+4. **内容を記述**  
+    テンプレートの各セクション（目的、前提条件、手順、テスト/検証）に沿って内容を記述します。
+
+#### PR手順
+
+1. **ブランチを作成**  
+    ```bash
+    git checkout -b docs/<変更内容を表す名前>
+    ```
+
+2. **ドキュメントを編集**  
+    上記のテンプレート使用手順に従い、ドキュメントを作成・編集します。
+
+3. **変更をコミット**  
+    ```bash
+    git add docs/
+    git commit -m "docs: <変更内容の説明>"
+    ```
+
+4. **プルリクエストを作成**  
+    - GitHub 上でプルリクエストを作成します
+    - タイトルには `docs:` プレフィックスを付けます
+    - 変更内容の概要を説明します
+
+5. **レビューを受ける**  
+    - レビュアーからのフィードバックに対応します
+    - 必要に応じて修正を行います
+
+6. **マージ**  
+    - レビュー承認後、プルリクエストをマージします
+
 ## ライセンス
 
 本プロジェクトは Apache License 2.0 および MIT License のデュアルライセンスです。
@@ -290,4 +350,4 @@ Lambda実行ロールには以下の権限が必要：
 ---
 
 **開発・保守**: Nagiyu  
-**最終更新**: 2024年
+**最終更新**: 2025年
