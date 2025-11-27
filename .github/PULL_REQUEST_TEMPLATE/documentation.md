@@ -17,7 +17,7 @@ assignees: []
 
 - [ ] フロントマター（メタデータ）が正しく記載されている
   - [ ] `title` が適切に設定されている
-  - [ ] `area` が正しく指定されている（例: finance, client, common）
+  - [ ] `area` が正しく指定されている（例: finance, common, contracts, guides）
   - [ ] `topic` が適切に設定されている
   - [ ] `owner` が設定されている
   - [ ] `last-updated` が更新日に設定されている
@@ -27,7 +27,7 @@ assignees: []
 - [ ] ドキュメントテンプレートに従っている（`docs/templates/doc-template.md` 参照）
 
 - [ ] ドキュメントの配置場所が適切である
-  - [ ] 適切なエリアディレクトリ配下に配置されている（例: `docs/finance/`, `docs/client/`）
+  - [ ] 適切なエリアディレクトリ配下に配置されている（例: `docs/finance/`, `docs/guides/`）
 
 ### 内容確認
 
