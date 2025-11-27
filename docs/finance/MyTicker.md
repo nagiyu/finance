@@ -1,3 +1,17 @@
+---
+title: "MyTicker"
+area: finance
+topic: feature
+owner: "@nagiyu"
+last-updated: 2025-11-27
+related-code-paths:
+    - "finance/services/MyTickerService.ts"
+    - "finance/interfaces/data/MyTickerDataType.ts"
+    - "finance/interfaces/record/MyTickerRecordType.ts"
+    - "finance/utils/MyTickerValidator.ts"
+status: active
+---
+
 # MyTicker
 
 ## 概要
