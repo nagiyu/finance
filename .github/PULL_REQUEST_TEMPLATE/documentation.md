@@ -16,18 +16,18 @@ assignees: []
 ### 必須項目
 
 - [ ] フロントマター（メタデータ）が正しく記載されている
-  - [ ] `title` が適切に設定されている
-  - [ ] `area` が正しく指定されている（例: finance, common, contracts, guides）
-  - [ ] `topic` が適切に設定されている
-  - [ ] `owner` が設定されている
-  - [ ] `last-updated` が更新日に設定されている
-  - [ ] `related-code-paths` が関連コードパスを含んでいる（該当する場合）
-  - [ ] `status` が設定されている（active, deprecated, draft）
+    - [ ] `title` が適切に設定されている
+    - [ ] `area` が正しく指定されている（例: finance, common, contracts, guides）
+    - [ ] `topic` が適切に設定されている
+    - [ ] `owner` が設定されている
+    - [ ] `last-updated` が更新日に設定されている
+    - [ ] `related-code-paths` が関連コードパスを含んでいる（該当する場合）
+    - [ ] `status` が設定されている（active, deprecated, draft）
 
 - [ ] ドキュメントテンプレートに従っている（`docs/templates/doc-template.md` 参照）
 
 - [ ] ドキュメントの配置場所が適切である
-  - [ ] 適切なエリアディレクトリ配下に配置されている（例: `docs/finance/`, `docs/guides/`）
+    - [ ] 適切なエリアディレクトリ配下に配置されている（例: `docs/finance/`, `docs/guides/`）
 
 ### 内容確認
 
