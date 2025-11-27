@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/nagiyu/finance/docs/contracts/doc-metadata.schema.json",
+  "title": "Document Metadata Schema",
+  "description": "JSON Schema for validating document frontmatter metadata in the finance project",
+  "type": "object",
+  "properties": {
+    "owner": {
+      "type": "string",
+      "description": "The owner or maintainer of the document"
+    },
+    "area": {
+      "type": "string",
+      "description": "The area or domain the document belongs to (e.g., 'finance', 'common', 'client')"
+    },
+    "topic": {
+      "type": "string",
+      "description": "The specific topic or subject of the document"
+    },
+    "last-updated": {
+      "type": "string",
+      "format": "date",
+      "description": "The date when the document was last updated (ISO 8601 date format: YYYY-MM-DD)"
+    },
+    "related-code-paths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of related code paths or file references"
+    }
+  },
+  "required": ["owner", "area", "topic", "last-updated"],
+  "additionalProperties": true
+}
