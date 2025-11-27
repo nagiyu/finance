@@ -25,6 +25,13 @@ Finance Management System のドキュメントハブです。各領域の詳細
 - [Server Documentation](./common/server/README.md) - サーバーサイド実装
 - [Client Documentation](./common/client/README.md) - クライアントサイド実装
 
+### [Client Module](./client/README.md)
+
+クライアントサイドアプリケーションの共通ドキュメントハブです。
+
+- [Finance Client](./finance/client/README.md) - 金融データ表示アプリケーション
+- [Common Client](./common/client/README.md) - 共通コンポーネントとユーティリティ
+
 ### [Guides](./guides/index.md)
 
 開発時の参考情報とガイドラインです。
