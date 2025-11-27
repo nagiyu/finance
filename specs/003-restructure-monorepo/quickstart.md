@@ -30,7 +30,7 @@ npm run dev
 ```
 
 ## 開発コンテナ（DevContainer）
-- ルートに統一された `devcontainer` 設定を提供します。VS Code の Remote - Containers 機能でルートの DevContainer を開いてください。
+- ルートに統一された `devcontainer` 設定を提供しますが、ルートに複数の設定を置くことや各プロジェクトごとの DevContainer の存在も許容します。重要なのは個々のファイル単位で不要に DevContainer を作成しないことです。VS Code の Remote - Containers 機能でルートまたは該当プロジェクトの DevContainer を開いてください。
 
 ## デプロイ（自動化）
 - デプロイは GitHub Actions 経由で実行されます。AWS へのリソース作成は CloudFormation テンプレートを使用します。
