@@ -10,10 +10,17 @@ npm install --prefix client/finance --no-audit --no-fund || true
 
 2. ローカルでのリンティング／検証の実行（例）:
 
+```bash
+# Markdown リンティング
+npm run docs:lint
+
+# ドキュメントメタデータスキーマの検証
+npm run docs:validate
 ```
-npx remark "docs/**/*.md" --use remark-preset-lint-recommended
-npx ajv validate -s specs/001-restructure-docs/contracts/doc-metadata.schema.json -d docs/**/metadata.json
-```
+
+上記のコマンドは `package.json` の `scripts` に定義されています:
+- `docs:lint`: remark を使用して Markdown ファイルのリンティングを実行
+- `docs:validate`: `scripts/validate-docs.js` を実行してドキュメントメタデータスキーマを検証
 
 3. 移行パイロット手順:
 - リポジトリをスキャンして `specs/001-restructure-docs/migration-plan.md` を作成する（手動またはスクリプト）。
