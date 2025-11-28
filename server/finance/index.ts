@@ -18,7 +18,7 @@ export const handler = async () => {
     const tickerService = new TickerService();
     const conditionService = new ConditionService();
     const notificationService = new NotificationService();
-    
+
     const financeNotificationService = new FinanceNotificationService(
       financeNotificationDataAccessor,
       exchangeService,
@@ -28,7 +28,10 @@ export const handler = async () => {
     );
 
     // Get client base URL from AWS Secrets Manager
-    const baseUrl = await SecretsManagerUtil.getSecretValue(process.env.PROJECT_SECRET!, 'CLIENT_BASE_URL');
+    const baseUrl = await SecretsManagerUtil.getSecretValue(
+      process.env.PROJECT_SECRET!,
+      'CLIENT_BASE_URL'
+    );
     const notificationEndpoint = `${baseUrl}/api/send-notification`;
 
     // Run for 10 minutes (600 seconds), checking every minute (60 seconds)
@@ -46,14 +49,16 @@ export const handler = async () => {
         // Wait for next cycle (unless we're near the end time)
         const remainingTime = endTime - Date.now();
         if (remainingTime > checkInterval) {
-          await new Promise(resolve => setTimeout(resolve, checkInterval));
+          await new Promise((resolve) => setTimeout(resolve, checkInterval));
         } else {
           break;
         }
       } catch (error) {
-        errors.push(`Error in check cycle: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        errors.push(
+          `Error in check cycle: ${error instanceof Error ? error.message : 'Unknown error'}`
+        );
         // Continue with next cycle even if this one failed
-        await new Promise(resolve => setTimeout(resolve, checkInterval));
+        await new Promise((resolve) => setTimeout(resolve, checkInterval));
       }
     }
 
