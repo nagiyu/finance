@@ -109,6 +109,7 @@ jobs:
 
   deploy-client-finance:
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.deploy_cloudformation == 'true' }}
 
     environment:
       name: ${{ github.ref == 'refs/heads/master' && 'production' || 'development' }}
@@ -192,6 +193,7 @@ jobs:
 
   deploy-server-finance:
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.deploy_cloudformation == 'true' }}
 
     environment:
       name: ${{ github.ref == 'refs/heads/master' && 'production' || 'development' }}
