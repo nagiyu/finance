@@ -2,12 +2,41 @@
 
 この手順は新しい開発者がリポジトリをクローンして、30 分以内に開発環境を起動し主要なテストを実行できることを目標としています。
 
-- ## 前提
+## 前提
+
 - Node.js 20.x がインストールされていること
 - `npm` が使用可能であること
 - Docker があると DevContainer の利用が容易
 
-## ローカルセットアップ（推奨）
+---
+
+## 開発コンテナ（DevContainer）- 推奨
+
+コンポーネント別に DevContainer を管理しています。VS Code の Remote - Containers 機能で該当コンポーネントの DevContainer を開いてください。
+
+### 推奨 DevContainer 設定ファイル
+
+| コンポーネント | DevContainer パス | 用途 |
+|---------------|-------------------|------|
+| クライアント（Next.js） | `.devcontainer/client/devcontainer.json` | クライアントアプリ開発 |
+| サーバー（Lambda） | `.devcontainer/server/devcontainer.json` ※作成予定 | サーバーサイド開発 |
+| finance（共通ロジック） | `.devcontainer/finance/devcontainer.json` | 共通モジュール開発 |
+| spec-kit | `.devcontainer/spec-kit/devcontainer.json` | 仕様書作成ツール |
+
+### DevContainer の起動方法
+
+1. VS Code でリポジトリを開く
+2. コマンドパレット（`F1` または `Ctrl+Shift+P`）を開く
+3. `Dev Containers: Open Folder in Container...` を選択
+4. リポジトリルートを選択
+5. 該当する DevContainer 設定を選択（例: `.devcontainer/client/devcontainer.json`）
+
+> **注意**: サブディレクトリ直下に残る `.devcontainer` は legacy であり、今後ルート直下の `.devcontainer/<component>/` 形式へ統一する予定です。
+
+---
+
+## ローカルセットアップ（DevContainer を使用しない場合）
+
 ```bash
 # リポジトリをクローン
 git clone git@github.com:YOUR_ORG/finance.git
@@ -15,31 +44,119 @@ cd finance
 
 # 依存関係インストール（npm）
 npm install
-
-# ルートで型チェックとテストを実行
-npm run typecheck
-npm test
 ```
 
-## 開発サーバ起動（クライアント）
+---
+
+## 各コンポーネントの起動手順
+
+### 1. クライアント（client/finance）
+
+Next.js ベースのフロントエンドアプリケーションです。
+
 ```bash
 # client ディレクトリに移動
 cd client/finance
+
+# 依存関係インストール
 npm install
+
+# 開発サーバ起動
 npm run dev
 ```
 
-## 開発コンテナ（DevContainer）
-- ルートに統一された `devcontainer` 設定を提供しますが、ルートに複数の設定を置くことや各プロジェクトごとの DevContainer の存在も許容します。重要なのは個々のファイル単位で不要に DevContainer を作成しないことです。VS Code の Remote - Containers 機能でルートまたは該当プロジェクトの DevContainer を開いてください。
+**確認方法**:
+- ブラウザで `http://localhost:3000` にアクセス
+- ページが正常に表示されることを確認
 
-## デプロイ（自動化）
-- デプロイは GitHub Actions 経由で実行されます。AWS へのリソース作成は CloudFormation テンプレートを使用します。
-- ローカルからデプロイする場合は、適切な AWS 資格情報を設定した上で CloudFormation を実行してください（ただし推奨はワークフロー経由）。
+**ビルド・リント**:
+```bash
+npm run build   # 本番ビルド
+npm run lint    # ESLint 実行
+```
+
+### 2. サーバー（server/finance）
+
+AWS Lambda 向けのサーバーサイドアプリケーションです。
+
+```bash
+# server ディレクトリに移動
+cd server/finance
+
+# 依存関係インストール
+npm install
+
+# ビルド
+npm run build
+```
+
+**確認方法**:
+- `dist/index.js` が生成されることを確認
+- ローカルでの動作確認は `test-eventbridge.js` や `test-financeutil.js` を使用
+
+### 3. finance（共通ロジック）
+
+共通のビジネスロジックとユーティリティを含むモジュールです。
+
+```bash
+# finance ディレクトリに移動
+cd finance
+
+# 依存関係インストール
+npm install
+
+# テスト実行
+npm test
+```
+
+**確認方法**:
+- Jest テストが全て成功することを確認
+
+---
 
 ## テストの実行
-- ユニット/統合: `npm test`（Jest）
-- E2E（Playwright）: `npm run test:e2e`（導入後）
+
+| コンポーネント | コマンド | テストフレームワーク |
+|---------------|---------|---------------------|
+| finance | `cd finance && npm test` | Jest |
+| client/finance | `cd client/finance && npm run lint` | ESLint |
+| server/finance | `cd server/finance && npm run build` | ビルド確認 |
+
+### E2E テスト（導入後）
+
+```bash
+npm run test:e2e  # Playwright
+```
+
+---
+
+## 30 分以内のセットアップ確認チェックリスト
+
+以下の手順を 30 分以内に完了できることを確認してください。
+
+- [ ] リポジトリのクローン（5 分）
+- [ ] `npm install` による依存関係インストール（5 分）
+- [ ] クライアント開発サーバの起動と動作確認（5 分）
+- [ ] サーバーのビルド成功確認（5 分）
+- [ ] finance モジュールのテスト実行（5 分）
+- [ ] （オプション）DevContainer での環境起動（5 分）
+
+---
+
+## デプロイ（自動化）
+
+- デプロイは GitHub Actions 経由で実行されます
+- AWS へのリソース作成は CloudFormation テンプレートを使用します
+- ローカルからデプロイする場合は、適切な AWS 資格情報を設定した上で CloudFormation を実行してください（ただし推奨はワークフロー経由）
+
+---
 
 ## よくある問題
-- 依存関係のキャッシュ問題がある場合は `npm install --force` を試してください。
+
+| 問題 | 解決方法 |
+|-----|---------|
+| 依存関係のキャッシュ問題 | `npm install --force` を試す |
+| DevContainer が起動しない | Docker Desktop が起動していることを確認 |
+| ポート 3000 が使用中 | 既存のプロセスを停止するか、別のポートを指定 |
+| TypeScript のエラー | `npm run typecheck` で詳細を確認 |
 
