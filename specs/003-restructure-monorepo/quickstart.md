@@ -19,16 +19,9 @@
 | コンポーネント | DevContainer パス | 状態 | 用途 |
 |---------------|-------------------|------|------|
 | クライアント（Next.js） | `.devcontainer/client/devcontainer.json` | ✅ 利用可能 | クライアントアプリ開発 |
+| サーバー（Lambda） | `.devcontainer/server/devcontainer.json` | ✅ 利用可能 | サーバーサイド開発 |
 | finance（共通ロジック） | `.devcontainer/finance/devcontainer.json` | ✅ 利用可能 | 共通モジュール開発 |
 | spec-kit | `.devcontainer/spec-kit/devcontainer.json` | ✅ 利用可能 | 仕様書作成ツール |
-
-#### 計画中の DevContainer
-
-| コンポーネント | DevContainer パス | 状態 | 用途 |
-|---------------|-------------------|------|------|
-| サーバー（Lambda） | `.devcontainer/server/devcontainer.json` | 🚧 作成予定（T001） | サーバーサイド開発 |
-
-> **Note**: サーバー用 DevContainer は T001 タスクで作成予定です。現時点では `server/finance/.devcontainer/` を使用してください。
 
 ### DevContainer の起動方法
 
@@ -76,10 +69,12 @@ npm run dev
 - ブラウザで `http://localhost:3000` にアクセス
 - ページが正常に表示されることを確認
 
-**ビルド・リント**:
+**ビルド・リント・型チェック**:
 ```bash
-npm run build   # 本番ビルド
-npm run lint    # ESLint 実行
+npm run build      # 本番ビルド
+npm run lint       # ESLint 実行
+npm run typecheck  # TypeScript 型チェック
+npm run setup      # 依存関係インストール
 ```
 
 ### 2. サーバー（server/finance）
@@ -105,6 +100,14 @@ npm run build
   node test-financeutil.js   # ユーティリティのテスト
   ```
 
+**リント・型チェック**:
+```bash
+npm run lint       # ESLint 実行
+npm run lint:fix   # ESLint 自動修正
+npm run typecheck  # TypeScript 型チェック
+npm run setup      # 依存関係インストール
+```
+
 ### 3. finance（共通ロジック）
 
 共通のビジネスロジックとユーティリティを含むモジュールです。
@@ -123,15 +126,33 @@ npm test
 **確認方法**:
 - Jest テストが全て成功することを確認
 
+**リント・型チェック**:
+```bash
+npm run lint       # ESLint 実行
+npm run lint:fix   # ESLint 自動修正
+npm run typecheck  # TypeScript 型チェック
+npm run setup      # 依存関係インストール
+```
+
 ---
 
 ## テストの実行
 
-| コンポーネント | コマンド | テストフレームワーク |
-|---------------|---------|---------------------|
-| finance | `cd finance && npm test` | Jest |
-| client/finance | `cd client/finance && npm run lint` | ESLint |
-| server/finance | `cd server/finance && npm run build` | ビルド確認 |
+| コンポーネント | テストコマンド | リント | 型チェック |
+|---------------|---------------|--------|-----------|
+| finance | `cd finance && npm test` | `npm run lint` | `npm run typecheck` |
+| client/finance | `cd client/finance && npm test` | `npm run lint` | `npm run typecheck` |
+| server/finance | `cd server/finance && npm run build` | `npm run lint` | `npm run typecheck` |
+
+### ルートでの一括実行
+
+```bash
+# ルートディレクトリから
+npm run lint          # ESLint 実行
+npm run lint:fix      # ESLint 自動修正
+npm run format        # Prettier でフォーマット
+npm run format:check  # フォーマットチェック
+```
 
 ### E2E テスト（導入後）
 
