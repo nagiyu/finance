@@ -9,6 +9,7 @@ on:
       - 'server/finance/**'
       - 'server/common/**'
       - 'finance/**'
+      - 'typescript-common/**'
       - '.github/workflows/ci-server.yml'
   workflow_dispatch:
 
