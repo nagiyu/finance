@@ -106,7 +106,10 @@ validate_component() {
     fi
 
     # Change to component directory
-    cd "${component_path}"
+    if ! cd "${component_path}"; then
+        log_error "Failed to change directory to: ${component_path}"
+        return 1
+    fi
 
     # Run setup (npm install)
     if ! run_check "${component}" "npm run setup" npm run setup; then
@@ -124,7 +127,10 @@ validate_component() {
     fi
 
     # Return to repo root
-    cd "${REPO_ROOT}"
+    if ! cd "${REPO_ROOT}"; then
+        log_error "Failed to return to repository root: ${REPO_ROOT}"
+        return 1
+    fi
 
     return ${failed}
 }
