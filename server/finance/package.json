@@ -3,7 +3,11 @@
   "version": "1.0.0",
   "main": "dist/index.js",
   "scripts": {
-    "build": "esbuild index.ts --bundle --minify --sourcemap --platform=node --target=es2020 --outfile=dist/index.js"
+    "build": "esbuild index.ts --bundle --minify --sourcemap --platform=node --target=es2020 --outfile=dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "echo \"ESLint not configured yet\" && exit 0",
+    "test": "echo \"No tests configured yet\" && exit 0",
+    "setup": "npm install"
   },
   "devDependencies": {
     "esbuild": "^0.25.9",
