@@ -21,6 +21,9 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.deploy_cloudformation == 'true' }}
 
+    permissions:
+      contents: read
+
     environment:
       name: ${{ github.ref == 'refs/heads/master' && 'production' || 'development' }}
 
