@@ -16,12 +16,19 @@
 
 ### 推奨 DevContainer 設定ファイル
 
-| コンポーネント | DevContainer パス | 用途 |
-|---------------|-------------------|------|
-| クライアント（Next.js） | `.devcontainer/client/devcontainer.json` | クライアントアプリ開発 |
-| サーバー（Lambda） | `.devcontainer/server/devcontainer.json` ※作成予定 | サーバーサイド開発 |
-| finance（共通ロジック） | `.devcontainer/finance/devcontainer.json` | 共通モジュール開発 |
-| spec-kit | `.devcontainer/spec-kit/devcontainer.json` | 仕様書作成ツール |
+| コンポーネント | DevContainer パス | 状態 | 用途 |
+|---------------|-------------------|------|------|
+| クライアント（Next.js） | `.devcontainer/client/devcontainer.json` | ✅ 利用可能 | クライアントアプリ開発 |
+| finance（共通ロジック） | `.devcontainer/finance/devcontainer.json` | ✅ 利用可能 | 共通モジュール開発 |
+| spec-kit | `.devcontainer/spec-kit/devcontainer.json` | ✅ 利用可能 | 仕様書作成ツール |
+
+#### 計画中の DevContainer
+
+| コンポーネント | DevContainer パス | 状態 | 用途 |
+|---------------|-------------------|------|------|
+| サーバー（Lambda） | `.devcontainer/server/devcontainer.json` | 🚧 作成予定（T001） | サーバーサイド開発 |
+
+> **Note**: サーバー用 DevContainer は T001 タスクで作成予定です。現時点では `server/finance/.devcontainer/` を使用してください。
 
 ### DevContainer の起動方法
 
@@ -31,7 +38,7 @@
 4. リポジトリルートを選択
 5. 該当する DevContainer 設定を選択（例: `.devcontainer/client/devcontainer.json`）
 
-> **注意**: サブディレクトリ直下に残る `.devcontainer` は legacy であり、今後ルート直下の `.devcontainer/<component>/` 形式へ統一する予定です。
+> **注意**: サブディレクトリ直下（例: `client/finance/.devcontainer/`, `server/finance/.devcontainer/`）に残る DevContainer は legacy 設定です。今後ルート直下の `.devcontainer/<component>/` 形式へ統一する予定です（T005 で一覧化・T019 で整理予定）。移行完了までは、まずルート直下の設定を優先して使用してください。
 
 ---
 
@@ -92,7 +99,11 @@ npm run build
 
 **確認方法**:
 - `dist/index.js` が生成されることを確認
-- ローカルでの動作確認は `test-eventbridge.js` や `test-financeutil.js` を使用
+- ローカルでの動作確認:
+  ```bash
+  node test-eventbridge.js   # EventBridge 関連のテスト
+  node test-financeutil.js   # ユーティリティのテスト
+  ```
 
 ### 3. finance（共通ロジック）
 
