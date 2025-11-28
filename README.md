@@ -122,6 +122,8 @@ Next.js を使用したモダンなWebアプリケーションです。
 
 ## クイックスタート
 
+> **📚 詳細なクイックスタートガイド**: 各コンポーネントの起動手順やDevContainerの使用方法については [Quickstart ガイド](./specs/003-restructure-monorepo/quickstart.md) を参照してください。
+
 ### 前提条件
 - Node.js 18.x 以上
 - npm または yarn
@@ -297,10 +299,17 @@ Lambda実行ロールには以下の権限が必要：
 
 ## ドキュメント
 
+### 主要ドキュメント
 - 📖 [Finance Module](./docs/finance/README.md) - 金融データ処理モジュール
 - 📖 [Common Module](./docs/common/README.md) - 共通機能モジュール
 - 🔧 [設定ガイド](./docs/settings/baseSetting.md) - 環境設定手順
 - 📝 [開発ガイド](./docs/guides/index.md) - 開発時の参考情報
+
+### クイックスタートとオンボーディング
+- 🚀 [Quickstart ガイド](./specs/003-restructure-monorepo/quickstart.md) - 開発環境セットアップと各コンポーネントの起動手順
+
+### コンポーネント README
+- 📄 [Client README](./client/finance/README.md) - Next.js クライアントアプリケーション
 
 ### ドキュメント編集手順
 
