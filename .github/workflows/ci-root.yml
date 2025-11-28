@@ -11,6 +11,9 @@ on:
       - develop
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   # Root-level checks
   root-lint:
@@ -71,7 +74,9 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: finance/package-lock.json
+          cache-dependency-path: |
+            typescript-common/common/package-lock.json
+            finance/package-lock.json
 
       - name: Install dependencies for typescript-common
         run: |
@@ -103,7 +108,9 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: finance/package-lock.json
+          cache-dependency-path: |
+            typescript-common/common/package-lock.json
+            finance/package-lock.json
 
       - name: Install dependencies for typescript-common
         run: |
@@ -135,7 +142,9 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: finance/package-lock.json
+          cache-dependency-path: |
+            typescript-common/common/package-lock.json
+            finance/package-lock.json
 
       - name: Install dependencies for typescript-common
         run: |
