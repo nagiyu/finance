@@ -3,22 +3,10 @@ name: CI - Server
 on:
   pull_request:
     branches:
-      - master
       - develop
     paths:
       - 'server/finance/**'
       - 'server/common/**'
-      - 'typescript-common/**'
-      - 'finance/**'
-      - '.github/workflows/ci-server.yml'
-  push:
-    branches:
-      - master
-      - develop
-    paths:
-      - 'server/finance/**'
-      - 'server/common/**'
-      - 'typescript-common/**'
       - 'finance/**'
       - '.github/workflows/ci-server.yml'
   workflow_dispatch:
