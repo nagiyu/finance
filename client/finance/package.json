@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "test": "echo \"No tests configured yet\" && exit 0",
+    "setup": "npm install"
   },
   "dependencies": {
     "next": "15.4.3",

@@ -2,7 +2,10 @@
   "name": "finance",
   "version": "1.0.0",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "typecheck": "tsc --noEmit",
+    "lint": "echo \"ESLint not configured yet\" && exit 0",
+    "setup": "npm install"
   },
   "dependencies": {
     "@mathieuc/tradingview": "^3.5.1"
