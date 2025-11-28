@@ -126,7 +126,6 @@ Resources:
   LambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub finance-${Environment}-lambda-execution-role
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -146,7 +145,6 @@ Resources:
   ECSTaskExecutionRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub finance-${Environment}-ecs-task-execution-role
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
