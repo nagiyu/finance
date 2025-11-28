@@ -69,7 +69,7 @@ description: "Task list for リポジトリ構成の再編とデプロイ自動�
 - [x] T016 [US2] ドキュメント `docs/structure.md` を作成し現在のモジュール配置と責務を記述する（docs/structure.md）
 - [x] T017 [P] [US2] 各モジュール（finance, client/finance, server）の README を整備し責務と起動手順を追記する（finance/README.md, client/finance/README.md, server/README.md）
 - [x] T018 [US2] ワークスペース定義（pnpm-workspace.yaml など）やルートの集合的ドキュメントを追加し、各コンポーネントの依存ルールを明記する（pnpm-workspace.yaml または該当）
-- [ ] T019 [US2] 古い無秩序な設定ファイルを移動または削除する PR を作成する（対象は specs/003-restructure-monorepo/legacy-devcontainer-list.md に基づく）
+- [x] T019 [US2] 古い無秩序な設定ファイルを移動または削除する PR を作成する（対象は specs/003-restructure-monorepo/legacy-devcontainer-list.md に基づく）
 
 ---
 
