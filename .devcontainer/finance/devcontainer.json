@@ -1,22 +1,33 @@
-// For format details, see https://aka.ms/devcontainer.json. For config options, see the
-// README at: https://github.com/devcontainers/templates/tree/main/src/typescript-node
 {
-	"name": "Finance",
-	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"image": "mcr.microsoft.com/devcontainers/typescript-node:1-22-bookworm"
-
-	// Features to add to the dev container. More info: https://containers.dev/features.
-	// "features": {},
-
-	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	// "forwardPorts": [],
-
-	// Use 'postCreateCommand' to run commands after the container is created.
-	// "postCreateCommand": "yarn install",
-
-	// Configure tool-specific properties.
-	// "customizations": {},
-
-	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
-	// "remoteUser": "root"
+  "name": "Finance Core",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "remoteUser": "node",
+  "containerEnv": {
+    "PROCESS_ENV": "local",
+    "PROJECT_SECRET": "DevFinance",
+    "PROJECT_AWS_ACCESS_KEY": "",
+    "PROJECT_AWS_SECRET_ACCESS_KEY": "",
+    "PROJECT_AWS_REGION": ""
+  },
+  "workspaceFolder": "/workspaces/finance/finance/finance.code-workspace",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "donjayamanne.githistory",
+        "eamodio.gitlens",
+        "github.vscode-pull-request-github",
+        "github.copilot",
+        "GitHub.copilot-chat",
+        "saoudrizwan.claude-dev",
+        "oderwat.indent-rainbow",
+        "wmaurer.change-case",
+        "humao.rest-client",
+        "bierner.markdown-mermaid",
+        "wayou.vscode-todo-highlight",
+        "dbaeumer.vscode-eslint"
+      ]
+    }
+  }
 }

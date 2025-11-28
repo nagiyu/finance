@@ -172,6 +172,30 @@ Next.js を使用したモダンなWebアプリケーションです。
     npm run build
     ```
 
+### DevContainer を使用した開発環境
+
+本リポジトリでは、コンポーネント別に DevContainer 設定を `.devcontainer/<component>/` 配下に用意しています。VS Code の Dev Containers 拡張機能または GitHub Codespaces で利用できます。
+
+| コンポーネント | DevContainer パス | 説明 |
+|---------------|------------------|------|
+| Client | `.devcontainer/client/` | Next.js クライアントアプリケーション開発用 |
+| Server | `.devcontainer/server/` | AWS Lambda サーバーサイド開発用 |
+| Finance | `.devcontainer/finance/` | 金融データ処理コアモジュール開発用 |
+| Spec Kit | `.devcontainer/spec-kit/` | 仕様管理ツール（Python環境） |
+
+**使用方法:**
+
+1. **VS Code で開く**
+    - VS Code で本リポジトリを開きます
+    - コマンドパレット（`Ctrl+Shift+P` / `Cmd+Shift+P`）を開き、「Dev Containers: Reopen in Container」を選択
+    - 使用するコンポーネントの DevContainer を選択
+
+2. **GitHub Codespaces で開く**
+    - GitHub リポジトリページで「Code」→「Codespaces」タブを選択
+    - 「New codespace」をクリックし、開発対象のコンポーネント用 DevContainer を選択
+
+**注意**: 各コンポーネントの DevContainer は独立しており、それぞれのビルド環境に最適化されています。サブディレクトリ内の古い `.devcontainer` ディレクトリは今後廃止予定です。
+
 ## 環境設定
 
 ### 環境変数
