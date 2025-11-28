@@ -6,7 +6,7 @@
 jest.mock('@finance/utils/FinanceUtil', () => {
   return {
     __esModule: true,
-    default: require('@finance/tests/mocks/utils/FinanceUtilMock').default,
+    default: jest.requireActual('@finance/tests/mocks/utils/FinanceUtilMock').default,
   };
 });
 
