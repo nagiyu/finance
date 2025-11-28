@@ -4,6 +4,15 @@ Finance Management System のドキュメントハブです。各領域の詳細
 
 ## 主要ドキュメント領域
 
+### [Repository Structure](./structure.md)
+
+リポジトリのモジュール配置と各コンポーネントの責務を説明しています。主要機能の実装箇所を素早く特定するためのガイドです。
+
+- トップレベル構成
+- 各モジュールの責務
+- 機能から実装箇所を探す
+- package.json スクリプト一覧
+
 ### [Finance Module](./finance/README.md)
 
 金融データ処理と株価追跡機能を提供するコアモジュールのドキュメントです。
