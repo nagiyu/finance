@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    "strict": true,
+    "noEmit": true,
     "paths": {
       "@finance/*": [
         "./*"
