@@ -2,6 +2,8 @@
 
 この手順は新しい開発者がリポジトリをクローンして、30 分以内に開発環境を起動し主要なテストを実行できることを目標としています。
 
+> **📚 関連ドキュメント**: システム全体の概要については [ルート README](../../README.md) を参照してください。
+
 ## 前提
 
 - Node.js 20.x がインストールされていること
@@ -191,4 +193,23 @@ npm run test:e2e  # Playwright
 | DevContainer が起動しない | Docker Desktop が起動していることを確認 |
 | ポート 3000 が使用中 | 既存のプロセスを停止するか、別のポートを指定 |
 | TypeScript のエラー | `npm run typecheck` で詳細を確認 |
+
+---
+
+## 関連ドキュメント
+
+### ルートドキュメント
+- 📖 [ルート README](../../README.md) - システム全体の概要
+- 📖 [Finance Module](../../docs/finance/README.md) - 金融データ処理モジュールの詳細
+- 📖 [Common Module](../../docs/common/README.md) - 共通機能モジュールの詳細
+
+### コンポーネント README
+- 📄 [Client README](../../client/finance/README.md) - Next.js クライアントアプリケーション
+
+### DevContainer 設定
+コンポーネント別の DevContainer 設定はリポジトリルート直下の `.devcontainer/<component>/` に配置されています：
+- `.devcontainer/client/` - クライアントアプリ開発用
+- `.devcontainer/server/` - サーバーサイド開発用
+- `.devcontainer/finance/` - 共通モジュール開発用
+- `.devcontainer/spec-kit/` - 仕様書作成ツール
 
