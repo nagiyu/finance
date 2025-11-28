@@ -64,7 +64,9 @@ npm run setup
 DevContainer 起動後は `finance/finance.code-workspace` がワークスペースとして自動的に読み込まれます。このワークスペースには以下が含まれます：
 
 - `finance/` - 本モジュール
-- `typescript-common/common/` - 共通 TypeScript ユーティリティ
+- `typescript-common/common/` - 共通 TypeScript ユーティリティ（サブモジュール）
+
+> **注意**: `typescript-common` はサブモジュールです。サブモジュールが未初期化の場合は `git submodule update --init --recursive` を実行してください。
 
 ワークスペース設定には以下が含まれます：
 - ESLint の自動修正（保存時）

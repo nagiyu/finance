@@ -67,9 +67,11 @@ npm run setup
 DevContainer 起動後は `client/finance/finance.code-workspace` がワークスペースとして自動的に読み込まれます。このワークスペースには以下が含まれます：
 
 - `client/finance/` - 本アプリケーション（client-finance）
-- `nextjs-common/common/` - 共通 Next.js コンポーネント（client-common）
-- `typescript-common/common/` - 共通 TypeScript ユーティリティ（common）
-- `finance/` - 金融コアモジュール（finance）
+- `nextjs-common/common/` - 共通 Next.js コンポーネント（サブモジュール）
+- `typescript-common/common/` - 共通 TypeScript ユーティリティ（サブモジュール）
+- `finance/` - 金融コアモジュール
+
+> **注意**: `nextjs-common` と `typescript-common` はサブモジュールです。サブモジュールが未初期化の場合は `git submodule update --init --recursive` を実行してください。
 
 ワークスペース設定には以下が含まれます：
 - ESLint の自動修正（保存時）

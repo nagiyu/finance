@@ -93,9 +93,11 @@ node test-financeutil.js
 DevContainer 起動後は `server/finance/finance.code-workspace` がワークスペースとして自動的に読み込まれます。このワークスペースには以下が含まれます：
 
 - `server/finance/` - 本モジュール
-- `server/common/` - サーバー共通機能（server-common）
-- `typescript-common/common/` - 共通 TypeScript ユーティリティ（common）
-- `finance/` - 金融コアモジュール（finance）
+- `server/common/` - サーバー共通機能
+- `typescript-common/common/` - 共通 TypeScript ユーティリティ（サブモジュール）
+- `finance/` - 金融コアモジュール
+
+> **注意**: `typescript-common` はサブモジュールです。サブモジュールが未初期化の場合は `git submodule update --init --recursive` を実行してください。
 
 ワークスペース設定には以下が含まれます：
 - ESLint の自動修正（保存時）
@@ -106,8 +108,8 @@ DevContainer 起動後は `server/finance/finance.code-workspace` がワーク�
 DevContainer を起動した後、以下のコマンドを実行して環境が正しくセットアップされていることを確認してください：
 
 ```bash
-# server/finance ディレクトリに移動
-cd /workspaces/finance/server/finance
+# ワークスペースが server/finance に設定されているため、
+# DevContainer 起動後は自動的にこのディレクトリが開かれます
 
 # 依存関係をインストール
 npm install
