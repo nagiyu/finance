@@ -80,12 +80,6 @@ npm test           # テスト実行
 npm run setup      # 依存関係インストール
 ```
 
-**検証ステップ**:
-```bash
-npm run typecheck  # 型チェックが成功することを確認
-npm test           # テストが成功することを確認
-```
-
 ### 2. サーバー（server/finance）
 
 AWS Lambda 向けのサーバーサイドアプリケーションです。
@@ -118,12 +112,6 @@ npm test           # テスト実行
 npm run setup      # 依存関係インストール
 ```
 
-**検証ステップ**:
-```bash
-npm run typecheck  # 型チェックが成功することを確認
-npm test           # テストが成功することを確認
-```
-
 ### 3. finance（共通ロジック）
 
 共通のビジネスロジックとユーティリティを含むモジュールです。
@@ -148,12 +136,6 @@ npm run lint       # ESLint 実行
 npm run lint:fix   # ESLint 自動修正
 npm run typecheck  # TypeScript 型チェック
 npm run setup      # 依存関係インストール
-```
-
-**検証ステップ**:
-```bash
-npm run typecheck  # 型チェックが成功することを確認
-npm test           # テストが成功することを確認
 ```
 
 ---
