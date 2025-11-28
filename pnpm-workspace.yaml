@@ -1,0 +1,22 @@
+# pnpm Workspace Definition
+# This file defines the workspace structure for the Finance Management System monorepo.
+#
+# For more information on pnpm workspaces, see:
+# https://pnpm.io/workspaces
+
+packages:
+  # Core business logic module
+  - 'finance'
+
+  # Client applications
+  - 'client/finance'
+
+  # Server-side implementations (Lambda functions)
+  - 'server/finance'
+
+  # Shared packages (Git submodules)
+  # These are managed as external Git submodules and are excluded from the workspace.
+  # They are imported directly via relative paths in each component.
+  # See docs/dependencies.md for usage guidelines.
+  # - "typescript-common"
+  # - "nextjs-common"

@@ -13,6 +13,15 @@ Finance Management System のドキュメントハブです。各領域の詳細
 - 機能から実装箇所を探す
 - package.json スクリプト一覧
 
+### [Dependency Rules](./dependencies.md)
+
+コンポーネント間の依存関係ルールと共有パッケージ（`typescript-common`、`nextjs-common`）の使用方法を説明しています。
+
+- ワークスペース構成
+- 共有パッケージの責務と使用ルール
+- 許可/禁止される依存関係
+- サブモジュールの更新方法
+
 ### [Finance Module](./finance/README.md)
 
 金融データ処理と株価追跡機能を提供するコアモジュールのドキュメントです。
