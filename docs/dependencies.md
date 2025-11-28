@@ -79,35 +79,30 @@ import { Layout } from '../../nextjs-common/components/Layout';
 
 以下の図は、コンポーネント間の許可される依存関係を示しています。
 
-```
-                    ┌─────────────────────┐
-                    │  typescript-common  │
-                    │    (共通基盤)       │
-                    └─────────────────────┘
-                              ▲
-                              │ 参照可
-          ┌───────────────────┼───────────────────┐
-          │                   │                   │
-          ▼                   ▼                   ▼
-┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
-│    finance/     │ │ client/finance/ │ │ server/finance/ │
-│ (コアモジュール) │ │ (フロントエンド) │ │   (Lambda)      │
-└─────────────────┘ └─────────────────┘ └─────────────────┘
-          ▲                   │                   │
-          │ 参照可            │ 参照可            │ 参照可
-          └───────────────────┴───────────────────┘
+```mermaid
+flowchart TB
+    subgraph shared["共有パッケージ"]
+        TS["typescript-common<br/>(共通基盤)"]
+        NX["nextjs-common<br/>(Next.js 共通)"]
+    end
 
-                    ┌─────────────────────┐
-                    │   nextjs-common     │
-                    │ (Next.js 共通)      │
-                    └─────────────────────┘
-                              ▲
-                              │ 参照可
-                              │
-                    ┌─────────────────┐
-                    │ client/finance/ │
-                    │ (フロントエンド) │
-                    └─────────────────┘
+    subgraph components["コンポーネント"]
+        FIN["finance/<br/>(コアモジュール)"]
+        CLI["client/finance/<br/>(フロントエンド)"]
+        SRV["server/finance/<br/>(Lambda)"]
+    end
+
+    %% typescript-common への参照
+    FIN --> TS
+    CLI --> TS
+    SRV --> TS
+
+    %% finance/ への参照
+    CLI --> FIN
+    SRV --> FIN
+
+    %% nextjs-common への参照（client/finance のみ）
+    CLI --> NX
 ```
 
 ### 依存関係の詳細ルール
