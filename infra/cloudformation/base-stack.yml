@@ -13,8 +13,8 @@ Parameters:
       - production
 
 Resources:
-  # IAM Roles
-  LambdaExecutionRole:
+  # IAM Roles for Lambda
+  ClientLambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
@@ -28,11 +28,11 @@ Resources:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
       Tags:
         - Key: Name
-          Value: !Sub finance-${Environment}-lambda-execution-role
+          Value: !Sub finance-${Environment}-client-lambda-execution-role
         - Key: Environment
           Value: !Ref Environment
 
-  ECSTaskExecutionRole:
+  ServerLambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
@@ -40,28 +40,28 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              Service: ecs-tasks.amazonaws.com
+              Service: lambda.amazonaws.com
             Action: sts:AssumeRole
       ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
       Tags:
         - Key: Name
-          Value: !Sub finance-${Environment}-ecs-task-execution-role
+          Value: !Sub finance-${Environment}-server-lambda-execution-role
         - Key: Environment
           Value: !Ref Environment
 
 Outputs:
-  LambdaExecutionRoleArn:
-    Description: ARN of the Lambda execution role
-    Value: !GetAtt LambdaExecutionRole.Arn
+  ClientLambdaExecutionRoleArn:
+    Description: ARN of the Client Lambda execution role
+    Value: !GetAtt ClientLambdaExecutionRole.Arn
     Export:
-      Name: !Sub finance-${Environment}-lambda-execution-role-arn
+      Name: !Sub finance-${Environment}-client-lambda-execution-role-arn
 
-  ECSTaskExecutionRoleArn:
-    Description: ARN of the ECS task execution role
-    Value: !GetAtt ECSTaskExecutionRole.Arn
+  ServerLambdaExecutionRoleArn:
+    Description: ARN of the Server Lambda execution role
+    Value: !GetAtt ServerLambdaExecutionRole.Arn
     Export:
-      Name: !Sub finance-${Environment}-ecs-task-execution-role-arn
+      Name: !Sub finance-${Environment}-server-lambda-execution-role-arn
 
   Environment:
     Description: Deployment environment
