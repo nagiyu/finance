@@ -26,11 +26,11 @@ description: "Task list for リポジトリ構成の再編とデプロイ自動�
 
 ## Phase 1: Setup (共有インフラ／コンポーネント分離を前提)
 
-- [ ] T001 [P] 各コンポーネント用 DevContainer 設定をルート直下 `.devcontainer/<component>/devcontainer.json` 形式で作成/整備する（例: .devcontainer/client/devcontainer.json, .devcontainer/server/devcontainer.json, .devcontainer/finance/devcontainer.json）
-- [ ] T002 [P] 各コンポーネントの `package.json` に `typecheck` / `lint` / `test` / `setup` スクリプトを整備する（client/finance/package.json, server/package.json, finance/package.json）
-- [ ] T003 [P] ルートと各コンポーネントで ESLint/Prettier 設定を調整し、共通ルールはルートにまとめつつプロジェクト毎の上書きを許容する（.eslintrc.cjs/.prettierrc, client/finance/.eslintrc.js, server/.eslintrc.js）
-- [ ] T004 [P] Quickstart を検証・補強して `specs/003-restructure-monorepo/quickstart.md` に各コンポーネントの起動手順と推奨 DevContainer（`.devcontainer/<component>/devcontainer.json`）利用法を反映する（specs/003-restructure-monorepo/quickstart.md）
-- [ ] T005 [P] 既存サブディレクトリに残る legacy DevContainer や古い環境定義を検索し一覧を作成する（specs/003-restructure-monorepo/legacy-devcontainer-list.md）
+- [x] T001 [P] 各コンポーネント用 DevContainer 設定をルート直下 `.devcontainer/<component>/devcontainer.json` 形式で作成/整備する（例: .devcontainer/client/devcontainer.json, .devcontainer/server/devcontainer.json, .devcontainer/finance/devcontainer.json）
+- [x] T002 [P] 各コンポーネントの `package.json` に `typecheck` / `lint` / `test` / `setup` スクリプトを整備する（client/finance/package.json, server/package.json, finance/package.json）
+- [x] T003 [P] ルートと各コンポーネントで ESLint/Prettier 設定を調整し、共通ルールはルートにまとめつつプロジェクト毎の上書きを許容する（.eslintrc.cjs/.prettierrc, client/finance/.eslintrc.js, server/.eslintrc.js）
+- [x] T004 [P] Quickstart を検証・補強して `specs/003-restructure-monorepo/quickstart.md` に各コンポーネントの起動手順と推奨 DevContainer（`.devcontainer/<component>/devcontainer.json`）利用法を反映する（specs/003-restructure-monorepo/quickstart.md）
+- [x] T005 [P] 既存サブディレクトリに残る legacy DevContainer や古い環境定義を検索し一覧を作成する（specs/003-restructure-monorepo/legacy-devcontainer-list.md）
 
 ---
 
@@ -38,11 +38,11 @@ description: "Task list for リポジトリ構成の再編とデプロイ自動�
 
 ※ すべてのユーザーストーリーはこのフェーズ完了後に着手可能
 
-- [ ] T006 CI ワークフロー（各コンポーネント向けの lint/typecheck/test ジョブを含む）を追加する（.github/workflows/ci-root.yml, .github/workflows/ci-client.yml, .github/workflows/ci-server.yml）
-- [ ] T007 デプロイ用ワークフローを追加する（CloudFormation 実行を含む）（.github/workflows/deploy.yml）
-- [ ] T008 基本的な CloudFormation テンプレートのスケルトンを作成する（infra/cloudformation/base-stack.yml）
-- [ ] T009 デプロイ用スクリプト（aws CLI 実行ラッパー）を作成する（scripts/deploy/deploy_stack.sh）
-- [ ] T010 ルート README と quickstart のリンクを整備する（README.md / specs/003-restructure-monorepo/quickstart.md）
+- [x] T006 CI ワークフロー（各コンポーネント向けの lint/typecheck/test ジョブを含む）を追加する（.github/workflows/ci-root.yml, .github/workflows/ci-client.yml, .github/workflows/ci-server.yml）
+- [x] T007 デプロイ用ワークフローを追加する（CloudFormation 実行を含む）（.github/workflows/deploy.yml）
+- [x] T008 基本的な CloudFormation テンプレートのスケルトンを作成する（infra/cloudformation/base-stack.yml）
+- [x] T009 デプロイ用スクリプト（aws CLI 実行ラッパー）を作成する（scripts/deploy/deploy_stack.sh）
+- [x] T010 ルート README と quickstart のリンクを整備する（README.md / specs/003-restructure-monorepo/quickstart.md）
 
 ---
 
@@ -52,11 +52,11 @@ description: "Task list for リポジトリ構成の再編とデプロイ自動�
 
 **Independent Test**: `specs/003-restructure-monorepo/quickstart.md` の手順に従い、各コンポーネントで `npm run typecheck` と `npm test` が成功すること。
 
-- [ ] T011 [US1] Quickstart を確定し、各コンポーネントのセットアップ/起動手順を `specs/003-restructure-monorepo/quickstart.md` に反映する（specs/003-restructure-monorepo/quickstart.md）
-- [ ] T012 [P] [US1] 各コンポーネントの `package.json` に `setup` スクリプトを追加/整備する（client/finance/package.json, server/package.json, finance/package.json）
-- [ ] T013 [US1] 各コンポーネント用 DevContainer 利用手順を README に追加する（finance/README.md, client/finance/README.md, server/README.md）
-- [ ] T014 [P] [US1] 開発環境起動を検証するセルフチェックスクリプトを追加し、コンポーネント単位でのビルド検証を行う（scripts/check-quickstart.sh）
-- [ ] T015 [US1] 主要テスト（`npm test`）が CI で成功することを確認するためのワークフロー設定を完成させる（.github/workflows/ci-root.yml, .github/workflows/ci-client.yml, .github/workflows/ci-server.yml）
+- [x] T011 [US1] Quickstart を確定し、各コンポーネントのセットアップ/起動手順を `specs/003-restructure-monorepo/quickstart.md` に反映する（specs/003-restructure-monorepo/quickstart.md）
+- [x] T012 [P] [US1] 各コンポーネントの `package.json` に `setup` スクリプトを追加/整備する（client/finance/package.json, server/package.json, finance/package.json）
+- [x] T013 [US1] 各コンポーネント用 DevContainer 利用手順を README に追加する（finance/README.md, client/finance/README.md, server/README.md）
+- [x] T014 [P] [US1] 開発環境起動を検証するセルフチェックスクリプトを追加し、コンポーネント単位でのビルド検証を行う（scripts/check-quickstart.sh）
+- [x] T015 [US1] 主要テスト（`npm test`）が CI で成功することを確認するためのワークフロー設定を完成させる（.github/workflows/ci-root.yml, .github/workflows/ci-client.yml, .github/workflows/ci-server.yml）
 
 ---
 
@@ -66,10 +66,10 @@ description: "Task list for リポジトリ構成の再編とデプロイ自動�
 
 **Independent Test**: ドキュメント `docs/structure.md` を参照して、主要機能の実装箇所を 3 分以内に特定できること。各コンポーネントの `package.json` に記載されたスクリプトでビルド/テストが実行できること。
 
-- [ ] T016 [US2] ドキュメント `docs/structure.md` を作成し現在のモジュール配置と責務を記述する（docs/structure.md）
-- [ ] T017 [P] [US2] 各モジュール（finance, client/finance, server）の README を整備し責務と起動手順を追記する（finance/README.md, client/finance/README.md, server/README.md）
-- [ ] T018 [US2] ワークスペース定義（pnpm-workspace.yaml など）やルートの集合的ドキュメントを追加し、各コンポーネントの依存ルールを明記する（pnpm-workspace.yaml または該当）
-- [ ] T019 [US2] 古い無秩序な設定ファイルを移動または削除する PR を作成する（対象は specs/003-restructure-monorepo/legacy-devcontainer-list.md に基づく）
+- [x] T016 [US2] ドキュメント `docs/structure.md` を作成し現在のモジュール配置と責務を記述する（docs/structure.md）
+- [x] T017 [P] [US2] 各モジュール（finance, client/finance, server）の README を整備し責務と起動手順を追記する（finance/README.md, client/finance/README.md, server/README.md）
+- [x] T018 [US2] ワークスペース定義（pnpm-workspace.yaml など）やルートの集合的ドキュメントを追加し、各コンポーネントの依存ルールを明記する（pnpm-workspace.yaml または該当）
+- [x] T019 [US2] 古い無秩序な設定ファイルを移動または削除する PR を作成する（対象は specs/003-restructure-monorepo/legacy-devcontainer-list.md に基づく）
 
 ---
 
