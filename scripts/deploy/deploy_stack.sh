@@ -22,6 +22,7 @@
 set -o errexit
 set -o pipefail
 set -o nounset
+set -o errtrace
 
 #######################################
 # Logging functions
@@ -114,9 +115,9 @@ check_prerequisites() {
         exit 4
     fi
 
-    # Check AWS CLI version
+    # Check AWS CLI version (with fallback for different output formats)
     local aws_version
-    aws_version=$(aws --version 2>&1 | cut -d/ -f2 | cut -d' ' -f1)
+    aws_version=$(aws --version 2>&1 | head -1 | sed -E 's/.*aws-cli\/([0-9.]+).*/\1/' || echo "unknown")
     log_info "AWS CLI version: ${aws_version}"
 
     # Check AWS credentials (basic check)
@@ -143,10 +144,12 @@ validate_template() {
         --region "${REGION}" > /dev/null 2>&1; then
 
         log_error "Template validation failed"
-        # Run again to show the actual error
-        aws cloudformation validate-template \
+        # Capture and display the actual error message
+        local validation_output
+        validation_output=$(aws cloudformation validate-template \
             --template-body "file://${template_file}" \
-            --region "${REGION}" 2>&1 || true
+            --region "${REGION}" 2>&1) || true
+        log_error "Validation output: ${validation_output}"
         exit 5
     fi
 
@@ -244,6 +247,8 @@ main() {
                 shift 2
                 ;;
             --parameter-overrides)
+                # Consume all following arguments until we hit another flag (starts with --)
+                # Note: CloudFormation parameters use Key=Value format, so values starting with -- are unusual
                 shift
                 while [[ $# -gt 0 && ! "$1" =~ ^-- ]]; do
                     PARAMETER_OVERRIDES+=("$1")
@@ -251,6 +256,7 @@ main() {
                 done
                 ;;
             --capabilities)
+                # Consume capability values (e.g., CAPABILITY_IAM, CAPABILITY_NAMED_IAM)
                 shift
                 while [[ $# -gt 0 && ! "$1" =~ ^-- ]]; do
                     CAPABILITIES+=("$1")
@@ -258,6 +264,7 @@ main() {
                 done
                 ;;
             --tags)
+                # Consume tag values in Key=Value format
                 shift
                 while [[ $# -gt 0 && ! "$1" =~ ^-- ]]; do
                     TAGS+=("$1")
@@ -286,15 +293,15 @@ main() {
 
     # Validate required parameters
     local missing_params=()
-    
+
     if [[ -z "${STACK_NAME}" ]]; then
         missing_params+=("--stack-name")
     fi
-    
+
     if [[ -z "${REGION}" ]]; then
         missing_params+=("--region")
     fi
-    
+
     if [[ -z "${TEMPLATE_FILE}" ]]; then
         missing_params+=("--template-file")
     fi
