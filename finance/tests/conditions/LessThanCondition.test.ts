@@ -1,7 +1,7 @@
 jest.mock('@finance/utils/FinanceUtil', () => {
   return {
     __esModule: true,
-    default: require('@finance/tests/mocks/utils/FinanceUtilMock').default
+    default: require('@finance/tests/mocks/utils/FinanceUtilMock').default,
   };
 });
 
@@ -17,10 +17,7 @@ describe('LessThanCondition', () => {
   const conditionKey = 'LessThan';
 
   beforeEach(() => {
-    service = new ConditionService(
-      new ExchangeServiceMock(),
-      new TickerServiceMock()
-    );
+    service = new ConditionService(new ExchangeServiceMock(), new TickerServiceMock());
   });
 
   describe('指定価格を下回る', () => {
@@ -51,10 +48,16 @@ describe('LessThanCondition', () => {
       FinanceUtilMock.StockPriceDataMock = [
         {
           date: '2025-01-01 00:00',
-          data: [1000, 900, 950, 960] // 終値900
-        }
+          data: [1000, 900, 950, 960], // 終値900
+        },
       ];
-      const result = await service.checkCondition(conditionKey, 'MOCK_EXCHANGE', 'MOCK_TICKER', EXCHANGE_SESSION.EXTENDED, 950);
+      const result = await service.checkCondition(
+        conditionKey,
+        'MOCK_EXCHANGE',
+        'MOCK_TICKER',
+        EXCHANGE_SESSION.EXTENDED,
+        950
+      );
       expect(result.met).toBe(true);
       expect(result.message).not.toBe('');
     });
@@ -63,10 +66,16 @@ describe('LessThanCondition', () => {
       FinanceUtilMock.StockPriceDataMock = [
         {
           date: '2025-01-01 00:00',
-          data: [1000, 1000, 950, 960] // 終値1000
-        }
+          data: [1000, 1000, 950, 960], // 終値1000
+        },
       ];
-      const result = await service.checkCondition(conditionKey, 'MOCK_EXCHANGE', 'MOCK_TICKER', EXCHANGE_SESSION.EXTENDED, 950);
+      const result = await service.checkCondition(
+        conditionKey,
+        'MOCK_EXCHANGE',
+        'MOCK_TICKER',
+        EXCHANGE_SESSION.EXTENDED,
+        950
+      );
       expect(result.met).toBe(false);
       expect(result.message).not.toBe('');
     });
@@ -75,17 +84,28 @@ describe('LessThanCondition', () => {
       FinanceUtilMock.StockPriceDataMock = [
         {
           date: '2025-01-01 00:00',
-          data: [1000, -1, 950, 960] // high価格が-1 (0を下回る)
-        }
+          data: [1000, -1, 950, 960], // high価格が-1 (0を下回る)
+        },
       ];
-      const result = await service.checkCondition(conditionKey, 'MOCK_EXCHANGE', 'MOCK_TICKER', EXCHANGE_SESSION.EXTENDED, 0);
+      const result = await service.checkCondition(
+        conditionKey,
+        'MOCK_EXCHANGE',
+        'MOCK_TICKER',
+        EXCHANGE_SESSION.EXTENDED,
+        0
+      );
       expect(result.met).toBe(true);
       expect(result.message).not.toBe('');
     });
 
     it('Check Condition: targetPrice未指定で例外', async () => {
       await expect(
-        service.checkCondition(conditionKey, 'MOCK_EXCHANGE', 'MOCK_TICKER', EXCHANGE_SESSION.EXTENDED)
+        service.checkCondition(
+          conditionKey,
+          'MOCK_EXCHANGE',
+          'MOCK_TICKER',
+          EXCHANGE_SESSION.EXTENDED
+        )
       ).rejects.toThrow('Target price is required for LessThanCondition');
     });
   });

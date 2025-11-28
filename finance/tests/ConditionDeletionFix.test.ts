@@ -1,12 +1,12 @@
 /**
- * Test to verify that condition deletions are properly preserved 
+ * Test to verify that condition deletions are properly preserved
  * during notification processing
  */
 
 jest.mock('@finance/utils/FinanceUtil', () => {
   return {
     __esModule: true,
-    default: require('@finance/tests/mocks/utils/FinanceUtilMock').default
+    default: require('@finance/tests/mocks/utils/FinanceUtilMock').default,
   };
 });
 
@@ -19,7 +19,7 @@ import TickerServiceMock from '@finance/tests/mocks/services/TickerServiceMock';
 
 // Mock NotificationService
 const mockNotificationService = {
-  sendPushNotification: jest.fn()
+  sendPushNotification: jest.fn(),
 };
 
 describe('FinanceNotificationService - Condition Deletion Fix', () => {
@@ -34,12 +34,12 @@ describe('FinanceNotificationService - Condition Deletion Fix', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    // Setup mock stock price data  
+    // Setup mock stock price data
     FinanceUtilMock.StockPriceDataMock = [
       {
         date: '2025-01-01 00:00',
-        data: [1000, 960, 950, 1010]
-      }
+        data: [1000, 960, 950, 1010],
+      },
     ];
 
     service = new FinanceNotificationService(
@@ -52,8 +52,12 @@ describe('FinanceNotificationService - Condition Deletion Fix', () => {
 
     // Mock the base class methods
     jest.spyOn(service, 'get').mockImplementation(jest.fn());
-    superGetByIdSpy = jest.spyOn(Object.getPrototypeOf(Object.getPrototypeOf(service)), 'getById').mockImplementation(jest.fn());
-    superUpdateSpy = jest.spyOn(Object.getPrototypeOf(Object.getPrototypeOf(service)), 'update').mockImplementation(jest.fn());
+    superGetByIdSpy = jest
+      .spyOn(Object.getPrototypeOf(Object.getPrototypeOf(service)), 'getById')
+      .mockImplementation(jest.fn());
+    superUpdateSpy = jest
+      .spyOn(Object.getPrototypeOf(Object.getPrototypeOf(service)), 'update')
+      .mockImplementation(jest.fn());
 
     // Mock the time-related private methods to ensure conditions are always checked
     jest.spyOn(service as any, 'isWithinExchangeHours').mockReturnValue(true);
@@ -78,7 +82,7 @@ describe('FinanceNotificationService - Condition Deletion Fix', () => {
           frequency: 'ExchangeStartOnly' as any,
           session: 'extended' as any,
           targetPrice: 100,
-          firstNotificationSent: false
+          firstNotificationSent: false,
         },
         {
           id: 'condition-2',
@@ -87,11 +91,11 @@ describe('FinanceNotificationService - Condition Deletion Fix', () => {
           frequency: 'ExchangeStartOnly' as any,
           session: 'extended' as any,
           targetPrice: 50,
-          firstNotificationSent: false
-        }
+          firstNotificationSent: false,
+        },
       ],
       create: Date.now(),
-      update: Date.now()
+      update: Date.now(),
     };
 
     // Setup: Latest notification with condition-1 deleted by user
@@ -105,9 +109,9 @@ describe('FinanceNotificationService - Condition Deletion Fix', () => {
           frequency: 'ExchangeStartOnly' as any,
           session: 'extended' as any,
           targetPrice: 50,
-          firstNotificationSent: false
-        }
-      ]
+          firstNotificationSent: false,
+        },
+      ],
     };
 
     // Mock the service methods
@@ -119,22 +123,19 @@ describe('FinanceNotificationService - Condition Deletion Fix', () => {
     await service.notification('https://example.com/endpoint');
 
     // Verify that update was called with the latest condition list (preserving deletion)
-    expect(superUpdateSpy).toHaveBeenCalledWith(
-      'notification-1',
-      {
-        conditionList: [
-          {
-            id: 'condition-2',
-            mode: 'Sell',
-            conditionName: 'LessThan',
-            frequency: 'ExchangeStartOnly',
-            session: 'extended',
-            targetPrice: 50,
-            firstNotificationSent: true // This should be updated to true
-          }
-        ]
-      }
-    );
+    expect(superUpdateSpy).toHaveBeenCalledWith('notification-1', {
+      conditionList: [
+        {
+          id: 'condition-2',
+          mode: 'Sell',
+          conditionName: 'LessThan',
+          frequency: 'ExchangeStartOnly',
+          session: 'extended',
+          targetPrice: 50,
+          firstNotificationSent: true, // This should be updated to true
+        },
+      ],
+    });
 
     // Verify getById was called to get latest data
     expect(superGetByIdSpy).toHaveBeenCalledWith('notification-1');
@@ -158,17 +159,17 @@ describe('FinanceNotificationService - Condition Deletion Fix', () => {
           frequency: 'ExchangeStartOnly' as any,
           session: 'extended' as any,
           targetPrice: 100,
-          firstNotificationSent: false
-        }
+          firstNotificationSent: false,
+        },
       ],
       create: Date.now(),
-      update: Date.now()
+      update: Date.now(),
     };
 
     // Setup: All conditions deleted by user
     const latestNotification = {
       ...originalNotification,
-      conditionList: []
+      conditionList: [],
     };
 
     // Mock the service methods
@@ -180,12 +181,9 @@ describe('FinanceNotificationService - Condition Deletion Fix', () => {
     await service.notification('https://example.com/endpoint');
 
     // Verify that update was called with empty condition list
-    expect(superUpdateSpy).toHaveBeenCalledWith(
-      'notification-1',
-      {
-        conditionList: []
-      }
-    );
+    expect(superUpdateSpy).toHaveBeenCalledWith('notification-1', {
+      conditionList: [],
+    });
   });
 
   it('should skip update when no conditions need firstNotificationSent flag update', async () => {
@@ -206,11 +204,11 @@ describe('FinanceNotificationService - Condition Deletion Fix', () => {
           frequency: 'ExchangeStartOnly' as any,
           session: 'extended' as any,
           targetPrice: 100,
-          firstNotificationSent: true // Already sent
-        }
+          firstNotificationSent: true, // Already sent
+        },
       ],
       create: Date.now(),
-      update: Date.now()
+      update: Date.now(),
     };
 
     // Mock the service methods

@@ -148,7 +148,7 @@ describe('MyTickerService', () => {
       };
 
       const record = (service as any).dataToRecord(originalData);
-      
+
       // Add required fields that would be added by the database
       const completeRecord = {
         ID: 'generated-id',

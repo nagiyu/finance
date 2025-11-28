@@ -1,6 +1,9 @@
 import ErrorUtil from '@common/utils/ErrorUtil';
 import { CURRENCY, CurrencyType } from '@finance/consts/CurrencyConst';
-import { TargetPriceCalculationInput, TargetPriceCalculationResult } from '@finance/interfaces/data/TargetPriceDataType';
+import {
+  TargetPriceCalculationInput,
+  TargetPriceCalculationResult,
+} from '@finance/interfaces/data/TargetPriceDataType';
 
 /**
  * Service for calculating target prices based on current holdings
@@ -9,13 +12,15 @@ export default class TargetPriceService {
   // Fixed exchange rates (same as CurrencyUtil)
   private static readonly USD_TO_JPY_RATE = 143.0;
   private static readonly JPY_TO_USD_RATE = 0.007;
-  
+
   /**
    * Calculate target prices for buy and sell conditions based on current holdings
    * @param input Input parameters for target price calculation
    * @returns Target price calculation result
    */
-  public static calculateTargetPrice(input: TargetPriceCalculationInput): TargetPriceCalculationResult {
+  public static calculateTargetPrice(
+    input: TargetPriceCalculationInput
+  ): TargetPriceCalculationResult {
     // Validate input
     this.validateInput(input);
 
@@ -30,20 +35,23 @@ export default class TargetPriceService {
 
     // Apply currency conversion if needed
     if (input.targetCurrency && input.targetCurrency !== input.currency) {
-      return this.convertCurrency({
-        averagePrice,
-        buyTargetPrice,
-        sellTargetPrice,
-        currency: input.currency,
-        originalCurrency: input.currency
-      }, input.targetCurrency);
+      return this.convertCurrency(
+        {
+          averagePrice,
+          buyTargetPrice,
+          sellTargetPrice,
+          currency: input.currency,
+          originalCurrency: input.currency,
+        },
+        input.targetCurrency
+      );
     }
 
     return {
       averagePrice,
       buyTargetPrice,
       sellTargetPrice,
-      currency: input.currency
+      currency: input.currency,
     };
   }
 
@@ -68,7 +76,7 @@ export default class TargetPriceService {
       totalCost,
       tolerance,
       currency,
-      targetCurrency
+      targetCurrency,
     });
   }
 
@@ -109,7 +117,7 @@ export default class TargetPriceService {
     targetCurrency: CurrencyType
   ): TargetPriceCalculationResult {
     const sourceCurrency = result.currency;
-    
+
     if (sourceCurrency === targetCurrency) {
       return result;
     }
@@ -130,7 +138,9 @@ export default class TargetPriceService {
       convertedBuyTargetPrice = this.convertJpyToUsd(result.buyTargetPrice);
       convertedSellTargetPrice = this.convertJpyToUsd(result.sellTargetPrice);
     } else {
-      ErrorUtil.throwError(`Unsupported currency conversion: ${sourceCurrency} to ${targetCurrency}`);
+      ErrorUtil.throwError(
+        `Unsupported currency conversion: ${sourceCurrency} to ${targetCurrency}`
+      );
     }
 
     return {
@@ -139,7 +149,7 @@ export default class TargetPriceService {
       sellTargetPrice: convertedSellTargetPrice,
       currency: targetCurrency,
       originalCurrency: sourceCurrency,
-      exchangeRate
+      exchangeRate,
     };
   }
 

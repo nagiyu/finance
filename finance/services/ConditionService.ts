@@ -96,24 +96,38 @@ export default class ConditionService {
   ): Promise<ConditionResult> {
     const ConditionClass = this.getCondition(conditionName);
     const condition = new ConditionClass(this.exchangeService, this.tickerService);
-    const met = await condition.checkCondition(exchangeId, tickerId, session, targetPrice, timeframe);
+    const met = await condition.checkCondition(
+      exchangeId,
+      tickerId,
+      session,
+      targetPrice,
+      timeframe
+    );
 
     if (!met) {
       return { met };
     }
 
-    const message = await this.getNotificationMessage(this.getConditionInfo(conditionName).name, tickerId, frequency);
+    const message = await this.getNotificationMessage(
+      this.getConditionInfo(conditionName).name,
+      tickerId,
+      frequency
+    );
     return { met, message };
   }
 
-  private async getNotificationMessage(conditionName: string, tickerId: string, frequency?: FinanceNotificationFrequencyType): Promise<string> {
+  private async getNotificationMessage(
+    conditionName: string,
+    tickerId: string,
+    frequency?: FinanceNotificationFrequencyType
+  ): Promise<string> {
     const ticker = await this.tickerService.getById(tickerId);
     if (!ticker) {
       ErrorUtil.throwError(`Ticker with ID ${tickerId} not found`);
     }
 
     let message = `${ticker.name} shows ${conditionName} pattern - signal detected`;
-    
+
     if (frequency) {
       const frequencyText = FrequencyUtil.formatFrequency(frequency);
       message += ` (通知頻度: ${frequencyText})`;

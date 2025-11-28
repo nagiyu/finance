@@ -1,7 +1,7 @@
 jest.mock('@finance/utils/FinanceUtil', () => {
   return {
     __esModule: true,
-    default: require('@finance/tests/mocks/utils/FinanceUtilMock').default
+    default: require('@finance/tests/mocks/utils/FinanceUtilMock').default,
   };
 });
 
@@ -17,10 +17,7 @@ describe('SansenYoinomyojoCondition', () => {
   const conditionKey = 'SansenYoinomyojo';
 
   beforeEach(() => {
-    service = new ConditionService(
-      new ExchangeServiceMock(),
-      new TickerServiceMock()
-    );
+    service = new ConditionService(new ExchangeServiceMock(), new TickerServiceMock());
   });
 
   describe('三川宵の明星', () => {
@@ -52,19 +49,24 @@ describe('SansenYoinomyojoCondition', () => {
       FinanceUtilMock.StockPriceDataMock = [
         {
           date: '2025-01-01 00:00',
-          data: [950, 1010, 940, 1020] // large bullish candle [open, close, low, high] - close > open, large body
+          data: [950, 1010, 940, 1020], // large bullish candle [open, close, low, high] - close > open, large body
         },
         {
           date: '2025-01-02 00:00',
-          data: [1030, 1025, 1025, 1040] // small bearish candle with gap up [open, close, low, high] - gap up (low 1025 > first high 1020), small body
+          data: [1030, 1025, 1025, 1040], // small bearish candle with gap up [open, close, low, high] - gap up (low 1025 > first high 1020), small body
         },
         {
           date: '2025-01-03 00:00',
-          data: [1020, 960, 950, 1025] // large bearish candle [open, close, low, high] - close < open, large body
-        }
+          data: [1020, 960, 950, 1025], // large bearish candle [open, close, low, high] - close < open, large body
+        },
       ];
 
-      const result = await service.checkCondition(conditionKey, 'MOCK_EXCHANGE', 'MOCK_TICKER', EXCHANGE_SESSION.EXTENDED);
+      const result = await service.checkCondition(
+        conditionKey,
+        'MOCK_EXCHANGE',
+        'MOCK_TICKER',
+        EXCHANGE_SESSION.EXTENDED
+      );
 
       expect(result.met).toBe(true);
       expect(result.message).not.toBe('');

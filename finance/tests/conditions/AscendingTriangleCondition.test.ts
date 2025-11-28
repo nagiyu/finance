@@ -1,7 +1,7 @@
 jest.mock('@finance/utils/FinanceUtil', () => {
   return {
     __esModule: true,
-    default: require('@finance/tests/mocks/utils/FinanceUtilMock').default
+    default: require('@finance/tests/mocks/utils/FinanceUtilMock').default,
   };
 });
 
@@ -17,10 +17,7 @@ describe('AscendingTriangleCondition', () => {
   const conditionKey = 'AscendingTriangle';
 
   beforeEach(() => {
-    service = new ConditionService(
-      new ExchangeServiceMock(),
-      new TickerServiceMock()
-    );
+    service = new ConditionService(new ExchangeServiceMock(), new TickerServiceMock());
   });
 
   describe('アセンディング・トライアングル', () => {
@@ -51,7 +48,7 @@ describe('AscendingTriangleCondition', () => {
       // Classic ascending triangle pattern with horizontal resistance and rising support
       FinanceUtilMock.StockPriceDataMock = [
         // Early pattern formation - lower lows
-        { date: '2025-01-01 00:00', data: [1000, 1020, 990, 1025] },  // Low: 990
+        { date: '2025-01-01 00:00', data: [1000, 1020, 990, 1025] }, // Low: 990
         { date: '2025-01-02 00:00', data: [1025, 1050, 1020, 1055] }, // High: 1055, Low: 1020
         { date: '2025-01-03 00:00', data: [1055, 1048, 1035, 1058] }, // High: 1058 (resistance)
         { date: '2025-01-04 00:00', data: [1048, 1030, 1025, 1052] }, // Pullback
@@ -76,10 +73,15 @@ describe('AscendingTriangleCondition', () => {
         { date: '2025-01-17 00:00', data: [1072, 1078, 1068, 1080] }, // Continued upward momentum
         { date: '2025-01-18 00:00', data: [1078, 1085, 1075, 1088] }, // Strong follow through
         { date: '2025-01-19 00:00', data: [1085, 1082, 1080, 1090] }, // Consolidation above breakout
-        { date: '2025-01-20 00:00', data: [1082, 1095, 1080, 1098] }  // Continued strength
+        { date: '2025-01-20 00:00', data: [1082, 1095, 1080, 1098] }, // Continued strength
       ];
 
-      const result = await service.checkCondition(conditionKey, 'MOCK_EXCHANGE', 'MOCK_TICKER', EXCHANGE_SESSION.EXTENDED);
+      const result = await service.checkCondition(
+        conditionKey,
+        'MOCK_EXCHANGE',
+        'MOCK_TICKER',
+        EXCHANGE_SESSION.EXTENDED
+      );
 
       expect(result.met).toBe(true);
     });
@@ -101,10 +103,15 @@ describe('AscendingTriangleCondition', () => {
         { date: '2025-01-12 00:00', data: [1240, 1260, 1235, 1265] },
         { date: '2025-01-13 00:00', data: [1260, 1280, 1255, 1285] },
         { date: '2025-01-14 00:00', data: [1280, 1300, 1275, 1305] },
-        { date: '2025-01-15 00:00', data: [1300, 1320, 1295, 1325] }
+        { date: '2025-01-15 00:00', data: [1300, 1320, 1295, 1325] },
       ];
 
-      const result = await service.checkCondition(conditionKey, 'MOCK_EXCHANGE', 'MOCK_TICKER', EXCHANGE_SESSION.EXTENDED);
+      const result = await service.checkCondition(
+        conditionKey,
+        'MOCK_EXCHANGE',
+        'MOCK_TICKER',
+        EXCHANGE_SESSION.EXTENDED
+      );
 
       expect(result.met).toBe(false);
     });
@@ -112,7 +119,7 @@ describe('AscendingTriangleCondition', () => {
     it('Check Condition: ブレイクアウトなし（抵抗線での反発）', async () => {
       // Pattern forms but no breakout - price gets rejected at resistance
       FinanceUtilMock.StockPriceDataMock = [
-        { date: '2025-01-01 00:00', data: [1000, 1020, 990, 1025] },  // Low: 990
+        { date: '2025-01-01 00:00', data: [1000, 1020, 990, 1025] }, // Low: 990
         { date: '2025-01-02 00:00', data: [1025, 1050, 1020, 1055] }, // High: 1055
         { date: '2025-01-03 00:00', data: [1055, 1048, 1035, 1058] }, // High: 1058 (resistance)
         { date: '2025-01-04 00:00', data: [1048, 1030, 1025, 1052] }, // Pullback
@@ -127,10 +134,15 @@ describe('AscendingTriangleCondition', () => {
         { date: '2025-01-13 00:00', data: [1059, 1057, 1055, 1062] }, // Higher low: 1055
         // Failed breakout - price gets rejected and falls
         { date: '2025-01-14 00:00', data: [1057, 1045, 1040, 1060] }, // Rejection, closes lower
-        { date: '2025-01-15 00:00', data: [1045, 1035, 1030, 1050] }  // Continued weakness
+        { date: '2025-01-15 00:00', data: [1045, 1035, 1030, 1050] }, // Continued weakness
       ];
 
-      const result = await service.checkCondition(conditionKey, 'MOCK_EXCHANGE', 'MOCK_TICKER', EXCHANGE_SESSION.EXTENDED);
+      const result = await service.checkCondition(
+        conditionKey,
+        'MOCK_EXCHANGE',
+        'MOCK_TICKER',
+        EXCHANGE_SESSION.EXTENDED
+      );
 
       expect(result.met).toBe(false);
     });
@@ -152,10 +164,15 @@ describe('AscendingTriangleCondition', () => {
         { date: '2025-01-12 00:00', data: [980, 960, 950, 970] },
         { date: '2025-01-13 00:00', data: [960, 940, 930, 950] },
         { date: '2025-01-14 00:00', data: [940, 920, 910, 930] },
-        { date: '2025-01-15 00:00', data: [920, 900, 890, 910] }
+        { date: '2025-01-15 00:00', data: [920, 900, 890, 910] },
       ];
 
-      const result = await service.checkCondition(conditionKey, 'MOCK_EXCHANGE', 'MOCK_TICKER', EXCHANGE_SESSION.EXTENDED);
+      const result = await service.checkCondition(
+        conditionKey,
+        'MOCK_EXCHANGE',
+        'MOCK_TICKER',
+        EXCHANGE_SESSION.EXTENDED
+      );
 
       expect(result.met).toBe(false);
     });
@@ -165,10 +182,15 @@ describe('AscendingTriangleCondition', () => {
       FinanceUtilMock.StockPriceDataMock = [
         { date: '2025-01-01 00:00', data: [1000, 1020, 990, 1025] },
         { date: '2025-01-02 00:00', data: [1025, 1050, 1020, 1055] },
-        { date: '2025-01-03 00:00', data: [1055, 1048, 1035, 1058] }
+        { date: '2025-01-03 00:00', data: [1055, 1048, 1035, 1058] },
       ];
 
-      const result = await service.checkCondition(conditionKey, 'MOCK_EXCHANGE', 'MOCK_TICKER', EXCHANGE_SESSION.EXTENDED);
+      const result = await service.checkCondition(
+        conditionKey,
+        'MOCK_EXCHANGE',
+        'MOCK_TICKER',
+        EXCHANGE_SESSION.EXTENDED
+      );
 
       expect(result.met).toBe(false);
     });

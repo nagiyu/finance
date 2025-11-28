@@ -6,9 +6,9 @@ import EnvironmentalUtil from '@common/utils/EnvironmentalUtil';
 export type { TimeFrame } from '@mathieuc/tradingview';
 
 export interface GetStockPriceDataOptions {
-  count?: number;      // 取得件数（デフォルト: 30）
-  timeframe?: TimeFrame;  // タイムフレーム（デフォルト: '1'）
-  session?: string;    // セッション（デフォルト: 'regular', 'extended' for pre/after-market）
+  count?: number; // 取得件数（デフォルト: 30）
+  timeframe?: TimeFrame; // タイムフレーム（デフォルト: '1'）
+  session?: string; // セッション（デフォルト: 'regular', 'extended' for pre/after-market）
 }
 
 export default class FinanceUtil {
@@ -24,7 +24,11 @@ export default class FinanceUtil {
     }
   }
 
-  public static async getStockPriceData(exchange: string, ticker: string, options?: GetStockPriceDataOptions): Promise<any> {
+  public static async getStockPriceData(
+    exchange: string,
+    ticker: string,
+    options?: GetStockPriceDataOptions
+  ): Promise<any> {
     const market = `${exchange}:${ticker}`;
     const count = options?.count ?? 30;
     const timeframe: TimeFrame = options?.timeframe ?? '1';
@@ -39,7 +43,8 @@ export default class FinanceUtil {
         session: session,
       });
 
-      chart.onError((...err) => { // Listen for errors (can avoid crash)
+      chart.onError((...err) => {
+        // Listen for errors (can avoid crash)
         console.error('Chart error:', ...err);
 
         chart.delete();
@@ -48,7 +53,8 @@ export default class FinanceUtil {
         reject(err);
       });
 
-      chart.onUpdate(() => { // When price changes
+      chart.onUpdate(() => {
+        // When price changes
         if (!chart.periods[0]) {
           chart.delete();
           client.end();
@@ -61,15 +67,8 @@ export default class FinanceUtil {
         // periodsは新しい順なので、指定件数を昇順に並べ替え
         const periods = (chart.periods.slice(0, count) as PricePeriod[]).reverse();
         const data = periods.map((p) => ({
-          date: p.time
-            ? new Date(p.time * 1000).toISOString().slice(0, 16).replace('T', ' ')
-            : "",
-          data: [
-            p.open ?? 0,
-            p.close ?? 0,
-            p.min ?? 0,
-            p.max ?? 0
-          ]
+          date: p.time ? new Date(p.time * 1000).toISOString().slice(0, 16).replace('T', ' ') : '',
+          data: [p.open ?? 0, p.close ?? 0, p.min ?? 0, p.max ?? 0],
         }));
 
         chart.delete();
@@ -86,7 +85,11 @@ export default class FinanceUtil {
    * Get the current stock price for a given exchange and ticker
    * Returns the latest close price
    */
-  public static async getCurrentStockPrice(exchange: string, ticker: string, session?: string): Promise<number | null> {
+  public static async getCurrentStockPrice(
+    exchange: string,
+    ticker: string,
+    session?: string
+  ): Promise<number | null> {
     try {
       const stockData = await this.getStockPriceData(exchange, ticker, { count: 1, session });
 

@@ -80,7 +80,9 @@ describe('MyTickerValidator', () => {
         averagePrice: 150.5,
       };
 
-      expect(() => MyTickerValidator.validate(invalidData)).toThrow('Quantity must be greater than 0');
+      expect(() => MyTickerValidator.validate(invalidData)).toThrow(
+        'Quantity must be greater than 0'
+      );
     });
 
     it('should throw error when quantity is negative', () => {
@@ -92,7 +94,9 @@ describe('MyTickerValidator', () => {
         averagePrice: 150.5,
       };
 
-      expect(() => MyTickerValidator.validate(invalidData)).toThrow('Quantity must be greater than 0');
+      expect(() => MyTickerValidator.validate(invalidData)).toThrow(
+        'Quantity must be greater than 0'
+      );
     });
 
     it('should throw error when averagePrice is missing', () => {
@@ -115,7 +119,9 @@ describe('MyTickerValidator', () => {
         averagePrice: 0,
       };
 
-      expect(() => MyTickerValidator.validate(invalidData)).toThrow('AveragePrice must be greater than 0');
+      expect(() => MyTickerValidator.validate(invalidData)).toThrow(
+        'AveragePrice must be greater than 0'
+      );
     });
 
     it('should throw error when averagePrice is negative', () => {
@@ -127,7 +133,9 @@ describe('MyTickerValidator', () => {
         averagePrice: -100,
       };
 
-      expect(() => MyTickerValidator.validate(invalidData)).toThrow('AveragePrice must be greater than 0');
+      expect(() => MyTickerValidator.validate(invalidData)).toThrow(
+        'AveragePrice must be greater than 0'
+      );
     });
 
     it('should accept fractional quantity', () => {

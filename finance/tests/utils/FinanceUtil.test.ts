@@ -9,7 +9,10 @@ describe.skip('FinanceUtil', () => {
 
   describe('getStockPriceData', () => {
     it('should fetch stock price data', async () => {
-      const data = await FinanceUtil.getStockPriceData('NASDAQ', 'AAPL', { count: 5, timeframe: '5' });
+      const data = await FinanceUtil.getStockPriceData('NASDAQ', 'AAPL', {
+        count: 5,
+        timeframe: '5',
+      });
       expect(data).toBeDefined();
       expect(data.length).toBeLessThanOrEqual(5);
     });

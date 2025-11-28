@@ -5,8 +5,9 @@ import { FINANCE_RECORD_DATA_TYPE } from '@finance/types/FinanceRecordDataType';
 
 export default class FinanceNotificationDataAccessor extends FinanceDataAccessorBase<FinanceNotificationRecordType> {
   public constructor(
-    dynamoDBService: DynamoDBService<FinanceNotificationRecordType>
-      = new DynamoDBService<FinanceNotificationRecordType>(FinanceDataAccessorBase.getFinanceTableName())
+    dynamoDBService: DynamoDBService<FinanceNotificationRecordType> = new DynamoDBService<FinanceNotificationRecordType>(
+      FinanceDataAccessorBase.getFinanceTableName()
+    )
   ) {
     super(FINANCE_RECORD_DATA_TYPE.FINANCE_NOTIFICATION, dynamoDBService);
   }

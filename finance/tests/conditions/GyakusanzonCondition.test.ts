@@ -1,7 +1,7 @@
 jest.mock('@finance/utils/FinanceUtil', () => {
   return {
     __esModule: true,
-    default: require('@finance/tests/mocks/utils/FinanceUtilMock').default
+    default: require('@finance/tests/mocks/utils/FinanceUtilMock').default,
   };
 });
 
@@ -17,10 +17,7 @@ describe('GyakusanzonCondition', () => {
   const conditionKey = 'Gyakusanzon';
 
   beforeEach(() => {
-    service = new ConditionService(
-      new ExchangeServiceMock(),
-      new TickerServiceMock()
-    );
+    service = new ConditionService(new ExchangeServiceMock(), new TickerServiceMock());
   });
 
   describe('逆三尊', () => {
@@ -54,31 +51,36 @@ describe('GyakusanzonCondition', () => {
         { date: '2025-01-01 00:00', data: [1000, 990, 980, 995] },
         // Left shoulder valley
         { date: '2025-01-02 00:00', data: [990, 970, 930, 980] }, // Left shoulder: 930
-        // Peak after left shoulder  
+        // Peak after left shoulder
         { date: '2025-01-03 00:00', data: [970, 1000, 965, 1020] }, // Peak: 1000
         { date: '2025-01-04 00:00', data: [1000, 995, 975, 990] },
-        
+
         // Head valley (lowest)
         { date: '2025-01-05 00:00', data: [995, 920, 900, 950] }, // Head: 900 (lowest)
         // Peak after head
         { date: '2025-01-06 00:00', data: [920, 1005, 945, 995] }, // Peak: 1005
         { date: '2025-01-07 00:00', data: [1005, 990, 975, 985] },
-        
+
         // Right shoulder valley (similar to left)
         { date: '2025-01-08 00:00', data: [990, 955, 925, 960] }, // Right shoulder: 925 (similar to 930)
         // Rally from right shoulder
         { date: '2025-01-09 00:00', data: [955, 980, 950, 975] },
         { date: '2025-01-10 00:00', data: [980, 1000, 960, 985] },
-        
+
         // Neckline break confirmation (neckline = (1000 + 1005) / 2 = 1002.5)
         { date: '2025-01-11 00:00', data: [1000, 1010, 990, 1005] },
         { date: '2025-01-12 00:00', data: [1010, 1020, 1000, 1015] },
         { date: '2025-01-13 00:00', data: [1020, 1025, 1005, 1020] }, // Break: close=1025 > 1002.5
         { date: '2025-01-14 00:00', data: [1025, 1030, 1015, 1028] }, // Confirmation: close=1030 > 1002.5
-        { date: '2025-01-15 00:00', data: [1030, 1040, 1025, 1035] }  // Confirmation: close=1040 > 1002.5
+        { date: '2025-01-15 00:00', data: [1030, 1040, 1025, 1035] }, // Confirmation: close=1040 > 1002.5
       ];
 
-      const result = await service.checkCondition(conditionKey, 'MOCK_EXCHANGE', 'MOCK_TICKER', EXCHANGE_SESSION.EXTENDED);
+      const result = await service.checkCondition(
+        conditionKey,
+        'MOCK_EXCHANGE',
+        'MOCK_TICKER',
+        EXCHANGE_SESSION.EXTENDED
+      );
 
       expect(result.met).toBe(true);
       expect(result.message).not.toBe('');
@@ -92,12 +94,12 @@ describe('GyakusanzonCondition', () => {
         { date: '2025-01-02 00:00', data: [990, 970, 950, 980] }, // Left shoulder: 950
         { date: '2025-01-03 00:00', data: [970, 1000, 965, 1020] }, // Peak: 1000
         { date: '2025-01-04 00:00', data: [1000, 995, 975, 990] },
-        
+
         // Head valley
         { date: '2025-01-05 00:00', data: [995, 920, 900, 950] }, // Head: 900
         { date: '2025-01-06 00:00', data: [920, 1005, 945, 995] }, // Peak: 1005
         { date: '2025-01-07 00:00', data: [1005, 990, 975, 985] },
-        
+
         // Right shoulder - much lower valley (20% difference from left shoulder)
         { date: '2025-01-08 00:00', data: [990, 820, 790, 850] }, // Right shoulder: 790 (too low)
         { date: '2025-01-09 00:00', data: [820, 880, 850, 875] },
@@ -106,10 +108,15 @@ describe('GyakusanzonCondition', () => {
         { date: '2025-01-12 00:00', data: [1010, 1020, 1000, 1015] },
         { date: '2025-01-13 00:00', data: [1020, 1025, 1005, 1020] },
         { date: '2025-01-14 00:00', data: [1025, 1030, 1015, 1028] },
-        { date: '2025-01-15 00:00', data: [1030, 1040, 1025, 1035] }
+        { date: '2025-01-15 00:00', data: [1030, 1040, 1025, 1035] },
       ];
 
-      const result = await service.checkCondition(conditionKey, 'MOCK_EXCHANGE', 'MOCK_TICKER', EXCHANGE_SESSION.EXTENDED);
+      const result = await service.checkCondition(
+        conditionKey,
+        'MOCK_EXCHANGE',
+        'MOCK_TICKER',
+        EXCHANGE_SESSION.EXTENDED
+      );
 
       expect(result.met).toBe(false);
     });
@@ -123,12 +130,12 @@ describe('GyakusanzonCondition', () => {
         { date: '2025-01-02 00:00', data: [990, 970, 930, 980] }, // Left shoulder: 930
         { date: '2025-01-03 00:00', data: [970, 940, 935, 945] }, // Very shallow peak: 940 (only 1.1% above 930)
         { date: '2025-01-04 00:00', data: [940, 942, 938, 941] }, // Still shallow
-        
+
         // Head valley
         { date: '2025-01-05 00:00', data: [942, 920, 900, 950] }, // Head: 900
         { date: '2025-01-06 00:00', data: [920, 915, 910, 920] }, // Very shallow peak: 915 (only 1.7% above 900)
         { date: '2025-01-07 00:00', data: [915, 917, 912, 916] }, // Still shallow
-        
+
         // Right shoulder
         { date: '2025-01-08 00:00', data: [917, 955, 925, 960] }, // Right shoulder: 925
         // Keep all subsequent peaks low to ensure shallow peaks between valleys are used
@@ -138,10 +145,15 @@ describe('GyakusanzonCondition', () => {
         { date: '2025-01-12 00:00', data: [945, 950, 943, 948] },
         { date: '2025-01-13 00:00', data: [950, 955, 948, 953] },
         { date: '2025-01-14 00:00', data: [955, 960, 953, 958] },
-        { date: '2025-01-15 00:00', data: [960, 965, 958, 963] }
+        { date: '2025-01-15 00:00', data: [960, 965, 958, 963] },
       ];
 
-      const result = await service.checkCondition(conditionKey, 'MOCK_EXCHANGE', 'MOCK_TICKER', EXCHANGE_SESSION.EXTENDED);
+      const result = await service.checkCondition(
+        conditionKey,
+        'MOCK_EXCHANGE',
+        'MOCK_TICKER',
+        EXCHANGE_SESSION.EXTENDED
+      );
 
       expect(result.met).toBe(false);
     });
@@ -154,26 +166,31 @@ describe('GyakusanzonCondition', () => {
         { date: '2025-01-02 00:00', data: [990, 970, 930, 980] }, // Left shoulder: 930
         { date: '2025-01-03 00:00', data: [970, 1000, 965, 1020] }, // Peak: 1000
         { date: '2025-01-04 00:00', data: [1000, 995, 975, 990] },
-        
+
         // Head valley
         { date: '2025-01-05 00:00', data: [995, 920, 900, 950] }, // Head: 900
         { date: '2025-01-06 00:00', data: [920, 1005, 945, 995] }, // Peak: 1005
         { date: '2025-01-07 00:00', data: [1005, 990, 975, 985] },
-        
+
         // Right shoulder
         { date: '2025-01-08 00:00', data: [990, 955, 925, 960] }, // Right shoulder: 925
         { date: '2025-01-09 00:00', data: [955, 980, 950, 975] },
         { date: '2025-01-10 00:00', data: [980, 1000, 960, 985] },
-        
+
         // No neckline break - prices stay below neckline (1002.5)
         { date: '2025-01-11 00:00', data: [1000, 995, 990, 992] }, // close=992 < 1002.5
         { date: '2025-01-12 00:00', data: [995, 997, 993, 996] }, // close=997 < 1002.5
         { date: '2025-01-13 00:00', data: [997, 1000, 995, 998] }, // close=1000 < 1002.5
         { date: '2025-01-14 00:00', data: [1000, 1001, 998, 999] }, // close=1001 < 1002.5
-        { date: '2025-01-15 00:00', data: [1001, 1002, 999, 1001] }  // close=1002 < 1002.5
+        { date: '2025-01-15 00:00', data: [1001, 1002, 999, 1001] }, // close=1002 < 1002.5
       ];
 
-      const result = await service.checkCondition(conditionKey, 'MOCK_EXCHANGE', 'MOCK_TICKER', EXCHANGE_SESSION.EXTENDED);
+      const result = await service.checkCondition(
+        conditionKey,
+        'MOCK_EXCHANGE',
+        'MOCK_TICKER',
+        EXCHANGE_SESSION.EXTENDED
+      );
 
       expect(result.met).toBe(false);
     });
@@ -186,26 +203,31 @@ describe('GyakusanzonCondition', () => {
         { date: '2025-01-02 00:00', data: [990, 970, 930, 980] }, // Left shoulder: 930
         { date: '2025-01-03 00:00', data: [970, 1000, 965, 1020] }, // Peak: 1000
         { date: '2025-01-04 00:00', data: [1000, 995, 975, 990] },
-        
+
         // Head valley
         { date: '2025-01-05 00:00', data: [995, 920, 900, 950] }, // Head: 900
         { date: '2025-01-06 00:00', data: [920, 1005, 945, 995] }, // Peak: 1005
         { date: '2025-01-07 00:00', data: [1005, 990, 975, 985] },
-        
+
         // Right shoulder
         { date: '2025-01-08 00:00', data: [990, 955, 925, 960] }, // Right shoulder: 925
         { date: '2025-01-09 00:00', data: [955, 980, 950, 975] },
         { date: '2025-01-10 00:00', data: [980, 1000, 960, 985] },
-        
+
         // Insufficient confirmation - only 1 of last 3 candles breaks neckline
         { date: '2025-01-11 00:00', data: [1000, 995, 990, 992] }, // close=992 < 1002.5
         { date: '2025-01-12 00:00', data: [995, 997, 993, 996] }, // close=997 < 1002.5
         { date: '2025-01-13 00:00', data: [997, 1010, 995, 1008] }, // close=1008 > 1002.5 (only 1 break)
         { date: '2025-01-14 00:00', data: [1010, 1001, 998, 999] }, // close=1001 < 1002.5
-        { date: '2025-01-15 00:00', data: [1001, 1002, 999, 1000] }  // close=1002 < 1002.5
+        { date: '2025-01-15 00:00', data: [1001, 1002, 999, 1000] }, // close=1002 < 1002.5
       ];
 
-      const result = await service.checkCondition(conditionKey, 'MOCK_EXCHANGE', 'MOCK_TICKER', EXCHANGE_SESSION.EXTENDED);
+      const result = await service.checkCondition(
+        conditionKey,
+        'MOCK_EXCHANGE',
+        'MOCK_TICKER',
+        EXCHANGE_SESSION.EXTENDED
+      );
 
       expect(result.met).toBe(false);
     });
@@ -220,26 +242,31 @@ describe('GyakusanzonCondition', () => {
         { date: '2025-01-02 00:00', data: [28200, 27800, 27500, 27900] }, // Left shoulder: 27500
         { date: '2025-01-03 00:00', data: [27800, 28200, 27700, 28400] }, // Peak: 28400
         { date: '2025-01-04 00:00', data: [28200, 28100, 28000, 28150] },
-        
+
         // Head formation (lowest point)
         { date: '2025-01-05 00:00', data: [28100, 27200, 26800, 27500] }, // Head: 26800 (lowest)
         { date: '2025-01-06 00:00', data: [27200, 28000, 27100, 28350] }, // Peak: 28350
         { date: '2025-01-07 00:00', data: [28000, 28100, 28000, 28200] },
-        
+
         // Right shoulder formation (similar to left)
         { date: '2025-01-08 00:00', data: [28200, 27800, 27600, 27900] }, // Right shoulder: 27600 (similar to 27500)
         { date: '2025-01-09 00:00', data: [27800, 28200, 27700, 28000] },
         { date: '2025-01-10 00:00', data: [28200, 28300, 28100, 28250] },
-        
+
         // Neckline break (neckline = (28400 + 28350) / 2 = 28375)
         { date: '2025-01-11 00:00', data: [28300, 28500, 28200, 28400] },
         { date: '2025-01-12 00:00', data: [28500, 28600, 28400, 28550] }, // Break: close=28600 > 28375
         { date: '2025-01-13 00:00', data: [28600, 28900, 28500, 28800] }, // Confirmation: close=28900 > 28375
         { date: '2025-01-14 00:00', data: [28900, 29200, 28800, 29100] }, // Confirmation: close=29200 > 28375
-        { date: '2025-01-15 00:00', data: [29200, 29500, 29100, 29400] }  // Continued rally
+        { date: '2025-01-15 00:00', data: [29200, 29500, 29100, 29400] }, // Continued rally
       ];
 
-      const result = await service.checkCondition(conditionKey, 'MOCK_EXCHANGE', 'MOCK_TICKER', EXCHANGE_SESSION.EXTENDED);
+      const result = await service.checkCondition(
+        conditionKey,
+        'MOCK_EXCHANGE',
+        'MOCK_TICKER',
+        EXCHANGE_SESSION.EXTENDED
+      );
 
       expect(result.met).toBe(true);
       expect(result.message).not.toBe('');

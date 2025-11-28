@@ -102,7 +102,7 @@ describe('ConditionUtil', () => {
     it('GreaterThan and LessThan should have target price enabled', () => {
       const greaterInfo = ConditionUtil.getConditionInfo('GreaterThan');
       const lessInfo = ConditionUtil.getConditionInfo('LessThan');
-      
+
       expect(greaterInfo.enableTargetPrice).toBe(true);
       expect(lessInfo.enableTargetPrice).toBe(true);
     });

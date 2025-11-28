@@ -1,7 +1,7 @@
 jest.mock('@finance/utils/FinanceUtil', () => {
   return {
     __esModule: true,
-    default: require('@finance/tests/mocks/utils/FinanceUtilMock').default
+    default: require('@finance/tests/mocks/utils/FinanceUtilMock').default,
   };
 });
 
@@ -15,17 +15,17 @@ import FinanceNotificationService from '@finance/services/FinanceNotificationSer
 import FinanceUtilMock from '@finance/tests/mocks/utils/FinanceUtilMock';
 import TickerServiceMock from '@finance/tests/mocks/services/TickerServiceMock';
 import { EXCHANGE_SESSION } from '@finance/consts/ExchangeConsts';
-import { FINANCE_NOTIFICATION_CONDITION_MODE, FINANCE_NOTIFICATION_FREQUENCY } from '@finance/consts/FinanceNotificationConst';
+import {
+  FINANCE_NOTIFICATION_CONDITION_MODE,
+  FINANCE_NOTIFICATION_FREQUENCY,
+} from '@finance/consts/FinanceNotificationConst';
 import { FINANCE_RECORD_DATA_TYPE } from '@finance/types/FinanceRecordDataType';
 import type { TimeFrame } from '@finance/utils/FinanceUtil';
 
 describe('FinanceNotificationService', () => {
   let service: FinanceNotificationService;
   let dataAccessor: FinanceNotificationDataAccessorMock;
-  const conditionService = new ConditionService(
-    new ExchangeServiceMock(),
-    new TickerServiceMock()
-  );
+  const conditionService = new ConditionService(new ExchangeServiceMock(), new TickerServiceMock());
   const notificationService = new NotificationServiceMock();
 
   beforeEach(() => {
@@ -46,8 +46,8 @@ describe('FinanceNotificationService', () => {
       FinanceUtilMock.StockPriceDataMock = [
         {
           date: '2025-01-01 00:00',
-          data: [1000, 960, 950, 1010]
-        }
+          data: [1000, 960, 950, 1010],
+        },
       ];
 
       await service.create({
@@ -66,9 +66,9 @@ describe('FinanceNotificationService', () => {
             session: EXCHANGE_SESSION.EXTENDED,
             targetPrice: 950,
             timeframe: '1' as TimeFrame,
-            firstNotificationSent: false
-          }
-        ]
+            firstNotificationSent: false,
+          },
+        ],
       });
 
       await service.notification('http://localhost:3000/endpoint');
@@ -83,8 +83,8 @@ describe('FinanceNotificationService', () => {
       FinanceUtilMock.StockPriceDataMock = [
         {
           date: '2025-01-01 00:00',
-          data: [1000, 960, 950, 1010]
-        }
+          data: [1000, 960, 950, 1010],
+        },
       ];
 
       await service.create({
@@ -103,9 +103,9 @@ describe('FinanceNotificationService', () => {
             session: EXCHANGE_SESSION.EXTENDED,
             targetPrice: 950,
             timeframe: '1' as TimeFrame,
-            firstNotificationSent: false
-          }
-        ]
+            firstNotificationSent: false,
+          },
+        ],
       });
 
       await service.notification('http://localhost:3000/endpoint');
@@ -135,19 +135,21 @@ describe('FinanceNotificationService', () => {
             session: EXCHANGE_SESSION.EXTENDED,
             targetPrice: 950,
             timeframe: '1' as TimeFrame,
-            firstNotificationSent: false
-          }
-        ]
+            firstNotificationSent: false,
+          },
+        ],
       };
 
       // First creation should succeed
       await service.create(notificationData);
 
       // Second creation with same exchangeId and tickerId but different terminal ID should succeed
-      await expect(service.create({
-        ...notificationData,
-        terminalId: CommonUtil.generateUUID() // Different terminal ID
-      })).resolves.toBeDefined();
+      await expect(
+        service.create({
+          ...notificationData,
+          terminalId: CommonUtil.generateUUID(), // Different terminal ID
+        })
+      ).resolves.toBeDefined();
     });
 
     it('should prevent creating duplicate Exchange and Ticker combination for same terminal', async () => {
@@ -168,19 +170,21 @@ describe('FinanceNotificationService', () => {
             session: EXCHANGE_SESSION.EXTENDED,
             targetPrice: 950,
             timeframe: '1' as TimeFrame,
-            firstNotificationSent: false
-          }
-        ]
+            firstNotificationSent: false,
+          },
+        ],
       };
 
       // First creation should succeed
       await service.create(notificationData);
 
       // Second creation with same exchangeId, tickerId AND same terminal ID should fail
-      await expect(service.create({
-        ...notificationData,
-        subscriptionEndpoint: 'http://localhost:3000/endpoint2' // Different endpoint but same terminal
-      })).rejects.toThrow('指定された Exchange と Ticker の組み合わせは既に登録されています');
+      await expect(
+        service.create({
+          ...notificationData,
+          subscriptionEndpoint: 'http://localhost:3000/endpoint2', // Different endpoint but same terminal
+        })
+      ).rejects.toThrow('指定された Exchange と Ticker の組み合わせは既に登録されています');
     });
 
     it('should allow creating notifications with different Exchange or Ticker', async () => {
@@ -200,19 +204,19 @@ describe('FinanceNotificationService', () => {
             session: EXCHANGE_SESSION.EXTENDED,
             targetPrice: 950,
             timeframe: '1' as TimeFrame,
-            firstNotificationSent: false
-          }
-        ]
+            firstNotificationSent: false,
+          },
+        ],
       };
 
       // Create first notification
       await service.create(baseNotificationData);
 
-      // Since the mock services return the same data for any ID, 
+      // Since the mock services return the same data for any ID,
       // we can't test with different exchange/ticker IDs in this mock environment.
       // This test demonstrates the concept but would work with real services
       // that return different data for different IDs.
-      
+
       // In a real environment, this would test:
       // 1. Different ticker with same exchange - should succeed
       // 2. Different exchange with same ticker - should succeed
@@ -238,36 +242,38 @@ describe('FinanceNotificationService', () => {
             session: EXCHANGE_SESSION.EXTENDED,
             targetPrice: 950,
             timeframe: '1' as TimeFrame,
-            firstNotificationSent: false
-          }
-        ]
+            firstNotificationSent: false,
+          },
+        ],
       };
 
       // Create notification
       const created = await service.create(notificationData);
 
       // Update with same exchangeId and tickerId should succeed
-      await expect(service.update(created.id, {
-        exchangeId: ExchangeServiceMock.MockExchangeName,
-        tickerId: TickerServiceMock.MockTickerName,
-        conditionList: [
-          {
-            id: 'test-condition-1',
-            mode: FINANCE_NOTIFICATION_CONDITION_MODE.BUY,
-            conditionName: 'GreaterThan',
-            frequency: FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
-            session: EXCHANGE_SESSION.EXTENDED,
-            targetPrice: 1000, // Different target price
-            timeframe: '1' as TimeFrame,
-            firstNotificationSent: false
-          }
-        ]
-      })).resolves.toBeDefined();
+      await expect(
+        service.update(created.id, {
+          exchangeId: ExchangeServiceMock.MockExchangeName,
+          tickerId: TickerServiceMock.MockTickerName,
+          conditionList: [
+            {
+              id: 'test-condition-1',
+              mode: FINANCE_NOTIFICATION_CONDITION_MODE.BUY,
+              conditionName: 'GreaterThan',
+              frequency: FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
+              session: EXCHANGE_SESSION.EXTENDED,
+              targetPrice: 1000, // Different target price
+              timeframe: '1' as TimeFrame,
+              firstNotificationSent: false,
+            },
+          ],
+        })
+      ).resolves.toBeDefined();
     });
 
     it('should prevent updating to duplicate Exchange and Ticker combination for same terminal', async () => {
       const terminalId = CommonUtil.generateUUID();
-      
+
       // Create two different notifications for the same terminal
       const notification1 = await service.create({
         terminalId: terminalId,
@@ -285,9 +291,9 @@ describe('FinanceNotificationService', () => {
             session: EXCHANGE_SESSION.EXTENDED,
             targetPrice: 950,
             timeframe: '1' as TimeFrame,
-            firstNotificationSent: false
-          }
-        ]
+            firstNotificationSent: false,
+          },
+        ],
       });
 
       const notification2 = await service.create({
@@ -306,34 +312,36 @@ describe('FinanceNotificationService', () => {
             session: EXCHANGE_SESSION.EXTENDED,
             targetPrice: 950,
             timeframe: '1' as TimeFrame,
-            firstNotificationSent: false
-          }
-        ]
+            firstNotificationSent: false,
+          },
+        ],
       });
 
       // Try to update notification2 to use same exchange/ticker as notification1 (same terminal)
-      await expect(service.update(notification2.id, {
-        exchangeId: ExchangeServiceMock.MockExchangeName,
-        tickerId: TickerServiceMock.MockTickerName,
-        conditionList: [
-          {
-            id: 'test-condition-2',
-            mode: FINANCE_NOTIFICATION_CONDITION_MODE.BUY,
-            conditionName: 'GreaterThan',
-            frequency: FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
-            session: EXCHANGE_SESSION.EXTENDED,
-            targetPrice: 950,
-            timeframe: '1' as TimeFrame,
-            firstNotificationSent: false
-          }
-        ]
-      })).rejects.toThrow('指定された Exchange と Ticker の組み合わせは既に登録されています');
+      await expect(
+        service.update(notification2.id, {
+          exchangeId: ExchangeServiceMock.MockExchangeName,
+          tickerId: TickerServiceMock.MockTickerName,
+          conditionList: [
+            {
+              id: 'test-condition-2',
+              mode: FINANCE_NOTIFICATION_CONDITION_MODE.BUY,
+              conditionName: 'GreaterThan',
+              frequency: FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
+              session: EXCHANGE_SESSION.EXTENDED,
+              targetPrice: 950,
+              timeframe: '1' as TimeFrame,
+              firstNotificationSent: false,
+            },
+          ],
+        })
+      ).rejects.toThrow('指定された Exchange と Ticker の組み合わせは既に登録されています');
     });
 
     it('should allow updating to duplicate Exchange and Ticker combination for different terminals', async () => {
       const terminalId1 = CommonUtil.generateUUID();
       const terminalId2 = CommonUtil.generateUUID();
-      
+
       // Create notifications for different terminals
       const notification1 = await service.create({
         terminalId: terminalId1,
@@ -351,9 +359,9 @@ describe('FinanceNotificationService', () => {
             session: EXCHANGE_SESSION.EXTENDED,
             targetPrice: 950,
             timeframe: '1' as TimeFrame,
-            firstNotificationSent: false
-          }
-        ]
+            firstNotificationSent: false,
+          },
+        ],
       });
 
       const notification2 = await service.create({
@@ -372,28 +380,30 @@ describe('FinanceNotificationService', () => {
             session: EXCHANGE_SESSION.EXTENDED,
             targetPrice: 950,
             timeframe: '1' as TimeFrame,
-            firstNotificationSent: false
-          }
-        ]
+            firstNotificationSent: false,
+          },
+        ],
       });
 
       // Try to update notification2 to use same exchange/ticker as notification1 (different terminal)
-      await expect(service.update(notification2.id, {
-        exchangeId: ExchangeServiceMock.MockExchangeName,
-        tickerId: TickerServiceMock.MockTickerName,
-        conditionList: [
-          {
-            id: 'test-condition-2',
-            mode: FINANCE_NOTIFICATION_CONDITION_MODE.BUY,
-            conditionName: 'GreaterThan',
-            frequency: FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
-            session: EXCHANGE_SESSION.EXTENDED,
-            targetPrice: 950,
-            timeframe: '1' as TimeFrame,
-            firstNotificationSent: false
-          }
-        ]
-      })).resolves.toBeDefined();
+      await expect(
+        service.update(notification2.id, {
+          exchangeId: ExchangeServiceMock.MockExchangeName,
+          tickerId: TickerServiceMock.MockTickerName,
+          conditionList: [
+            {
+              id: 'test-condition-2',
+              mode: FINANCE_NOTIFICATION_CONDITION_MODE.BUY,
+              conditionName: 'GreaterThan',
+              frequency: FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
+              session: EXCHANGE_SESSION.EXTENDED,
+              targetPrice: 950,
+              timeframe: '1' as TimeFrame,
+              firstNotificationSent: false,
+            },
+          ],
+        })
+      ).resolves.toBeDefined();
     });
   });
 
@@ -403,8 +413,8 @@ describe('FinanceNotificationService', () => {
         FinanceUtilMock.StockPriceDataMock = [
           {
             date: '2025-01-01 00:00',
-            data: [1000, 960, 950, 1010]
-          }
+            data: [1000, 960, 950, 1010],
+          },
         ];
 
         const results = await service.checkConditionsByMode(
@@ -427,8 +437,8 @@ describe('FinanceNotificationService', () => {
         FinanceUtilMock.StockPriceDataMock = [
           {
             date: '2025-01-01 00:00',
-            data: [1000, 900, 950, 1010]
-          }
+            data: [1000, 900, 950, 1010],
+          },
         ];
 
         const results = await service.checkConditionsByMode(
@@ -451,8 +461,8 @@ describe('FinanceNotificationService', () => {
         FinanceUtilMock.StockPriceDataMock = [
           {
             date: '2025-01-01 00:00',
-            data: [900, 900, 900, 900]
-          }
+            data: [900, 900, 900, 900],
+          },
         ];
 
         const results = await service.checkConditionsByMode(
@@ -474,8 +484,8 @@ describe('FinanceNotificationService', () => {
         FinanceUtilMock.StockPriceDataMock = [
           {
             date: '2025-01-01 00:00',
-            data: [1000, 960, 950, 1010]
-          }
+            data: [1000, 960, 950, 1010],
+          },
         ];
 
         const results = await service.checkConditionsByMode(
@@ -498,8 +508,8 @@ describe('FinanceNotificationService', () => {
         FinanceUtilMock.StockPriceDataMock = [
           {
             date: '2025-01-01 00:00',
-            data: [1000, 900, 850, 900]
-          }
+            data: [1000, 900, 850, 900],
+          },
         ];
 
         const results = await service.checkConditionsByMode(
@@ -522,8 +532,8 @@ describe('FinanceNotificationService', () => {
         FinanceUtilMock.StockPriceDataMock = [
           {
             date: '2025-01-01 00:00',
-            data: [1000, 900, 850, 900]
-          }
+            data: [1000, 900, 850, 900],
+          },
         ];
 
         const results = await service.checkConditionsByMode(
@@ -545,8 +555,8 @@ describe('FinanceNotificationService', () => {
         FinanceUtilMock.StockPriceDataMock = [
           {
             date: '2025-01-01 00:00',
-            data: [1100, 1100, 1100, 1100]
-          }
+            data: [1100, 1100, 1100, 1100],
+          },
         ];
 
         const results = await service.checkConditionsByMode(
@@ -570,8 +580,8 @@ describe('FinanceNotificationService', () => {
         FinanceUtilMock.StockPriceDataMock = [
           {
             date: '2025-01-01 00:00',
-            data: [1000, 960, 950, 1010]
-          }
+            data: [1000, 960, 950, 1010],
+          },
         ];
 
         const results = await service.checkConditionsByMode(
@@ -595,8 +605,8 @@ describe('FinanceNotificationService', () => {
         FinanceUtilMock.StockPriceDataMock = [
           {
             date: '2025-01-01 00:00',
-            data: [1000, 960, 950, 1010]
-          }
+            data: [1000, 960, 950, 1010],
+          },
         ];
 
         const results = await service.checkConditionsByMode(
@@ -610,9 +620,9 @@ describe('FinanceNotificationService', () => {
         );
 
         // Check that results with messages include frequency information
-        const metConditionsWithMessage = results.filter(r => r.message);
+        const metConditionsWithMessage = results.filter((r) => r.message);
         if (metConditionsWithMessage.length > 0) {
-          expect(metConditionsWithMessage.some(r => r.message?.includes('通知頻度'))).toBe(true);
+          expect(metConditionsWithMessage.some((r) => r.message?.includes('通知頻度'))).toBe(true);
         }
       });
     });

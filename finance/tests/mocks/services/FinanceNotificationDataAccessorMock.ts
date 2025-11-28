@@ -8,7 +8,9 @@ export default class FinanceNotificationDataAccessorMock extends FinanceNotifica
   private dynamoDBServiceMock: DynamoDBServiceMock<FinanceNotificationRecordType>;
 
   public constructor() {
-    const dynamoDBServiceMock = new DynamoDBServiceMock<FinanceNotificationRecordType>('TestFinance');
+    const dynamoDBServiceMock = new DynamoDBServiceMock<FinanceNotificationRecordType>(
+      'TestFinance'
+    );
     super(dynamoDBServiceMock);
     this.dynamoDBServiceMock = dynamoDBServiceMock;
   }

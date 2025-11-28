@@ -1,7 +1,7 @@
 jest.mock('@finance/utils/FinanceUtil', () => {
   return {
     __esModule: true,
-    default: require('@finance/tests/mocks/utils/FinanceUtilMock').default
+    default: require('@finance/tests/mocks/utils/FinanceUtilMock').default,
   };
 });
 
@@ -17,10 +17,7 @@ describe('RisingDoubleBottomCondition', () => {
   const conditionKey = 'RisingDoubleBottom';
 
   beforeEach(() => {
-    service = new ConditionService(
-      new ExchangeServiceMock(),
-      new TickerServiceMock()
-    );
+    service = new ConditionService(new ExchangeServiceMock(), new TickerServiceMock());
   });
 
   describe('切り上げダブルボトム', () => {

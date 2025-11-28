@@ -9,7 +9,7 @@ describe('TargetPriceService', () => {
         currentQuantity: 100,
         totalCost: 150000, // 1500 JPY per share
         tolerance: 0.1, // ±10%
-        currency: CURRENCY.JPY
+        currency: CURRENCY.JPY,
       };
 
       const result = TargetPriceService.calculateTargetPrice(input);
@@ -27,7 +27,7 @@ describe('TargetPriceService', () => {
         currentQuantity: 50,
         totalCost: 2500, // $50 per share
         tolerance: 0.05, // ±5%
-        currency: CURRENCY.USD
+        currency: CURRENCY.USD,
       };
 
       const result = TargetPriceService.calculateTargetPrice(input);
@@ -44,7 +44,7 @@ describe('TargetPriceService', () => {
         totalCost: 1000, // $100 per share
         tolerance: 0.1, // ±10%
         currency: CURRENCY.USD,
-        targetCurrency: CURRENCY.JPY
+        targetCurrency: CURRENCY.JPY,
       };
 
       const result = TargetPriceService.calculateTargetPrice(input);
@@ -64,7 +64,7 @@ describe('TargetPriceService', () => {
         totalCost: 143000, // ¥1430 per share
         tolerance: 0.2, // ±20%
         currency: CURRENCY.JPY,
-        targetCurrency: CURRENCY.USD
+        targetCurrency: CURRENCY.USD,
       };
 
       const result = TargetPriceService.calculateTargetPrice(input);
@@ -83,7 +83,7 @@ describe('TargetPriceService', () => {
         currentQuantity: 33.5,
         totalCost: 5025, // 150 per share
         tolerance: 0.1, // ±10%
-        currency: CURRENCY.USD
+        currency: CURRENCY.USD,
       };
 
       const result = TargetPriceService.calculateTargetPrice(input);
@@ -130,11 +130,12 @@ describe('TargetPriceService', () => {
         currentQuantity: 0,
         totalCost: 1000,
         tolerance: 0.1,
-        currency: CURRENCY.JPY
+        currency: CURRENCY.JPY,
       };
 
-      expect(() => TargetPriceService.calculateTargetPrice(input))
-        .toThrow('Current quantity must be greater than 0');
+      expect(() => TargetPriceService.calculateTargetPrice(input)).toThrow(
+        'Current quantity must be greater than 0'
+      );
     });
 
     it('should throw error for zero or negative total cost', () => {
@@ -142,11 +143,12 @@ describe('TargetPriceService', () => {
         currentQuantity: 100,
         totalCost: -1000,
         tolerance: 0.1,
-        currency: CURRENCY.JPY
+        currency: CURRENCY.JPY,
       };
 
-      expect(() => TargetPriceService.calculateTargetPrice(input))
-        .toThrow('Total cost must be greater than 0');
+      expect(() => TargetPriceService.calculateTargetPrice(input)).toThrow(
+        'Total cost must be greater than 0'
+      );
     });
 
     it('should throw error for negative tolerance', () => {
@@ -154,11 +156,12 @@ describe('TargetPriceService', () => {
         currentQuantity: 100,
         totalCost: 1000,
         tolerance: -0.1,
-        currency: CURRENCY.JPY
+        currency: CURRENCY.JPY,
       };
 
-      expect(() => TargetPriceService.calculateTargetPrice(input))
-        .toThrow('Tolerance must be between 0 and 1 (exclusive of 1)');
+      expect(() => TargetPriceService.calculateTargetPrice(input)).toThrow(
+        'Tolerance must be between 0 and 1 (exclusive of 1)'
+      );
     });
 
     it('should throw error for tolerance >= 1', () => {
@@ -166,11 +169,12 @@ describe('TargetPriceService', () => {
         currentQuantity: 100,
         totalCost: 1000,
         tolerance: 1.1,
-        currency: CURRENCY.JPY
+        currency: CURRENCY.JPY,
       };
 
-      expect(() => TargetPriceService.calculateTargetPrice(input))
-        .toThrow('Tolerance must be between 0 and 1 (exclusive of 1)');
+      expect(() => TargetPriceService.calculateTargetPrice(input)).toThrow(
+        'Tolerance must be between 0 and 1 (exclusive of 1)'
+      );
     });
 
     it('should accept tolerance of 0', () => {
@@ -178,7 +182,7 @@ describe('TargetPriceService', () => {
         currentQuantity: 100,
         totalCost: 1000,
         tolerance: 0,
-        currency: CURRENCY.JPY
+        currency: CURRENCY.JPY,
       };
 
       const result = TargetPriceService.calculateTargetPrice(input);
@@ -192,11 +196,12 @@ describe('TargetPriceService', () => {
         currentQuantity: 100,
         totalCost: 1000,
         tolerance: 0.1,
-        currency: 'EUR'
+        currency: 'EUR',
       };
 
-      expect(() => TargetPriceService.calculateTargetPrice(input))
-        .toThrow('Currency must be either JPY or USD');
+      expect(() => TargetPriceService.calculateTargetPrice(input)).toThrow(
+        'Currency must be either JPY or USD'
+      );
     });
 
     it('should throw error for invalid target currency', () => {
@@ -205,11 +210,12 @@ describe('TargetPriceService', () => {
         totalCost: 1000,
         tolerance: 0.1,
         currency: CURRENCY.JPY,
-        targetCurrency: 'EUR'
+        targetCurrency: 'EUR',
       };
 
-      expect(() => TargetPriceService.calculateTargetPrice(input))
-        .toThrow('Target currency must be either JPY or USD');
+      expect(() => TargetPriceService.calculateTargetPrice(input)).toThrow(
+        'Target currency must be either JPY or USD'
+      );
     });
   });
 });
