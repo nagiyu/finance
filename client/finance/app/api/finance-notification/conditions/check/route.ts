@@ -57,7 +57,9 @@ export async function GET(request: NextRequest) {
 
     // Validate and cast timeframe to proper type
     const timeframeType: TimeFrame =
-      timeframe && TimeFrameUtil.isValidTimeFrame(timeframe) ? timeframe : TimeFrameUtil.getDefaultTimeFrame();
+      timeframe && TimeFrameUtil.isValidTimeFrame(timeframe)
+        ? timeframe
+        : TimeFrameUtil.getDefaultTimeFrame();
 
     for (const conditionName of evaluableConditions) {
       try {
@@ -77,7 +79,7 @@ export async function GET(request: NextRequest) {
             name: conditionInfo.name,
             key: conditionName,
             isBuyCondition: conditionInfo.isBuyCondition,
-            isSellCondition: conditionInfo.isSellCondition
+            isSellCondition: conditionInfo.isSellCondition,
           });
         }
       } catch (error) {

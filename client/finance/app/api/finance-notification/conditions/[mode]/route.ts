@@ -9,7 +9,10 @@ import { SelectOptionType } from '@client-common/interfaces/SelectOptionType';
 import ConditionService from '@finance/services/ConditionService';
 import { FinanceFeature, ROOT_FEATURE } from '@finance/consts/FinanceConst';
 import { FinanceNotificationConditionModeType } from '@finance/types/FinanceNotificationType';
-import { FINANCE_NOTIFICATION_CONDITION_MODE, SIMPLIFIED_CONDITION_NAME } from '@finance/consts/FinanceNotificationConst';
+import {
+  FINANCE_NOTIFICATION_CONDITION_MODE,
+  SIMPLIFIED_CONDITION_NAME,
+} from '@finance/consts/FinanceNotificationConst';
 
 import { FinanceAuthorizationService } from '@/services/auth/FinanceAuthorizationService';
 
@@ -26,7 +29,7 @@ const getConditionList = (mode: FinanceNotificationConditionModeType): string[] 
     default:
       ErrorUtil.throwError(`Invalid mode: ${mode}`);
   }
-}
+};
 
 /**
  * 認可サービスのインスタンス
@@ -47,7 +50,10 @@ const getOptions = (level: PermissionLevel): APIResponseOptions => ({
   },
 });
 
-export async function GET(_: NextRequest, { params }: { params: Promise<{ mode: FinanceNotificationConditionModeType }> }) {
+export async function GET(
+  _: NextRequest,
+  { params }: { params: Promise<{ mode: FinanceNotificationConditionModeType }> }
+) {
   return await APIUtil.apiHandler(async () => {
     const mode: FinanceNotificationConditionModeType = (await params).mode;
 
@@ -58,7 +64,7 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ mode: 
     const nonSimplifiedConditions: string[] = [];
 
     // Separate conditions by enableSimplifiedMode
-    conditionList.forEach(condition => {
+    conditionList.forEach((condition) => {
       const info = service.getConditionInfo(condition);
       if (info.enableSimplifiedMode) {
         simplifiedConditions.push(condition);
@@ -74,15 +80,15 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ mode: 
       const modeLabel = mode === FINANCE_NOTIFICATION_CONDITION_MODE.BUY ? '買い' : '売り';
       conditionOptionList.push({
         label: `簡易設定 (全${modeLabel}パターン)`,
-        value: SIMPLIFIED_CONDITION_NAME
+        value: SIMPLIFIED_CONDITION_NAME,
       });
     }
 
     // Add non-simplified conditions individually
-    nonSimplifiedConditions.forEach(condition => {
+    nonSimplifiedConditions.forEach((condition) => {
       conditionOptionList.push({
         label: service.getConditionInfo(condition).name,
-        value: condition
+        value: condition,
       });
     });
 

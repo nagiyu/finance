@@ -16,7 +16,7 @@ export default function TimeFrameSelect({
   label = '時間枠',
   value,
   disabled = false,
-  onChange
+  onChange,
 }: TimeFrameSelectProps) {
   return (
     <BasicSelect

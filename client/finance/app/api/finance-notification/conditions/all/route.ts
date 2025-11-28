@@ -57,7 +57,9 @@ export async function GET(request: NextRequest) {
 
     // Validate and cast timeframe to proper type
     const timeframeType: TimeFrame =
-      timeframe && TimeFrameUtil.isValidTimeFrame(timeframe) ? timeframe : TimeFrameUtil.getDefaultTimeFrame();
+      timeframe && TimeFrameUtil.isValidTimeFrame(timeframe)
+        ? timeframe
+        : TimeFrameUtil.getDefaultTimeFrame();
 
     for (const conditionKey of evaluableConditionKeys) {
       try {
@@ -80,7 +82,7 @@ export async function GET(request: NextRequest) {
           description: conditionInfo.description,
           isBuyCondition: conditionInfo.isBuyCondition,
           isSellCondition: conditionInfo.isSellCondition,
-          isMet: result.met
+          isMet: result.met,
         });
       } catch (error) {
         console.warn(`Failed to check condition ${conditionKey}:`, error);
@@ -93,7 +95,7 @@ export async function GET(request: NextRequest) {
           description: conditionInfo.description,
           isBuyCondition: conditionInfo.isBuyCondition,
           isSellCondition: conditionInfo.isSellCondition,
-          isMet: false
+          isMet: false,
         });
       }
     }

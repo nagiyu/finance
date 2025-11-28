@@ -1,4 +1,4 @@
-import type { MetadataRoute } from 'next'
+import type { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
@@ -13,8 +13,8 @@ export default function manifest(): MetadataRoute.Manifest {
       {
         src: '/logo.png',
         sizes: '400x400',
-        type: 'image/png'
-      }
+        type: 'image/png',
+      },
     ],
-  }
+  };
 }

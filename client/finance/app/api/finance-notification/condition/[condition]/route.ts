@@ -39,7 +39,8 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ condit
     if (condition === SIMPLIFIED_CONDITION_NAME) {
       const simplifiedConditionInfo = {
         name: '簡易設定',
-        description: '買い・売りモードに応じた全てのパターン条件を一括で設定します。個別の価格条件（指定価格を上回る・下回る）は含まれません。',
+        description:
+          '買い・売りモードに応じた全てのパターン条件を一括で設定します。個別の価格条件（指定価格を上回る・下回る）は含まれません。',
         isBuyCondition: true,
         isSellCondition: true,
         enableTargetPrice: false,

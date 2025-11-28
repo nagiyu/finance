@@ -4,14 +4,17 @@ import { useEffect, useState } from 'react';
 
 import { PermissionLevel } from '@common/enums/PermissionLevel';
 
-import { CheckPermissionRequestType, CheckPermissionResponseType, } from '@client-common/routes/auth/check-permission/route';
+import {
+  CheckPermissionRequestType,
+  CheckPermissionResponseType,
+} from '@client-common/routes/auth/check-permission/route';
 
 import { FinanceFeature } from '@finance/consts/FinanceConst';
 
 /**
  * 権限チェックカスタムフック
  * 指定された機能と権限レベルに対する権限を確認
- * 
+ *
  * @param feature チェックする機能
  * @param level 必要な権限レベル
  * @returns { hasPermission: boolean, loading: boolean }

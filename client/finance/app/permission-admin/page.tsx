@@ -5,7 +5,10 @@ import React, { useState, useEffect } from 'react';
 import { PermissionLevel } from '@common/enums/PermissionLevel';
 import { PermissionMatrix } from '@common/interfaces/authorization/PermissionMatrix';
 
-import { CheckPermissionRequestType, CheckPermissionResponseType, } from '@client-common/routes/auth/check-permission/route';
+import {
+  CheckPermissionRequestType,
+  CheckPermissionResponseType,
+} from '@client-common/routes/auth/check-permission/route';
 
 import { FinanceFeature } from '@finance/consts/FinanceConst';
 

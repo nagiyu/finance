@@ -15,7 +15,7 @@ export default function SessionSelect({
   label = '取引時間',
   value,
   disabled = false,
-  onChange
+  onChange,
 }: SessionSelectProps) {
   return (
     <BasicSelect

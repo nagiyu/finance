@@ -1,15 +1,15 @@
-import { NextRequest } from "next/server";
+import { NextRequest } from 'next/server';
 
-import CommonUtil from "@common/utils/CommonUtil";
+import CommonUtil from '@common/utils/CommonUtil';
 import { PermissionLevel } from '@common/enums/PermissionLevel';
 
 import APIUtil, { APIResponseOptions } from '@client-common/utils/APIUtil';
 
 import { FinanceFeature, ROOT_FEATURE } from '@finance/consts/FinanceConst';
 
-import TickerDataAccessor from "@/services/ticker/TickerDataAcceesor";
+import TickerDataAccessor from '@/services/ticker/TickerDataAcceesor';
 import { FinanceAuthorizationService } from '@/services/auth/FinanceAuthorizationService';
-import { TickerDataType } from "@/interfaces/data/TickerDataType";
+import { TickerDataType } from '@/interfaces/data/TickerDataType';
 
 /**
  * 認可サービスのインスタンス
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
       id: CommonUtil.generateUUID(),
       create: now,
       update: now,
-    }
+    };
 
     await TickerDataAccessor.create(ticker);
 

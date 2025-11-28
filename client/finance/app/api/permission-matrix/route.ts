@@ -44,10 +44,10 @@ const authorizationService = new FinanceAuthorizationService();
 /**
  * APIレスポンスオプション
  */
-const options: APIResponseOptions = ({
+const options: APIResponseOptions = {
   rootFeature: ROOT_FEATURE,
   feature: FinanceFeature.PERMISSION_ADMIN,
-});
+};
 
 /**
  * 権限マトリックス取得API
