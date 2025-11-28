@@ -1,0 +1,70 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  Base stack for Finance application infrastructure.
+  Provides IAM Roles and Outputs to be extended by other templates.
+
+Parameters:
+  Environment:
+    Type: String
+    Description: Deployment environment (development or production)
+    Default: development
+    AllowedValues:
+      - development
+      - production
+
+Resources:
+  # IAM Roles for Lambda
+  ClientLambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Tags:
+        - Key: Name
+          Value: !Sub finance-${Environment}-client-lambda-execution-role
+        - Key: Environment
+          Value: !Ref Environment
+
+  ServerLambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Tags:
+        - Key: Name
+          Value: !Sub finance-${Environment}-server-lambda-execution-role
+        - Key: Environment
+          Value: !Ref Environment
+
+Outputs:
+  ClientLambdaExecutionRoleArn:
+    Description: ARN of the Client Lambda execution role
+    Value: !GetAtt ClientLambdaExecutionRole.Arn
+    Export:
+      Name: !Sub finance-${Environment}-client-lambda-execution-role-arn
+
+  ServerLambdaExecutionRoleArn:
+    Description: ARN of the Server Lambda execution role
+    Value: !GetAtt ServerLambdaExecutionRole.Arn
+    Export:
+      Name: !Sub finance-${Environment}-server-lambda-execution-role-arn
+
+  Environment:
+    Description: Deployment environment
+    Value: !Ref Environment
+    Export:
+      Name: !Sub finance-${Environment}-environment
