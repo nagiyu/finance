@@ -1,18 +1,17 @@
 {
-  "name": "Finance Client",
+  "name": "Finance Server",
   "build": {
     "dockerfile": "Dockerfile"
   },
-  "remoteUser": "node",
+  "remoteUser": "user",
   "containerEnv": {
     "PROCESS_ENV": "local",
     "PROJECT_SECRET": "DevFinance",
     "PROJECT_AWS_ACCESS_KEY": "",
     "PROJECT_AWS_SECRET_ACCESS_KEY": "",
-    "PROJECT_AWS_REGION": "",
-    "NEXTAUTH_URL": "http://localhost:3000"
+    "PROJECT_AWS_REGION": ""
   },
-  "workspaceFolder": "/workspaces/finance/client/finance/finance.code-workspace",
+  "workspaceFolder": "/workspaces/finance/server/finance/finance.code-workspace",
   "customizations": {
     "vscode": {
       "extensions": [
