@@ -86,7 +86,11 @@ export default abstract class ConditionBase {
    * @param options Options for getting stock price data
    * @returns Stock price data or an error
    */
-  protected async getStockPriceData(exchangeId: string, tickerId: string, options?: GetStockPriceDataOptions): Promise<any> {
+  protected async getStockPriceData(
+    exchangeId: string,
+    tickerId: string,
+    options?: GetStockPriceDataOptions
+  ): Promise<any> {
     const exchange = await this.exchangeService.getById(exchangeId);
     if (!exchange) {
       ErrorUtil.throwError(`Exchange with ID ${exchangeId} not found`);
@@ -107,7 +111,11 @@ export default abstract class ConditionBase {
    * @param session Exchange session (optional)
    * @returns Current stock price or null if not available
    */
-  protected async getCurrentStockPrice(exchangeId: string, tickerId: string, session?: string): Promise<number | null> {
+  protected async getCurrentStockPrice(
+    exchangeId: string,
+    tickerId: string,
+    session?: string
+  ): Promise<number | null> {
     const exchange = await this.exchangeService.getById(exchangeId);
     if (!exchange) {
       ErrorUtil.throwError(`Exchange with ID ${exchangeId} not found`);

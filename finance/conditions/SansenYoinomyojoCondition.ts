@@ -5,7 +5,8 @@ import ErrorUtil from '@common/utils/ErrorUtil';
 
 export const SansenYoinomyojoConditionInfo: ConditionInfo = {
   name: '三川宵の明星',
-  description: '三川宵の明星は、株価チャートにおける弱気の反転パターンで、3本のローソク足で構成されます。最初のローソク足は長い陽線で、次に小さな陰線または十字線がギャップアップして出現し、最後に大きな陰線が続きます。このパターンは、買い圧力が弱まり、売り圧力が強まっていることを示唆し、価格の下落を予測します。',
+  description:
+    '三川宵の明星は、株価チャートにおける弱気の反転パターンで、3本のローソク足で構成されます。最初のローソク足は長い陽線で、次に小さな陰線または十字線がギャップアップして出現し、最後に大きな陰線が続きます。このパターンは、買い圧力が弱まり、売り圧力が強まっていることを示唆し、価格の下落を予測します。',
   isBuyCondition: false,
   isSellCondition: true,
   enableTargetPrice: false,
@@ -22,10 +23,10 @@ export default class SansenYoinomyojoCondition extends ConditionBase {
     timeframe?: TimeFrame | null
   ): Promise<boolean> {
     try {
-      const stockData = await this.getStockPriceData(exchangeId, tickerId, { 
-        count: 3, 
+      const stockData = await this.getStockPriceData(exchangeId, tickerId, {
+        count: 3,
         session,
-        timeframe: timeframe || '1'
+        timeframe: timeframe || '1',
       });
 
       if (!stockData || !Array.isArray(stockData) || stockData.length < 3) {
@@ -55,7 +56,15 @@ export default class SansenYoinomyojoCondition extends ConditionBase {
       const thirdCandleSize = Math.abs(thirdCandle.data[1] - thirdCandle.data[0]);
       const thirdIsLarge = thirdCandleSize > secondCandleSize * 1.5; // significantly larger than second candle
 
-      if (firstIsBullish && firstIsLong && secondIsBearish && secondIsSmall && hasGapUp && thirdIsBearish && thirdIsLarge) {
+      if (
+        firstIsBullish &&
+        firstIsLong &&
+        secondIsBearish &&
+        secondIsSmall &&
+        hasGapUp &&
+        thirdIsBearish &&
+        thirdIsLarge
+      ) {
         return true;
       }
 

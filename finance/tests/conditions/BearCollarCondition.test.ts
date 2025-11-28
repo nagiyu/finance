@@ -1,7 +1,7 @@
 jest.mock('@finance/utils/FinanceUtil', () => {
   return {
     __esModule: true,
-    default: require('@finance/tests/mocks/utils/FinanceUtilMock').default
+    default: jest.requireActual('@finance/tests/mocks/utils/FinanceUtilMock').default,
   };
 });
 
@@ -17,10 +17,7 @@ describe('BearCollarCondition', () => {
   const conditionKey = 'BearCollar';
 
   beforeEach(() => {
-    service = new ConditionService(
-      new ExchangeServiceMock(),
-      new TickerServiceMock()
-    );
+    service = new ConditionService(new ExchangeServiceMock(), new TickerServiceMock());
   });
 
   describe('ベアコラッグ', () => {
@@ -49,7 +46,12 @@ describe('BearCollarCondition', () => {
 
     it('Requires Target Price', async () => {
       await expect(
-        service.checkCondition(conditionKey, 'MOCK_EXCHANGE', 'MOCK_TICKER', EXCHANGE_SESSION.EXTENDED)
+        service.checkCondition(
+          conditionKey,
+          'MOCK_EXCHANGE',
+          'MOCK_TICKER',
+          EXCHANGE_SESSION.EXTENDED
+        )
       ).rejects.toThrow('Target price is required for BearCollarCondition');
     });
 
@@ -77,12 +79,18 @@ describe('BearCollarCondition', () => {
         { date: '2025-01-17 00:00', data: [850, 840, 820, 830] }, // bearish
         { date: '2025-01-18 00:00', data: [830, 820, 800, 810] }, // bearish
         { date: '2025-01-19 00:00', data: [810, 830, 790, 820] }, // bullish but small
-        { date: '2025-01-20 00:00', data: [820, 870, 850, 860] }  // bearish, current price close to target
+        { date: '2025-01-20 00:00', data: [820, 870, 850, 860] }, // bearish, current price close to target
       ];
 
       // Set current price to be near target price (860) with high volatility conditions
       const targetPrice = 860;
-      const result = await service.checkCondition(conditionKey, 'MOCK_EXCHANGE', 'MOCK_TICKER', EXCHANGE_SESSION.EXTENDED, targetPrice);
+      const result = await service.checkCondition(
+        conditionKey,
+        'MOCK_EXCHANGE',
+        'MOCK_TICKER',
+        EXCHANGE_SESSION.EXTENDED,
+        targetPrice
+      );
 
       expect(result.met).toBe(true);
       expect(result.message).not.toBe('');
@@ -110,11 +118,17 @@ describe('BearCollarCondition', () => {
         { date: '2025-01-17 00:00', data: [1032, 1037, 1027, 1034] },
         { date: '2025-01-18 00:00', data: [1034, 1039, 1029, 1036] },
         { date: '2025-01-19 00:00', data: [1036, 1041, 1031, 1038] },
-        { date: '2025-01-20 00:00', data: [1038, 1043, 1033, 1040] }
+        { date: '2025-01-20 00:00', data: [1038, 1043, 1033, 1040] },
       ];
 
       const targetPrice = 1040;
-      const result = await service.checkCondition(conditionKey, 'MOCK_EXCHANGE', 'MOCK_TICKER', EXCHANGE_SESSION.EXTENDED, targetPrice);
+      const result = await service.checkCondition(
+        conditionKey,
+        'MOCK_EXCHANGE',
+        'MOCK_TICKER',
+        EXCHANGE_SESSION.EXTENDED,
+        targetPrice
+      );
 
       expect(result.met).toBe(false);
     });

@@ -1,7 +1,7 @@
 jest.mock('@finance/utils/FinanceUtil', () => {
   return {
     __esModule: true,
-    default: require('@finance/tests/mocks/utils/FinanceUtilMock').default
+    default: jest.requireActual('@finance/tests/mocks/utils/FinanceUtilMock').default,
   };
 });
 
@@ -17,10 +17,7 @@ describe('RisingWedgeCondition', () => {
   const conditionKey = 'RisingWedge';
 
   beforeEach(() => {
-    service = new ConditionService(
-      new ExchangeServiceMock(),
-      new TickerServiceMock()
-    );
+    service = new ConditionService(new ExchangeServiceMock(), new TickerServiceMock());
   });
 
   describe('上昇ウェッジ', () => {
@@ -82,10 +79,15 @@ describe('RisingWedgeCondition', () => {
         { date: '2025-01-21 00:00', data: [1130, 1100, 1090, 1110] }, // Confirmed breakdown
         { date: '2025-01-22 00:00', data: [1110, 1090, 1080, 1095] }, // Sustained breakdown
         { date: '2025-01-23 00:00', data: [1095, 1080, 1070, 1085] }, // Further confirmation
-        { date: '2025-01-24 00:00', data: [1085, 1070, 1060, 1075] }  // Current candle
+        { date: '2025-01-24 00:00', data: [1085, 1070, 1060, 1075] }, // Current candle
       ];
 
-      const result = await service.checkCondition(conditionKey, 'MOCK_EXCHANGE', 'MOCK_TICKER', EXCHANGE_SESSION.EXTENDED);
+      const result = await service.checkCondition(
+        conditionKey,
+        'MOCK_EXCHANGE',
+        'MOCK_TICKER',
+        EXCHANGE_SESSION.EXTENDED
+      );
 
       expect(result.met).toBe(true);
       expect(result.message).not.toBe('');
@@ -112,10 +114,15 @@ describe('RisingWedgeCondition', () => {
         { date: '2025-01-12 00:00', data: [1110, 1100, 1085, 1115] }, // High: 1115, Low: 1085, spread: 30
         { date: '2025-01-13 00:00', data: [1115, 1120, 1095, 1125] },
         { date: '2025-01-14 00:00', data: [1125, 1115, 1100, 1130] }, // High: 1130, Low: 1100, spread: 30
-        { date: '2025-01-15 00:00', data: [1130, 1135, 1110, 1140] }
+        { date: '2025-01-15 00:00', data: [1130, 1135, 1110, 1140] },
       ];
 
-      const result = await service.checkCondition(conditionKey, 'MOCK_EXCHANGE', 'MOCK_TICKER', EXCHANGE_SESSION.EXTENDED);
+      const result = await service.checkCondition(
+        conditionKey,
+        'MOCK_EXCHANGE',
+        'MOCK_TICKER',
+        EXCHANGE_SESSION.EXTENDED
+      );
 
       expect(result.met).toBe(false);
     });
@@ -132,10 +139,15 @@ describe('RisingWedgeCondition', () => {
         { date: '2025-01-07 00:00', data: [1135, 1120, 1110, 1125] },
         { date: '2025-01-08 00:00', data: [1125, 1110, 1100, 1115] },
         { date: '2025-01-09 00:00', data: [1115, 1100, 1090, 1105] },
-        { date: '2025-01-10 00:00', data: [1105, 1090, 1080, 1095] }
+        { date: '2025-01-10 00:00', data: [1105, 1090, 1080, 1095] },
       ];
 
-      const result = await service.checkCondition(conditionKey, 'MOCK_EXCHANGE', 'MOCK_TICKER', EXCHANGE_SESSION.EXTENDED);
+      const result = await service.checkCondition(
+        conditionKey,
+        'MOCK_EXCHANGE',
+        'MOCK_TICKER',
+        EXCHANGE_SESSION.EXTENDED
+      );
 
       expect(result.met).toBe(false);
     });
@@ -166,10 +178,15 @@ describe('RisingWedgeCondition', () => {
         // No breakdown - price stays within wedge
         { date: '2025-01-15 00:00', data: [1130, 1135, 1115, 1140] },
         { date: '2025-01-16 00:00', data: [1140, 1145, 1125, 1150] },
-        { date: '2025-01-17 00:00', data: [1150, 1155, 1135, 1160] } // Still within bounds
+        { date: '2025-01-17 00:00', data: [1150, 1155, 1135, 1160] }, // Still within bounds
       ];
 
-      const result = await service.checkCondition(conditionKey, 'MOCK_EXCHANGE', 'MOCK_TICKER', EXCHANGE_SESSION.EXTENDED);
+      const result = await service.checkCondition(
+        conditionKey,
+        'MOCK_EXCHANGE',
+        'MOCK_TICKER',
+        EXCHANGE_SESSION.EXTENDED
+      );
 
       expect(result.met).toBe(false);
     });
@@ -179,10 +196,15 @@ describe('RisingWedgeCondition', () => {
       FinanceUtilMock.StockPriceDataMock = [
         { date: '2025-01-01 00:00', data: [1000, 1020, 990, 1025] },
         { date: '2025-01-02 00:00', data: [1025, 1010, 1005, 1030] },
-        { date: '2025-01-03 00:00', data: [1030, 1040, 1015, 1045] }
+        { date: '2025-01-03 00:00', data: [1030, 1040, 1015, 1045] },
       ];
 
-      const result = await service.checkCondition(conditionKey, 'MOCK_EXCHANGE', 'MOCK_TICKER', EXCHANGE_SESSION.EXTENDED);
+      const result = await service.checkCondition(
+        conditionKey,
+        'MOCK_EXCHANGE',
+        'MOCK_TICKER',
+        EXCHANGE_SESSION.EXTENDED
+      );
 
       expect(result.met).toBe(false);
     });
@@ -191,35 +213,40 @@ describe('RisingWedgeCondition', () => {
       // Steeper lower trend line showing strong convergence
       FinanceUtilMock.StockPriceDataMock = [
         // Early phase - wide spread
-        { date: '2025-01-01 00:00', data: [1000, 1020, 980, 1025] },  // Spread: 45
+        { date: '2025-01-01 00:00', data: [1000, 1020, 980, 1025] }, // Spread: 45
         { date: '2025-01-02 00:00', data: [1025, 1030, 1000, 1035] },
         { date: '2025-01-03 00:00', data: [1035, 1045, 1015, 1050] }, // Spread: 35
         { date: '2025-01-04 00:00', data: [1050, 1055, 1030, 1060] },
         { date: '2025-01-05 00:00', data: [1060, 1070, 1045, 1075] }, // Spread: 30
-        
+
         // Middle phase - narrowing
         { date: '2025-01-06 00:00', data: [1075, 1080, 1060, 1085] },
         { date: '2025-01-07 00:00', data: [1085, 1090, 1072, 1095] }, // Spread: 23
         { date: '2025-01-08 00:00', data: [1095, 1100, 1082, 1105] },
         { date: '2025-01-09 00:00', data: [1105, 1110, 1092, 1115] }, // Spread: 23
         { date: '2025-01-10 00:00', data: [1115, 1120, 1102, 1125] },
-        
+
         // Late phase - tight convergence
         { date: '2025-01-11 00:00', data: [1125, 1128, 1110, 1132] },
         { date: '2025-01-12 00:00', data: [1132, 1135, 1118, 1138] }, // Spread: 20
         { date: '2025-01-13 00:00', data: [1138, 1142, 1125, 1145] },
         { date: '2025-01-14 00:00', data: [1145, 1148, 1132, 1150] }, // Spread: 18
         { date: '2025-01-15 00:00', data: [1150, 1152, 1138, 1155] },
-        
+
         // Breakdown
         { date: '2025-01-16 00:00', data: [1155, 1135, 1125, 1140] },
         { date: '2025-01-17 00:00', data: [1140, 1115, 1105, 1120] },
         { date: '2025-01-18 00:00', data: [1120, 1095, 1085, 1100] },
         { date: '2025-01-19 00:00', data: [1100, 1085, 1075, 1090] },
-        { date: '2025-01-20 00:00', data: [1090, 1070, 1060, 1075] }
+        { date: '2025-01-20 00:00', data: [1090, 1070, 1060, 1075] },
       ];
 
-      const result = await service.checkCondition(conditionKey, 'MOCK_EXCHANGE', 'MOCK_TICKER', EXCHANGE_SESSION.EXTENDED);
+      const result = await service.checkCondition(
+        conditionKey,
+        'MOCK_EXCHANGE',
+        'MOCK_TICKER',
+        EXCHANGE_SESSION.EXTENDED
+      );
 
       expect(result.met).toBe(true);
     });
@@ -228,7 +255,7 @@ describe('RisingWedgeCondition', () => {
       // Slower convergence pattern
       FinanceUtilMock.StockPriceDataMock = [
         // Gradual narrowing over longer period
-        { date: '2025-01-01 00:00', data: [1000, 1020, 990, 1025] },  // Spread: 35
+        { date: '2025-01-01 00:00', data: [1000, 1020, 990, 1025] }, // Spread: 35
         { date: '2025-01-02 00:00', data: [1025, 1030, 1005, 1035] },
         { date: '2025-01-03 00:00', data: [1035, 1040, 1015, 1045] },
         { date: '2025-01-04 00:00', data: [1045, 1050, 1025, 1055] }, // Spread: 30
@@ -243,16 +270,21 @@ describe('RisingWedgeCondition', () => {
         { date: '2025-01-13 00:00', data: [1135, 1140, 1117, 1145] }, // Spread: 28
         { date: '2025-01-14 00:00', data: [1145, 1150, 1125, 1155] },
         { date: '2025-01-15 00:00', data: [1155, 1160, 1137, 1165] }, // Spread: 28
-        
+
         // Breakdown
         { date: '2025-01-16 00:00', data: [1165, 1145, 1130, 1150] },
         { date: '2025-01-17 00:00', data: [1150, 1125, 1115, 1130] },
         { date: '2025-01-18 00:00', data: [1130, 1110, 1100, 1115] },
         { date: '2025-01-19 00:00', data: [1115, 1095, 1085, 1100] },
-        { date: '2025-01-20 00:00', data: [1100, 1080, 1070, 1085] }
+        { date: '2025-01-20 00:00', data: [1100, 1080, 1070, 1085] },
       ];
 
-      const result = await service.checkCondition(conditionKey, 'MOCK_EXCHANGE', 'MOCK_TICKER', EXCHANGE_SESSION.EXTENDED);
+      const result = await service.checkCondition(
+        conditionKey,
+        'MOCK_EXCHANGE',
+        'MOCK_TICKER',
+        EXCHANGE_SESSION.EXTENDED
+      );
 
       expect(result.met).toBe(true);
     });
@@ -260,29 +292,34 @@ describe('RisingWedgeCondition', () => {
     it('Check Condition: 上昇拡大（発散パターン）', async () => {
       // Diverging pattern - spread is widening, not narrowing (opposite of wedge)
       FinanceUtilMock.StockPriceDataMock = [
-        { date: '2025-01-01 00:00', data: [1000, 1020, 995, 1025] },   // Spread: 30
+        { date: '2025-01-01 00:00', data: [1000, 1020, 995, 1025] }, // Spread: 30
         { date: '2025-01-02 00:00', data: [1025, 1030, 1010, 1035] },
-        { date: '2025-01-03 00:00', data: [1035, 1045, 1018, 1050] },  // Spread: 32
+        { date: '2025-01-03 00:00', data: [1035, 1045, 1018, 1050] }, // Spread: 32
         { date: '2025-01-04 00:00', data: [1050, 1055, 1025, 1060] },
-        { date: '2025-01-05 00:00', data: [1060, 1070, 1032, 1075] },  // Spread: 43
+        { date: '2025-01-05 00:00', data: [1060, 1070, 1032, 1075] }, // Spread: 43
         { date: '2025-01-06 00:00', data: [1075, 1080, 1040, 1085] },
-        { date: '2025-01-07 00:00', data: [1085, 1095, 1047, 1100] },  // Spread: 53
+        { date: '2025-01-07 00:00', data: [1085, 1095, 1047, 1100] }, // Spread: 53
         { date: '2025-01-08 00:00', data: [1100, 1105, 1052, 1110] },
-        { date: '2025-01-09 00:00', data: [1110, 1120, 1058, 1125] },  // Spread: 67
+        { date: '2025-01-09 00:00', data: [1110, 1120, 1058, 1125] }, // Spread: 67
         { date: '2025-01-10 00:00', data: [1125, 1130, 1063, 1135] },
-        { date: '2025-01-11 00:00', data: [1135, 1145, 1068, 1150] },  // Spread: 82
+        { date: '2025-01-11 00:00', data: [1135, 1145, 1068, 1150] }, // Spread: 82
         { date: '2025-01-12 00:00', data: [1150, 1155, 1072, 1160] },
-        { date: '2025-01-13 00:00', data: [1160, 1170, 1075, 1175] },  // Spread: 100
+        { date: '2025-01-13 00:00', data: [1160, 1170, 1075, 1175] }, // Spread: 100
         { date: '2025-01-14 00:00', data: [1175, 1180, 1078, 1185] },
-        { date: '2025-01-15 00:00', data: [1185, 1195, 1080, 1200] },  // Spread: 120
+        { date: '2025-01-15 00:00', data: [1185, 1195, 1080, 1200] }, // Spread: 120
         { date: '2025-01-16 00:00', data: [1200, 1190, 1075, 1195] },
         { date: '2025-01-17 00:00', data: [1195, 1185, 1070, 1190] },
         { date: '2025-01-18 00:00', data: [1190, 1180, 1065, 1185] },
         { date: '2025-01-19 00:00', data: [1185, 1175, 1060, 1180] },
-        { date: '2025-01-20 00:00', data: [1180, 1170, 1055, 1175] }
+        { date: '2025-01-20 00:00', data: [1180, 1170, 1055, 1175] },
       ];
 
-      const result = await service.checkCondition(conditionKey, 'MOCK_EXCHANGE', 'MOCK_TICKER', EXCHANGE_SESSION.EXTENDED);
+      const result = await service.checkCondition(
+        conditionKey,
+        'MOCK_EXCHANGE',
+        'MOCK_TICKER',
+        EXCHANGE_SESSION.EXTENDED
+      );
 
       expect(result.met).toBe(false);
     });
@@ -304,10 +341,15 @@ describe('RisingWedgeCondition', () => {
         { date: '2025-01-12 00:00', data: [1040, 1045, 1035, 1050] },
         { date: '2025-01-13 00:00', data: [1050, 1040, 1035, 1045] },
         { date: '2025-01-14 00:00', data: [1045, 1050, 1040, 1055] },
-        { date: '2025-01-15 00:00', data: [1055, 1045, 1040, 1050] }
+        { date: '2025-01-15 00:00', data: [1055, 1045, 1040, 1050] },
       ];
 
-      const result = await service.checkCondition(conditionKey, 'MOCK_EXCHANGE', 'MOCK_TICKER', EXCHANGE_SESSION.EXTENDED);
+      const result = await service.checkCondition(
+        conditionKey,
+        'MOCK_EXCHANGE',
+        'MOCK_TICKER',
+        EXCHANGE_SESSION.EXTENDED
+      );
 
       expect(result.met).toBe(false);
     });

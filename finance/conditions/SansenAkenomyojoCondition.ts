@@ -5,7 +5,8 @@ import ErrorUtil from '@common/utils/ErrorUtil';
 
 export const SansenAkenomyojoConditionInfo: ConditionInfo = {
   name: '三川明けの明星',
-  description: '三川明けの明星は、株価チャートにおける強気の反転パターンで、3本のローソク足で構成されます。最初のローソク足は長い陰線で、次に小さな陽線がギャップアップして出現し、最後にもう一つの陽線が続きます。このパターンは、売り圧力が弱まり、買い圧力が強まっていることを示唆し、価格の上昇を予測します。',
+  description:
+    '三川明けの明星は、株価チャートにおける強気の反転パターンで、3本のローソク足で構成されます。最初のローソク足は長い陰線で、次に小さな陽線がギャップアップして出現し、最後にもう一つの陽線が続きます。このパターンは、売り圧力が弱まり、買い圧力が強まっていることを示唆し、価格の上昇を予測します。',
   isBuyCondition: true,
   isSellCondition: false,
   enableTargetPrice: false,
@@ -22,10 +23,10 @@ export default class SansenAkenomyojoCondition extends ConditionBase {
     timeframe?: TimeFrame | null
   ): Promise<boolean> {
     try {
-      const stockData = await this.getStockPriceData(exchangeId, tickerId, { 
-        count: 3, 
+      const stockData = await this.getStockPriceData(exchangeId, tickerId, {
+        count: 3,
         session,
-        timeframe: timeframe || '1'
+        timeframe: timeframe || '1',
       });
 
       if (!stockData || !Array.isArray(stockData) || stockData.length < 3) {
@@ -53,7 +54,14 @@ export default class SansenAkenomyojoCondition extends ConditionBase {
       // Third candle should be bullish
       const thirdIsBullish = thirdCandle.data[1] > thirdCandle.data[0]; // close > open
 
-      if (firstIsBearish && firstIsLong && secondIsBullish && secondIsSmall && hasGapUp && thirdIsBullish) {
+      if (
+        firstIsBearish &&
+        firstIsLong &&
+        secondIsBullish &&
+        secondIsSmall &&
+        hasGapUp &&
+        thirdIsBullish
+      ) {
         return true;
       }
 

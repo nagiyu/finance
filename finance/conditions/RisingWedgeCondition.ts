@@ -5,7 +5,8 @@ import ErrorUtil from '@common/utils/ErrorUtil';
 
 export const RisingWedgeConditionInfo: ConditionInfo = {
   name: '上昇ウェッジ',
-  description: '上昇ウェッジ（Rising Wedge）は、株価チャートにおける代表的な「弱気パターン」の一つです。高値と安値の両方が切り上がっていくものの、安値ラインの上昇角度が高値ラインより急になるため、チャートが先細りの「くさび型（ウェッジ）」になります。一見すると上昇基調に見えますが、上値の伸びが弱く、買い圧力より売り圧力が強まっている兆候とされます。多くの場合、下方にブレイクすると強い下落につながりやすいとされています。',
+  description:
+    '上昇ウェッジ（Rising Wedge）は、株価チャートにおける代表的な「弱気パターン」の一つです。高値と安値の両方が切り上がっていくものの、安値ラインの上昇角度が高値ラインより急になるため、チャートが先細りの「くさび型（ウェッジ）」になります。一見すると上昇基調に見えますが、上値の伸びが弱く、買い圧力より売り圧力が強まっている兆候とされます。多くの場合、下方にブレイクすると強い下落につながりやすいとされています。',
   isBuyCondition: false,
   isSellCondition: true,
   enableTargetPrice: false,
@@ -22,10 +23,10 @@ export default class RisingWedgeCondition extends ConditionBase {
     timeframe?: TimeFrame | null
   ): Promise<boolean> {
     try {
-      const stockData = await this.getStockPriceData(exchangeId, tickerId, { 
+      const stockData = await this.getStockPriceData(exchangeId, tickerId, {
         count: 25, // Need enough data points to detect the wedge pattern
         session,
-        timeframe: timeframe || '1'
+        timeframe: timeframe || '1',
       });
 
       if (!stockData || !Array.isArray(stockData) || stockData.length < 15) {
@@ -34,7 +35,7 @@ export default class RisingWedgeCondition extends ConditionBase {
 
       // Get the most recent candles
       const candles = stockData.slice(-25);
-      
+
       // Detect rising wedge pattern
       return this.detectRisingWedgePattern(candles);
     } catch (error) {
@@ -57,21 +58,24 @@ export default class RisingWedgeCondition extends ConditionBase {
 
     // Analyze different sections of the data (similar to original but with improvements)
     const firstThird = candles.slice(0, Math.floor(candles.length / 3));
-    const middleThird = candles.slice(Math.floor(candles.length / 3), Math.floor(candles.length * 2 / 3));
-    const lastThirdFull = candles.slice(Math.floor(candles.length * 2 / 3));
-    
+    const middleThird = candles.slice(
+      Math.floor(candles.length / 3),
+      Math.floor((candles.length * 2) / 3)
+    );
+    const lastThirdFull = candles.slice(Math.floor((candles.length * 2) / 3));
+
     // Exclude last few candles from highs/lows (they might be breakdown candles)
     const lastThird = lastThirdFull.slice(0, -5);
 
     // Get high and low values for each section
-    const firstHigh = Math.max(...firstThird.map(c => c.data[3]));
-    const firstLow = Math.min(...firstThird.map(c => c.data[2]));
-    
-    const middleHigh = Math.max(...middleThird.map(c => c.data[3]));
-    const middleLow = Math.min(...middleThird.map(c => c.data[2]));
+    const firstHigh = Math.max(...firstThird.map((c) => c.data[3]));
+    const firstLow = Math.min(...firstThird.map((c) => c.data[2]));
 
-    const lastHigh = Math.max(...lastThird.map(c => c.data[3]));
-    const lastLow = Math.min(...lastThird.map(c => c.data[2]));
+    const middleHigh = Math.max(...middleThird.map((c) => c.data[3]));
+    const middleLow = Math.min(...middleThird.map((c) => c.data[2]));
+
+    const lastHigh = Math.max(...lastThird.map((c) => c.data[3]));
+    const lastLow = Math.min(...lastThird.map((c) => c.data[2]));
 
     // Check for rising pattern: both highs and lows should generally increase
     const highsRising = middleHigh > firstHigh && lastHigh >= middleHigh;
@@ -88,7 +92,7 @@ export default class RisingWedgeCondition extends ConditionBase {
 
     // Pattern should show convergence (narrowing wedge) - be slightly more lenient
     const isConverging = lastSpread < firstSpread * 0.95 || lastSpread < middleSpread * 0.95;
-    
+
     if (!isConverging) {
       return false;
     }
@@ -112,9 +116,9 @@ export default class RisingWedgeCondition extends ConditionBase {
         // Allow for parallel or near-parallel lines if spread is clearly narrowing
         const slopeRatio = lowerTrend.slope / upperTrend.slope;
         const spreadDecreaseRatio = lastSpread / firstSpread;
-        
+
         // Either lower is steeper OR spread is significantly narrowing (compensates for parallel lines)
-        if (slopeRatio < 0.90 && spreadDecreaseRatio > 0.70) {
+        if (slopeRatio < 0.9 && spreadDecreaseRatio > 0.7) {
           return false; // Lower slope is too shallow and not much convergence
         }
       }
@@ -131,14 +135,14 @@ export default class RisingWedgeCondition extends ConditionBase {
     // Count breakdown candles
     let breakdownCount = 0;
     let significantBreakdownCount = 0;
-    
+
     for (const candle of recentCandles) {
       const low = candle.data[2];
       const close = candle.data[1];
-      
+
       if (low < supportLevel || close < supportLevel) {
         breakdownCount++;
-        
+
         // Significant breakdown if close or low is notably below support (0.5% threshold)
         if (close < supportLevel * 0.995 || low < supportLevel * 0.99) {
           significantBreakdownCount++;
@@ -160,7 +164,7 @@ export default class RisingWedgeCondition extends ConditionBase {
 
     // Find swing lows and calculate support trend line
     const swingLows = this.findSwingLows(candles);
-    
+
     if (swingLows.length >= 2) {
       const lowerTrend = this.calculateTrendLine(swingLows);
       if (lowerTrend && lowerTrend.slope > 0) {
@@ -172,9 +176,9 @@ export default class RisingWedgeCondition extends ConditionBase {
     // Fallback: use average of recent lows (more recent = more weight)
     // For rising wedge, the support is higher near the end
     const recentCount = Math.min(10, candles.length);
-    const recentLows = candles.slice(-recentCount).map(c => c.data[2]);
+    const recentLows = candles.slice(-recentCount).map((c) => c.data[2]);
     recentLows.sort((a, b) => a - b);
-    
+
     // Use average of lowest 50% (more lenient for rising pattern)
     const supportLows = recentLows.slice(0, Math.max(2, Math.ceil(recentLows.length * 0.5)));
     return supportLows.reduce((sum, low) => sum + low, 0) / supportLows.length;
@@ -184,15 +188,15 @@ export default class RisingWedgeCondition extends ConditionBase {
    * Find swing highs - peaks that are higher than nearby candles
    * More lenient than strict local maxima to work with rising wedge patterns
    */
-  private findSwingHighs(candles: any[]): Array<{index: number, price: number}> {
-    const highs: Array<{index: number, price: number}> = [];
+  private findSwingHighs(candles: any[]): Array<{ index: number; price: number }> {
+    const highs: Array<{ index: number; price: number }> = [];
     const lookback = 3; // Look 3 candles back and forward
-    
+
     for (let i = lookback; i < candles.length - lookback; i++) {
       const currentHigh = candles[i].data[3]; // high price
       let isPeak = true;
       let higherThanSome = false;
-      
+
       // Check if this is relatively high compared to surrounding candles
       for (let j = i - lookback; j <= i + lookback; j++) {
         if (j !== i) {
@@ -200,17 +204,18 @@ export default class RisingWedgeCondition extends ConditionBase {
             isPeak = false;
             break;
           }
-          if (candles[j].data[3] < currentHigh * 0.995) { // At least 0.5% higher
+          if (candles[j].data[3] < currentHigh * 0.995) {
+            // At least 0.5% higher
             higherThanSome = true;
           }
         }
       }
-      
+
       if (isPeak && higherThanSome) {
         highs.push({ index: i, price: currentHigh });
       }
     }
-    
+
     // If we don't have enough swing highs, include section-based highs
     if (highs.length < 2) {
       const sectionSize = Math.floor(candles.length / 4);
@@ -218,25 +223,25 @@ export default class RisingWedgeCondition extends ConditionBase {
         const start = section * sectionSize;
         const end = section === 3 ? candles.length : (section + 1) * sectionSize;
         const sectionCandles = candles.slice(start, end);
-        
+
         if (sectionCandles.length > 0) {
           let maxHigh = -Infinity;
           let maxIndex = -1;
-          
+
           for (let i = 0; i < sectionCandles.length; i++) {
             if (sectionCandles[i].data[3] > maxHigh) {
               maxHigh = sectionCandles[i].data[3];
               maxIndex = start + i;
             }
           }
-          
-          if (maxIndex >= 0 && !highs.some(h => h.index === maxIndex)) {
+
+          if (maxIndex >= 0 && !highs.some((h) => h.index === maxIndex)) {
             highs.push({ index: maxIndex, price: maxHigh });
           }
         }
       }
     }
-    
+
     return highs.sort((a, b) => a.index - b.index);
   }
 
@@ -244,15 +249,15 @@ export default class RisingWedgeCondition extends ConditionBase {
    * Find swing lows - troughs that are lower than nearby candles
    * More lenient than strict local minima to work with rising wedge patterns
    */
-  private findSwingLows(candles: any[]): Array<{index: number, price: number}> {
-    const lows: Array<{index: number, price: number}> = [];
+  private findSwingLows(candles: any[]): Array<{ index: number; price: number }> {
+    const lows: Array<{ index: number; price: number }> = [];
     const lookback = 3; // Look 3 candles back and forward
-    
+
     for (let i = lookback; i < candles.length - lookback; i++) {
       const currentLow = candles[i].data[2]; // low price
       let isTrough = true;
       let lowerThanSome = false;
-      
+
       // Check if this is relatively low compared to surrounding candles
       for (let j = i - lookback; j <= i + lookback; j++) {
         if (j !== i) {
@@ -260,17 +265,18 @@ export default class RisingWedgeCondition extends ConditionBase {
             isTrough = false;
             break;
           }
-          if (candles[j].data[2] > currentLow * 1.005) { // At least 0.5% lower
+          if (candles[j].data[2] > currentLow * 1.005) {
+            // At least 0.5% lower
             lowerThanSome = true;
           }
         }
       }
-      
+
       if (isTrough && lowerThanSome) {
         lows.push({ index: i, price: currentLow });
       }
     }
-    
+
     // If we don't have enough swing lows, include section-based lows
     if (lows.length < 2) {
       const sectionSize = Math.floor(candles.length / 4);
@@ -278,38 +284,43 @@ export default class RisingWedgeCondition extends ConditionBase {
         const start = section * sectionSize;
         const end = section === 3 ? candles.length : (section + 1) * sectionSize;
         const sectionCandles = candles.slice(start, end);
-        
+
         if (sectionCandles.length > 0) {
           let minLow = Infinity;
           let minIndex = -1;
-          
+
           for (let i = 0; i < sectionCandles.length; i++) {
             if (sectionCandles[i].data[2] < minLow) {
               minLow = sectionCandles[i].data[2];
               minIndex = start + i;
             }
           }
-          
-          if (minIndex >= 0 && !lows.some(l => l.index === minIndex)) {
+
+          if (minIndex >= 0 && !lows.some((l) => l.index === minIndex)) {
             lows.push({ index: minIndex, price: minLow });
           }
         }
       }
     }
-    
+
     return lows.sort((a, b) => a.index - b.index);
   }
 
   /**
    * Calculate trend line using linear regression
    */
-  private calculateTrendLine(points: Array<{index: number, price: number}>): {slope: number, intercept: number} | null {
+  private calculateTrendLine(
+    points: Array<{ index: number; price: number }>
+  ): { slope: number; intercept: number } | null {
     if (points.length < 2) {
       return null;
     }
 
     const n = points.length;
-    let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+    let sumX = 0,
+      sumY = 0,
+      sumXY = 0,
+      sumXX = 0;
 
     for (const point of points) {
       sumX += point.index;

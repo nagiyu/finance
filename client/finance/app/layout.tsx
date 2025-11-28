@@ -32,7 +32,9 @@ const getMenuItems = async (): Promise<MenuItemData[]> => {
   }
 
   // Finance Notificationメニュー
-  if (await authorizationService.authorize(FinanceFeature.FINANCE_NOTIFICATION, PermissionLevel.VIEW)) {
+  if (
+    await authorizationService.authorize(FinanceFeature.FINANCE_NOTIFICATION, PermissionLevel.VIEW)
+  ) {
     menuItems.push({ title: 'Finance Notification', url: '/finance-notification' });
   }
 
@@ -51,7 +53,7 @@ const getMenuItems = async (): Promise<MenuItemData[]> => {
   }
 
   return menuItems;
-}
+};
 
 export default async function RootLayout({
   children,
@@ -60,7 +62,7 @@ export default async function RootLayout({
 }>) {
   return (
     <CommonLayout
-      title='Finance'
+      title="Finance"
       menuItems={await getMenuItems()}
       enableAuthentication={true}
       enableNotification={true}

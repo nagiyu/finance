@@ -95,9 +95,7 @@ export default function PermissionMatrixEditor({
         <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '20px' }}>
           <thead>
             <tr style={{ backgroundColor: '#f5f5f5' }}>
-              <th style={{ border: '1px solid #ddd', padding: '12px', textAlign: 'left' }}>
-                機能
-              </th>
+              <th style={{ border: '1px solid #ddd', padding: '12px', textAlign: 'left' }}>機能</th>
               {Object.values(UserType).map((userType) => (
                 <th
                   key={userType}
@@ -122,11 +120,7 @@ export default function PermissionMatrixEditor({
                     <select
                       value={matrix[feature]?.[userType] || PermissionLevel.NONE}
                       onChange={(e) =>
-                        handlePermissionChange(
-                          feature,
-                          userType,
-                          e.target.value as PermissionLevel
-                        )
+                        handlePermissionChange(feature, userType, e.target.value as PermissionLevel)
                       }
                       style={{
                         padding: '8px',

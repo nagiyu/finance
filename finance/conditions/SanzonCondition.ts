@@ -5,7 +5,8 @@ import ErrorUtil from '@common/utils/ErrorUtil';
 
 export const SanzonConditionInfo: ConditionInfo = {
   name: '三尊',
-  description: '三尊（Head and Shoulders）は、上昇トレンドの終盤に現れやすい弱気の反転パターンです。3つの山（ピーク）を形成し、中央の山（頭）が最も高く、両側の山（肩）は類似の高さで頭より低くなります。山と山の間の安値（谷）を結んだネックラインを明確に下抜けることで下落トレンド入りのシグナルとされます。厳格な検証により、谷の深さ（2%以上）、肩の対称性、ネックライン突破の確認を行います。',
+  description:
+    '三尊（Head and Shoulders）は、上昇トレンドの終盤に現れやすい弱気の反転パターンです。3つの山（ピーク）を形成し、中央の山（頭）が最も高く、両側の山（肩）は類似の高さで頭より低くなります。山と山の間の安値（谷）を結んだネックラインを明確に下抜けることで下落トレンド入りのシグナルとされます。厳格な検証により、谷の深さ（2%以上）、肩の対称性、ネックライン突破の確認を行います。',
   isBuyCondition: false,
   isSellCondition: true,
   enableTargetPrice: false,
@@ -22,10 +23,10 @@ export default class SanzonCondition extends ConditionBase {
     timeframe?: TimeFrame | null
   ): Promise<boolean> {
     try {
-      const stockData = await this.getStockPriceData(exchangeId, tickerId, { 
+      const stockData = await this.getStockPriceData(exchangeId, tickerId, {
         count: 15, // Simpler pattern with fewer data points
         session,
-        timeframe: timeframe || '1'
+        timeframe: timeframe || '1',
       });
 
       if (!stockData || !Array.isArray(stockData) || stockData.length < 15) {
@@ -34,7 +35,7 @@ export default class SanzonCondition extends ConditionBase {
 
       // Get the most recent candles
       const candles = stockData.slice(-15);
-      
+
       // Simple approach: find 3 distinct peaks and check the pattern
       return this.detectSimpleHeadAndShouldersPattern(candles);
     } catch (error) {
@@ -53,7 +54,7 @@ export default class SanzonCondition extends ConditionBase {
       const prevHigh = candles[i - 1].data[3];
       const currentHigh = candles[i].data[3];
       const nextHigh = candles[i + 1].data[3];
-      
+
       if (currentHigh > prevHigh && currentHigh > nextHigh) {
         peaks.push({ index: i, price: currentHigh });
       }
@@ -77,7 +78,7 @@ export default class SanzonCondition extends ConditionBase {
           // Find valleys between peaks for neckline calculation
           const valley1 = this.findLowestBetween(candles, left.index, head.index);
           const valley2 = this.findLowestBetween(candles, head.index, right.index);
-          
+
           if (valley1 !== null && valley2 !== null) {
             // Valleys should be significantly lower than peaks (at least 2% lower for realistic market conditions)
             const valley1Depth = Math.min(
@@ -88,7 +89,7 @@ export default class SanzonCondition extends ConditionBase {
               (head.price - valley2) / head.price,
               (right.price - valley2) / right.price
             );
-            
+
             if (valley1Depth < 0.02 || valley2Depth < 0.02) {
               continue;
             }
@@ -101,18 +102,19 @@ export default class SanzonCondition extends ConditionBase {
 
             const neckline = (valley1 + valley2) / 2;
             const currentClose = candles[candles.length - 1].data[1];
-            
+
             // Pattern confirmed if current price is below neckline
             if (currentClose < neckline) {
               // Additional confirmation: ensure the breakdown is not just a brief dip
               // Check if at least 2 of the last 3 candles closed below neckline
               let confirmationCount = 0;
               for (let j = Math.max(0, candles.length - 3); j < candles.length; j++) {
-                if (candles[j].data[1] < neckline) { // close price
+                if (candles[j].data[1] < neckline) {
+                  // close price
                   confirmationCount++;
                 }
               }
-              
+
               if (confirmationCount >= 2) {
                 return true;
               }
@@ -134,7 +136,7 @@ export default class SanzonCondition extends ConditionBase {
     }
 
     let lowest = Number.MAX_VALUE;
-    
+
     for (let i = startIndex + 1; i < endIndex; i++) {
       const low = candles[i].data[2]; // low price
       if (low < lowest) {

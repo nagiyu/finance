@@ -8,7 +8,7 @@ import APIUtil, { APIResponseOptions } from '@client-common/utils/APIUtil';
 import { FinanceFeature, ROOT_FEATURE } from '@finance/consts/FinanceConst';
 
 import ExchangeUtil from '@/utils/ExchangeUtil';
-import { ExchangeDataType } from "@/interfaces/data/ExchangeDataType";
+import { ExchangeDataType } from '@/interfaces/data/ExchangeDataType';
 import { FinanceAuthorizationService } from '@/services/auth/FinanceAuthorizationService';
 
 /**

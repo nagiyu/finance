@@ -9,4 +9,4 @@ export const CURRENCY = {
 /**
  * Currency type definition
  */
-export type CurrencyType = typeof CURRENCY[keyof typeof CURRENCY];
+export type CurrencyType = (typeof CURRENCY)[keyof typeof CURRENCY];

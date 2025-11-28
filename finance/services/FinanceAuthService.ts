@@ -7,10 +7,11 @@ import { FinanceAuthRecordType } from '@finance/interfaces/record/FinanceAuthRec
 /**
  * Finance用の認証サービス
  */
-export default class FinanceAuthService extends AuthService<FinanceAuthDataType, FinanceAuthRecordType> {
-  public constructor(
-    dataAccessor?: AuthDataAccessor<FinanceAuthRecordType>
-  ) {
+export default class FinanceAuthService extends AuthService<
+  FinanceAuthDataType,
+  FinanceAuthRecordType
+> {
+  public constructor(dataAccessor?: AuthDataAccessor<FinanceAuthRecordType>) {
     if (!dataAccessor) {
       dataAccessor = new AuthDataAccessor<FinanceAuthRecordType>();
     }
@@ -18,7 +19,9 @@ export default class FinanceAuthService extends AuthService<FinanceAuthDataType,
     super(dataAccessor);
   }
 
-  protected override dataToRecord(data: Partial<FinanceAuthDataType>): Partial<FinanceAuthRecordType> {
+  protected override dataToRecord(
+    data: Partial<FinanceAuthDataType>
+  ): Partial<FinanceAuthRecordType> {
     const baseRecord = super.dataToRecord(data);
 
     return {

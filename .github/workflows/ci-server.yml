@@ -1,0 +1,155 @@
+name: CI - Server
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - release/**
+    paths:
+      - 'server/finance/**'
+      - 'server/common/**'
+      - 'finance/**'
+      - '.github/workflows/ci-server.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: |
+            typescript-common/common/package-lock.json
+            finance/package-lock.json
+            server/common/package-lock.json
+            server/finance/package-lock.json
+
+      - name: Install dependencies for typescript-common
+        run: |
+          cd typescript-common/common
+          npm install
+
+      - name: Install dependencies for finance
+        run: |
+          cd finance
+          npm install
+
+      - name: Install dependencies for server/common
+        run: |
+          cd server/common
+          npm install
+
+      - name: Install dependencies for server/finance
+        run: |
+          cd server/finance
+          npm install
+
+      - name: Run lint
+        run: |
+          cd server/finance
+          npm run lint
+
+  typecheck:
+    name: Type Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: |
+            typescript-common/common/package-lock.json
+            finance/package-lock.json
+            server/common/package-lock.json
+            server/finance/package-lock.json
+
+      - name: Install dependencies for typescript-common
+        run: |
+          cd typescript-common/common
+          npm install
+
+      - name: Install dependencies for finance
+        run: |
+          cd finance
+          npm install
+
+      - name: Install dependencies for server/common
+        run: |
+          cd server/common
+          npm install
+
+      - name: Install dependencies for server/finance
+        run: |
+          cd server/finance
+          npm install
+
+      - name: Run typecheck
+        run: |
+          cd server/finance
+          npm run typecheck
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: |
+            typescript-common/common/package-lock.json
+            finance/package-lock.json
+            server/common/package-lock.json
+            server/finance/package-lock.json
+
+      - name: Install dependencies for typescript-common
+        run: |
+          cd typescript-common/common
+          npm install
+
+      - name: Install dependencies for finance
+        run: |
+          cd finance
+          npm install
+
+      - name: Install dependencies for server/common
+        run: |
+          cd server/common
+          npm install
+
+      - name: Install dependencies for server/finance
+        run: |
+          cd server/finance
+          npm install
+
+      - name: Run tests
+        run: |
+          cd server/finance
+          npm test

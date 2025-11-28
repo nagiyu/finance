@@ -3,6 +3,10 @@
     "target": "ES2020",
     "strict": true,
     "noEmit": true,
+    "baseUrl": ".",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
     "paths": {
       "@/*": [
         "./*"
@@ -17,5 +21,18 @@
         "../../finance/*"
       ]
     }
-  }
+  },
+  "include": [
+    "index.ts",
+    "**/*.ts",
+    "../../typescript-common/common/**/*.ts",
+    "../../finance/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "**/node_modules",
+    "../../finance/tests",
+    "../../finance/**/*.test.ts",
+    "../../finance/**/*.spec.ts"
+  ]
 }

@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server";
+import { NextRequest } from 'next/server';
 
 import NotificationUtil, { PayloadType } from '@client-common/utils/NotificationUtil.server';
 
@@ -35,15 +35,15 @@ export async function POST(request: NextRequest) {
   }
 
   const payload: NotificationPayloadType = {
-    title: "Finance",
+    title: 'Finance',
     body: messageData,
-    icon: "/logo.png",
+    icon: '/logo.png',
     // Include custom data for the service worker
     data: {
       exchangeId,
       tickerId,
-      timeframe
-    }
+      timeframe,
+    },
   };
 
   return NotificationUtil.sendNotification(subscription, payload);

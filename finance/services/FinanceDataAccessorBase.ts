@@ -4,10 +4,14 @@ import EnvironmentalUtil from '@common/utils/EnvironmentalUtil';
 import { FinanceRecordDataType } from '@finance/types/FinanceRecordDataType';
 import { FinanceRecordTypeBase } from '@finance/interfaces/record/FinanceRecordTypeBase';
 
-export default abstract class FinanceDataAccessorBase<T extends FinanceRecordTypeBase> extends DataAccessorBase<T> {
+export default abstract class FinanceDataAccessorBase<
+  T extends FinanceRecordTypeBase,
+> extends DataAccessorBase<T> {
   public constructor(
     dataType: FinanceRecordDataType,
-    dynamoDBService: DynamoDBService<T> = new DynamoDBService<T>(FinanceDataAccessorBase.getFinanceTableName())
+    dynamoDBService: DynamoDBService<T> = new DynamoDBService<T>(
+      FinanceDataAccessorBase.getFinanceTableName()
+    )
   ) {
     super(FinanceDataAccessorBase.getFinanceTableName(), dataType, dynamoDBService);
   }

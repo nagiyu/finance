@@ -6,4 +6,5 @@ export const FINANCE_RECORD_DATA_TYPE = {
   PERMISSION_MATRIX: 'PermissionMatrix',
 } as const;
 
-export type FinanceRecordDataType = typeof FINANCE_RECORD_DATA_TYPE[keyof typeof FINANCE_RECORD_DATA_TYPE];
+export type FinanceRecordDataType =
+  (typeof FINANCE_RECORD_DATA_TYPE)[keyof typeof FINANCE_RECORD_DATA_TYPE];
