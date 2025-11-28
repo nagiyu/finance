@@ -36,7 +36,7 @@ jobs:
           sudo ./aws/install --update
 
       - name: AWS set Credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -60,12 +60,12 @@ jobs:
         run: |
           if [ -d "infra/cloudformation" ]; then
             echo "Packaging CloudFormation templates..."
+            shopt -s nullglob
             for template in infra/cloudformation/*.yml; do
-              if [ -f "$template" ]; then
-                echo "Validating $template..."
-                aws cloudformation validate-template --template-body file://$template
-              fi
+              echo "Validating $template..."
+              aws cloudformation validate-template --template-body file://$template
             done
+            shopt -u nullglob
           else
             echo "No infra/cloudformation directory found, skipping packaging."
           fi
@@ -89,8 +89,9 @@ jobs:
             fi
             
             # Deploy other stacks in infra/cloudformation directory
+            shopt -s nullglob
             for template in infra/cloudformation/*.yml; do
-              if [ -f "$template" ] && [ "$(basename $template)" != "base-stack.yml" ]; then
+              if [ "$(basename $template)" != "base-stack.yml" ]; then
                 STACK_NAME="${STACK_PREFIX}-$(basename $template .yml)"
                 echo "Deploying $STACK_NAME from $template..."
                 aws cloudformation deploy \
@@ -103,6 +104,7 @@ jobs:
                 || echo "$STACK_NAME deployment completed or no changes"
               fi
             done
+            shopt -u nullglob
           else
             echo "No infra/cloudformation directory found, skipping CloudFormation deployment."
             echo "Create infra/cloudformation/base-stack.yml to enable CloudFormation deployment."
