@@ -95,10 +95,10 @@ npm run build
 **確認方法**:
 - `dist/index.js` が生成されることを確認
 - ローカルでの動作確認:
-  ```bash
-  node test-eventbridge.js   # EventBridge 関連のテスト
-  node test-financeutil.js   # ユーティリティのテスト
-  ```
+    ```bash
+    node test-eventbridge.js   # EventBridge 関連のテスト
+    node test-financeutil.js   # ユーティリティのテスト
+    ```
 
 **リント・型チェック**:
 ```bash
