@@ -2,7 +2,7 @@ import { PermissionLevel } from '@common/enums/PermissionLevel';
 import { PermissionMatrix } from '@common/interfaces/authorization/PermissionMatrix';
 import { UserType } from '@common/enums/UserType';
 
-import PermissionMatrixDataAccessor from '@finance/services/PermissionMatrixDataAccessor';
+import PermissionMatrixDataAccessor from '@/services/auth/PermissionMatrixDataAccessor';
 import { FinanceFeature } from '@finance/consts/FinanceConst';
 
 /**
