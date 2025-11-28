@@ -5,6 +5,10 @@ on:
     branches:
       - develop
       - release/**
+    paths:
+      - 'finance/**'
+      - 'typescript-common/**'
+      - '.github/workflows/ci-root.yml'
   workflow_dispatch:
 
 permissions:
