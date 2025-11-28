@@ -71,11 +71,12 @@ npm run dev
 - ブラウザで `http://localhost:3000` にアクセス
 - ページが正常に表示されることを確認
 
-**ビルド・リント・型チェック**:
+**ビルド・リント・型チェック・テスト**:
 ```bash
 npm run build      # 本番ビルド
 npm run lint       # ESLint 実行
 npm run typecheck  # TypeScript 型チェック
+npm test           # テスト実行
 npm run setup      # 依存関係インストール
 ```
 
@@ -102,11 +103,12 @@ npm run build
     node test-financeutil.js   # ユーティリティのテスト
     ```
 
-**リント・型チェック**:
+**リント・型チェック・テスト**:
 ```bash
 npm run lint       # ESLint 実行
 npm run lint:fix   # ESLint 自動修正
 npm run typecheck  # TypeScript 型チェック
+npm test           # テスト実行
 npm run setup      # 依存関係インストール
 ```
 
@@ -144,7 +146,31 @@ npm run setup      # 依存関係インストール
 |---------------|---------------|--------|-----------|
 | finance | `cd finance && npm test` | `npm run lint` | `npm run typecheck` |
 | client/finance | `cd client/finance && npm test` | `npm run lint` | `npm run typecheck` |
-| server/finance | `cd server/finance && npm run build` | `npm run lint` | `npm run typecheck` |
+| server/finance | `cd server/finance && npm test` | `npm run lint` | `npm run typecheck` |
+
+### 検証手順（各コンポーネントで実施）
+
+各コンポーネントに移動して、以下のコマンドを実行し成功することを確認してください。
+
+```bash
+# finance コンポーネント
+cd finance
+npm install
+npm run typecheck  # 型チェックが成功すること
+npm test           # テストが成功すること
+
+# client/finance コンポーネント
+cd ../client/finance
+npm install
+npm run typecheck  # 型チェックが成功すること
+npm test           # テストが成功すること
+
+# server/finance コンポーネント
+cd ../../server/finance
+npm install
+npm run typecheck  # 型チェックが成功すること
+npm test           # テストが成功すること
+```
 
 ### ルートでの一括実行
 
