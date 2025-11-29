@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 #
-# deploy_stack.sh - AWS CloudFormation stack deployment wrapper
+# deploy-stack.sh - AWS CloudFormation stack deployment wrapper
 #
 # Usage:
-#   ./deploy_stack.sh --stack-name <name> --region <region> --template-file <path> [options]
+#   ./deploy-stack.sh --stack-name <name> --region <region> --template-file <path> [options]
 #
 # Required parameters:
 #   --stack-name <name>       Name of the CloudFormation stack
