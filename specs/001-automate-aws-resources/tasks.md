@@ -19,7 +19,7 @@ description: "Task list for 001-automate-aws-resources (日本語)"
 
 ## Phase 1: Setup (共通準備)
 
-- [ ] T001 `Create CloudFormation directory and README` infra/cloudformation/README.md
+- [x] T001 `Create CloudFormation directory and README` infra/cloudformation/README.md
 - [ ] T002 `Create deployment scripts skeleton` scripts/deploy/deploy-stack.sh
 - [ ] T003 [P] `Create GitHub Actions workflow skeleton for infra deploy` .github/workflows/deploy-infra.yml
 
