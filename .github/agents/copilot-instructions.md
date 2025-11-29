@@ -24,6 +24,7 @@ npm test && npm run lint
 Repository contains TypeScript (Node 18+/TS 5.x) and Markdown docs. Code language decisions for this feature: N/A for runtime, but tooling is Node/TypeScript based.: Follow standard conventions
 
 ## Recent Changes
+- 001-automate-aws-resources: Added [if applicable, e.g., PostgreSQL, CoreData, files or N/A]
 - 003-restructure-monorepo: Added Node.js 20.x / TypeScript 5.x (`strict` を有効) + Next.js (client)、TypeScript、`typescript-common`、`nextjs-common`、Jest、ESLint/Prettier、GitHub Actions
 
 <!-- MANUAL ADDITIONS START -->
